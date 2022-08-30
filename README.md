@@ -12,13 +12,16 @@ const Filedrive = require('fs-drive')
 
 const drive = new Filedrive('/self/keet-desktop')
 
+const entry = await drive.entry('/src/app.js')
+// => { executable, linkname, blob, metadata }
+
 for await (const file of drive.list('/src')) {
-  console.log(file) // => { key, entry }
+  // file => { key, entry }
 }
 
 const rs = drive.createReadStream('/src/app.js')
 for await (const chunk of rs) {
-  console.log(chunk) // Buffer<..>
+  // chunk => Buffer <..>
 }
 ```
 
