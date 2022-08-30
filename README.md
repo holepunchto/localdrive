@@ -10,7 +10,7 @@ npm i fs-drive
 ```javascript
 const Filedrive = require('fs-drive')
 
-const drive = new Filedrive('/self/keet-desktop')
+const drive = new Filedrive('/home/user/my-folder')
 
 const entry = await drive.entry('/src/app.js')
 // => { executable, linkname, blob, metadata }
