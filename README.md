@@ -117,5 +117,14 @@ Default `options`:
 
 #### `const ws = drive.createWriteStream(key, [options])`
 
+Stream a blob into the drive at `key` path.
+
+Available `options`:
+```js
+{
+  executable: Boolean
+}
+```
+
 ## License
 MIT
