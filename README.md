@@ -86,7 +86,7 @@ Returns the entry at `key` path in the drive. It looks like this:
 
 #### `await drive.del(key)`
 
-Deletes the file at `key` from the drive.
+Deletes the file at `key` path from the drive.
 
 #### `const iterator = drive.list([folder])`
 
