@@ -76,7 +76,20 @@ module.exports = class Filedrive {
     return fs.createReadStream(filename, opts)
   }
 
-  createWriteStream (key) {
+  createWriteStream (key, opts = {}) {
+    if (typeof key === 'object') return this.createWriteStream(key.key)
+
+    const filename = path.join(this.root, key)
+    const stream = fs.createWriteStream(filename)
+
+    if (opts.executable) {
+      // + not sure about this
+      stream.on('open', function () {
+        fs.chmodSync(filename, '755')
+      })
+    }
+
+    return stream
   }
 }
 
