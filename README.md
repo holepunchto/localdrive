@@ -13,8 +13,8 @@ const Filedrive = require('fs-drive')
 const drive = new Filedrive('/home/user/my-project')
 
 await drive.put('/blob.txt', Buffer.from('example'))
-await drive.put('/images/logo.png', Buffer.from('...'))
-await drive.put('/images/old-logo.png', Buffer.from('...'))
+await drive.put('/images/logo.png', Buffer.from('..'))
+await drive.put('/images/old-logo.png', Buffer.from('..'))
 
 const buffer = await drive.get('/blob.txt')
 // => <Buffer ..> "example"
