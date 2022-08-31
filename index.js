@@ -69,6 +69,18 @@ module.exports = class Filedrive {
     })
   }
 
+  async del (key) {
+    key = normalizeKey(key)
+    const filename = path.join(this.root, key)
+
+    try {
+      await fsp.unlink(filename)
+    } catch (error) {
+      if (error.code === 'ENOENT') return
+      throw error
+    }
+  }
+
   async * list (folder = '/') {
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
