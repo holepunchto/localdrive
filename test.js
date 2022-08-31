@@ -19,6 +19,7 @@ test('entry(key) not found', async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('not-exists.txt'), null)
+  t.alike(await drive.entry('not/exists.txt'), null)
 })
 
 test('entry(key) executable', async function (t) {
