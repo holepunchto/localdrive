@@ -29,15 +29,19 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Filedrive(root, options)`
+#### `const drive = new Filedrive(root, [options])`
 
 Creates a drive based on a root directory.
 
-#### `const entry = drive.entry(key)`
+#### `const entry = await drive.entry(key)`
+
+#### `const buffer = await drive.get(key)`
 
 #### `const iterator = drive.list(folder)`
 
 #### `const stream = drive.createReadStream(key)`
+
+#### `const stream = drive.createWriteStream(key, [options])`
 
 ## License
 MIT
