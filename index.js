@@ -55,9 +55,9 @@ module.exports = class Filedrive {
   createReadStream (key, opts = {}) {
     if (typeof key === 'object') return this.createReadStream(key.key)
 
-    if (typeof opts.length === 'number') {
+    if (typeof opts.length === 'number' && opts.length > 0) {
       const start = opts.start || 0
-      opts = { start, end: start + opts.length + 1 }
+      opts = { start, end: start + opts.length - 1 }
     }
 
     const filename = path.join(this.root, key)
