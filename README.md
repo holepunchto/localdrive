@@ -116,7 +116,7 @@ Default `options`:
 }
 ```
 
-`start` and `end` are inclusive.
+`start` and `end` are inclusive.\
 `length` overrides `end`, they're not meant to be used together.
 
 #### `const ws = drive.createWriteStream(key, [options])`
