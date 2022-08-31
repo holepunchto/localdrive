@@ -11,7 +11,11 @@ module.exports = class Filedrive {
 
   async entry (key) {
     const filename = path.join(this.root, key)
-    const stat = await fsp.lstat(filename)
+    const stat = await lstat(filename)
+
+    if (!stat) {
+      return null
+    }
 
     const entry = {
       executable: isExecutable(stat.mode),
