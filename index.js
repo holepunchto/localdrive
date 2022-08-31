@@ -11,11 +11,10 @@ module.exports = class Filedrive {
   }
 
   async entry (key) {
-    if (!key.startsWith('/')) key = unixPathResolve('/', key)
-
+    key = normalizeKey(key)
     const filename = path.join(this.root, key)
-    const stat = await lstat(filename)
 
+    const stat = await lstat(filename)
     if (!stat || stat.isDirectory()) {
       return null
     }
@@ -92,20 +91,31 @@ module.exports = class Filedrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
+    key = normalizeKey(key)
     const filename = path.join(this.root, key)
+
     return new FileReadStream(filename, opts)
   }
 
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
+    key = normalizeKey(key)
     const filename = path.join(this.root, key)
+
     return new FileWriteStream(filename, opts)
   }
 }
 
 function isExecutable (mode) {
   return !!(mode & fs.constants.S_IXUSR)
+}
+
+function normalizeKey (key) {
+  if (!key.startsWith('/')) {
+    key = unixPathResolve(path.join('/', key))
+  }
+  return key
 }
 
 async function lstat (filename) {
