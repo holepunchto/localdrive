@@ -10,7 +10,7 @@ module.exports = class Filedrive {
   }
 
   async entry (key) {
-    key = normalizeKey(key)
+    key = normalizePath(key)
     const filename = path.join(this.root, key)
 
     const stat = await lstat(filename)
@@ -69,7 +69,7 @@ module.exports = class Filedrive {
   }
 
   async del (key) {
-    key = normalizeKey(key)
+    key = normalizePath(key)
     const filename = path.join(this.root, key)
 
     try {
@@ -106,7 +106,7 @@ module.exports = class Filedrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = normalizeKey(key)
+    key = normalizePath(key)
     const filename = path.join(this.root, key)
 
     return new FileReadStream(filename, opts)
@@ -115,7 +115,7 @@ module.exports = class Filedrive {
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = normalizeKey(key)
+    key = normalizePath(key)
     const filename = path.join(this.root, key)
 
     return new FileWriteStream(filename, opts)
@@ -126,11 +126,11 @@ function isExecutable (mode) {
   return !!(mode & fs.constants.S_IXUSR)
 }
 
-function normalizeKey (key) {
-  if (!key.startsWith('/')) {
-    key = unixPathResolve(path.join('/', key))
+function normalizePath (name) {
+  if (!name.startsWith('/')) {
+    return unixPathResolve(path.join('/', name))
   }
-  return key
+  return name
 }
 
 async function lstat (filename) {
