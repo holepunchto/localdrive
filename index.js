@@ -37,6 +37,14 @@ module.exports = class Filedrive {
     return null
   }
 
+  async get (key) {
+    const entry = await this.entry(key)
+    if (!entry || !entry.blob) return null // + get(key) will return null for symbolic links, is it ok?
+
+    const filename = path.join(this.root, key)
+    return fsp.readFile(filename)
+  }
+
   async * list (folder = '/') {
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
