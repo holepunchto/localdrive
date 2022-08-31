@@ -32,3 +32,34 @@ test('createWriteStream(key) with options', async function (t) {
   })
   t.alike(await drive.get('new-script.sh'), buffer)
 })
+
+test('createWriteStream(key) write and end', async function (t) {
+  const drive = createDrive(t)
+
+  const data = 'new example'
+  const ws = drive.createWriteStream('new-example.txt')
+  ws.write(data)
+  ws.end()
+
+  // file doesn't exist yet
+  t.absent(await drive.entry('new-example.txt'))
+
+  // file exists but no data written yet
+  t.alike(await drive.entry('new-example.txt'), {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 0, byteOffset: 0, byteLength: 0 },
+    metadata: null
+  })
+
+  // file exists and data written
+  t.alike(await drive.entry('new-example.txt'), {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+    metadata: null
+  })
+
+  t.alike(await drive.get('new-example.txt'), Buffer.from(data))
+})
+
