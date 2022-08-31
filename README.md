@@ -21,7 +21,7 @@ for await (const file of drive.list('/src')) {
 
 const rs = drive.createReadStream('/src/app.js')
 for await (const chunk of rs) {
-  // chunk => Buffer <..>
+  // chunk => <Buffer ..>
 }
 ```
 
