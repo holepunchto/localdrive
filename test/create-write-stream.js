@@ -5,10 +5,10 @@ test('createWriteStream(key)', async function (t) {
   const drive = createDrive(t)
 
   const buffer = Buffer.from('example')
-  const ws = drive.createWriteStream('new-file.txt')
+  const ws = drive.createWriteStream('/new-file.txt')
   await bufferToStream(buffer, ws)
 
-  t.alike(await drive.entry('new-file.txt'), {
+  t.alike(await drive.entry('/new-file.txt'), {
     key: '/new-file.txt',
     value: {
       executable: false,
@@ -17,17 +17,17 @@ test('createWriteStream(key)', async function (t) {
       metadata: null
     }
   })
-  t.alike(await drive.get('new-file.txt'), buffer)
+  t.alike(await drive.get('/new-file.txt'), buffer)
 })
 
 test('createWriteStream(key) with options', async function (t) {
   const drive = createDrive(t)
 
   const buffer = Buffer.from('#!/bin/bash')
-  const ws = drive.createWriteStream('new-script.sh', { executable: true })
+  const ws = drive.createWriteStream('/new-script.sh', { executable: true })
   await bufferToStream(buffer, ws)
 
-  t.alike(await drive.entry('new-script.sh'), {
+  t.alike(await drive.entry('/new-script.sh'), {
     key: '/new-script.sh',
     value: {
       executable: true,
@@ -36,7 +36,7 @@ test('createWriteStream(key) with options', async function (t) {
       metadata: null
     }
   })
-  t.alike(await drive.get('new-script.sh'), buffer)
+  t.alike(await drive.get('/new-script.sh'), buffer)
 })
 
 test('createWriteStream(key) write and end', function (t) {
@@ -45,13 +45,13 @@ test('createWriteStream(key) write and end', function (t) {
   const drive = createDrive(t)
 
   const data = 'new example'
-  const ws = drive.createWriteStream('new-example.txt')
+  const ws = drive.createWriteStream('/new-example.txt')
   ws.once('close', onClose)
   ws.write(data)
   ws.end()
 
   async function onClose () {
-    t.alike(await drive.entry('new-example.txt'), {
+    t.alike(await drive.entry('/new-example.txt'), {
       key: '/new-example.txt',
       value: {
         executable: false,
@@ -61,6 +61,6 @@ test('createWriteStream(key) write and end', function (t) {
       }
     })
 
-    t.alike(await drive.get('new-example.txt'), Buffer.from(data))
+    t.alike(await drive.get('/new-example.txt'), Buffer.from(data))
   }
 })
