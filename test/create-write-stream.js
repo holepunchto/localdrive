@@ -64,3 +64,26 @@ test('createWriteStream(key) write and end', function (t) {
     t.alike(await drive.get('/new-example.txt'), Buffer.from(data))
   }
 })
+
+test('createWriteStream(key) on existing executable', async function (t) {
+  const drive = createDrive(t)
+
+  t.ok((await drive.entry('/script.sh')).value.executable)
+
+  const buffer = Buffer.from('new script')
+  const ws = drive.createWriteStream('/script.sh')
+  await bufferToStream(buffer, ws)
+
+  t.alike(await drive.entry('/new-file.txt'), {
+    key: '/new-file.txt',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
+      metadata: null
+    }
+  })
+  t.alike(await drive.get('/new-file.txt'), buffer)
+
+  t.absent((await drive.entry('/script.sh')).value.executable)
+})
