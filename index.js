@@ -79,7 +79,7 @@ module.exports = class Filedrive {
       throw error
     }
 
-    await gcdir(this.root, filename)
+    await gcdir(this.root, path.dirname(filename))
   }
 
   async * list (folder = '/', opts = {}) {
@@ -142,13 +142,12 @@ async function lstat (filename) {
   }
 }
 
-async function gcdir (root, fullname) {
-  const dirname = path.dirname(fullname)
-  if (root === dirname) return
-
+async function gcdir (root, dir) {
   try {
-    await fsp.rmdir(dirname)
-    await gcdir(root, dirname)
+    while (dir !== root) {
+      await fsp.rmdir(dir)
+      dir = path.dirname(dir)
+    }
   } catch {
     // silent error
   }
