@@ -10,6 +10,8 @@ module.exports = class Filedrive {
   }
 
   async entry (key) {
+    if (!key.startsWith('/')) key = unixPathResolve('/', key)
+
     const filename = path.join(this.root, key)
     const stat = await lstat(filename)
 
