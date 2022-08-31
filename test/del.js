@@ -62,7 +62,7 @@ test('del(key) gc empty parent folders', async function (t) {
 })
 
 test('del(key) should not gc root', async function (t) {
-  const drive = createDrive(t, { empty: true })
+  const drive = createDrive(t, undefined, { noTestFiles: true })
 
   t.ok(fs.existsSync(drive.root))
 

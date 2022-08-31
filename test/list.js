@@ -41,14 +41,15 @@ test('list(folder) entries', async function (t) {
   }
 })
 
-test('list(folder) ignore option', async function (t) {
-  const drive = createDrive(t)
-  const ignore = new Set(['LICENSE', 'examples'])
+test('list(folder) ignore', async function (t) {
+  const drive = createDrive(t, {
+    ignore: new Set(['LICENSE', 'examples'])
+  })
 
   const actualKeys = []
   const expectedKeys = ['/README.md', '/script.sh', '/key.secret', '/empty.txt', '/LICENSE.shortcut']
 
-  for await (const { key } of drive.list('/', { ignore })) {
+  for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
   }
 

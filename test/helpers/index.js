@@ -19,12 +19,12 @@ function createTmpDir () {
   return fs.mkdtempSync(tmpdir)
 }
 
-function createDrive (t, opts = {}) {
+function createDrive (t, opts, cfg = {}) {
   const root = createTmpDir()
   t.teardown(() => fs.rmSync(root, { recursive: true }))
-  if (!opts.empty) generateTestFiles(t, root)
+  if (!cfg.noTestFiles) generateTestFiles(t, root)
 
-  return new Filedrive(root)
+  return new Filedrive(root, opts)
 }
 
 function generateTestFiles (t, root) {

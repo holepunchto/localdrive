@@ -43,12 +43,15 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Filedrive(root)`
+#### `const drive = new Filedrive(root, [options])`
 
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
 
+Default `options`:
 ```js
-const drive = new Filedrive('/home/user/Desktop/my-project')
+{
+  ignore: new Set(['.git', '.github'])
+}
 ```
 
 #### `await drive.put(key, buffer, [options])`
@@ -84,16 +87,9 @@ Returns the entry at `key` path in the drive. It looks like this:
 
 Deletes the file at `key` from the drive.
 
-#### `const iterator = drive.list([folder], [options])`
+#### `const iterator = drive.list([folder])`
 
 Returns a stream of all entries in the drive inside of specified `folder`.
-
-Default `options`:
-```js
-{
-  ignore: new Set(['.git', '.github'])
-}
-```
 
 #### `const rs = drive.createReadStream(key, [options])`
 
