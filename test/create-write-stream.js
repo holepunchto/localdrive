@@ -5,8 +5,8 @@ test('createWriteStream(key)', async function (t) {
   const drive = createDrive(t)
 
   const buffer = Buffer.from('example')
-  const writeStream = drive.createWriteStream('new-file.txt')
-  await bufferToStream(buffer, writeStream)
+  const ws = drive.createWriteStream('new-file.txt')
+  await bufferToStream(buffer, ws)
 
   t.alike(await drive.entry('new-file.txt'), {
     key: '/new-file.txt',
@@ -24,8 +24,8 @@ test('createWriteStream(key) with options', async function (t) {
   const drive = createDrive(t)
 
   const buffer = Buffer.from('#!/bin/bash')
-  const writeStream = drive.createWriteStream('new-script.sh', { executable: true })
-  await bufferToStream(buffer, writeStream)
+  const ws = drive.createWriteStream('new-script.sh', { executable: true })
+  await bufferToStream(buffer, ws)
 
   t.alike(await drive.entry('new-script.sh'), {
     key: '/new-script.sh',
