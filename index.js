@@ -26,16 +26,11 @@ module.exports = class Filedrive {
     }
 
     if (stat.isFile()) {
-      entry.blob = {
-        blockOffset: 0,
-        blockLength: stat.blocks,
-        byteOffset: 0,
-        byteLength: stat.size
-      }
+      entry.blob = { blockOffset: 0, blockLength: stat.blocks, byteOffset: 0, byteLength: stat.size }
       return entry
     }
 
-    return null // + or entry?
+    return null
   }
 
   async * list (folder = '/') {
@@ -52,7 +47,6 @@ module.exports = class Filedrive {
         continue
       }
 
-      // const filename = path.join(fulldir, dirent.name)
       const entry = await this.entry(key)
       if (entry) yield { key, entry }
     }
