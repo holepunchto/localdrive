@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "standard && brittle test.js",
+    "test": "standard && brittle test/*.js --coverage",
     "lint": "standard"
   },
   "repository": {
