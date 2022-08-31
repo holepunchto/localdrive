@@ -55,6 +55,21 @@ module.exports = class Filedrive {
     return Buffer.concat(chunks)
   }
 
+  async put (key, buffer) {
+    return new Promise((resolve, reject) => {
+      const ws = this.createWriteStream(key)
+      let error = null
+      ws.on('error', (err) => {
+        error = err
+      })
+      ws.on('close', () => {
+        if (error) reject(error)
+        else resolve()
+      })
+      ws.end(buffer)
+    })
+  }
+
   async * list (folder = '/') {
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
