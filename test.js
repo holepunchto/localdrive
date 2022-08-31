@@ -43,10 +43,11 @@ test('entry(key) symbolic link', async function (t) {
   })
 })
 
-test('entry(key) folder', async function (t) {
+test('entry(key) existing folder', async function (t) {
   const drive = createDrive(t)
 
   t.is(await drive.entry('examples'), null)
+  t.is(await drive.entry('examples/more'), null)
 })
 
 test('entry(key) file inside a folder', async function (t) {
