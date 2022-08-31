@@ -59,3 +59,22 @@ test('entry(key) file inside a folder', async function (t) {
     metadata: null
   })
 })
+
+test('entry(key) permission denied', async function (t) {
+  const drive = createDrive(t)
+
+  t.alike(await drive.entry('key.secret'), {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 4 },
+    metadata: null
+  })
+
+  // + should we ignore permission errors and just return null?
+  try {
+    await drive.get('key.secret')
+    t.fail('should have given error')
+  } catch (error) {
+    t.is(error.code, 'EACCES')
+  }
+})
