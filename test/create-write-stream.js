@@ -70,20 +70,9 @@ test('createWriteStream(key) on existing executable', async function (t) {
 
   t.ok((await drive.entry('/script.sh')).value.executable)
 
-  const buffer = Buffer.from('new script')
-  const ws = drive.createWriteStream('/script.sh')
+  const buffer = Buffer.from('# script replaced')
+  const ws = drive.createWriteStream('/script.sh') // we're not marking it as executable
   await bufferToStream(buffer, ws)
-
-  t.alike(await drive.entry('/new-file.txt'), {
-    key: '/new-file.txt',
-    value: {
-      executable: false,
-      linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
-      metadata: null
-    }
-  })
-  t.alike(await drive.get('/new-file.txt'), buffer)
 
   t.absent((await drive.entry('/script.sh')).value.executable)
 })
