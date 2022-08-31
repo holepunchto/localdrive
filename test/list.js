@@ -6,7 +6,7 @@ test('list(folder) keys', async function (t) {
 
   const actualKeys = []
   const expectedKeys = [
-    '/README.md', '/script.sh', '/LICENSE', '/key.secret',
+    '/README.md', '/script.sh', '/LICENSE', '/key.secret', 'empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
     '/LICENSE.shortcut'

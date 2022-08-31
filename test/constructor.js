@@ -14,7 +14,7 @@ test('new Filedrive() ignore', async function (t) {
   })
 
   const actualKeys = []
-  const expectedKeys = ['/README.md', '/script.sh', '/key.secret', '/LICENSE.shortcut']
+  const expectedKeys = ['/README.md', '/script.sh', '/key.secret', 'empty.txt', '/LICENSE.shortcut']
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
