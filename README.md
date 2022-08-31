@@ -15,6 +15,9 @@ const drive = new Filedrive('/home/user/my-folder')
 const entry = await drive.entry('/src/app.js')
 // => { executable, linkname, blob, metadata }
 
+const buffer = await drive.get('/src/app.js')
+// => <Buffer ..>
+
 for await (const file of drive.list('/src')) {
   // file => { key, entry }
 }
@@ -23,6 +26,10 @@ const rs = drive.createReadStream('/src/app.js')
 for await (const chunk of rs) {
   // chunk => <Buffer ..>
 }
+
+const ws = drive.createWriteStream('/src/app.js')
+ws.write('new app')
+ws.end()
 ```
 
 Minimal API that is similar to `Hyperdrive`.
