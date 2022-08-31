@@ -107,20 +107,26 @@ test('createReadStream(key) with options', async function (t) {
   const stream1 = drive.createReadStream('/LICENSE', { start: 0, end: 0 })
   t.is(await streamToString(stream1), 'M')
 
-  const stream2 = drive.createReadStream('/LICENSE', { start: 0, end: 1 })
-  t.is(await streamToString(stream2), 'MI')
+  const stream2 = drive.createReadStream('/LICENSE', { start: 1, end: 1 })
+  t.is(await streamToString(stream2), 'I')
+
+  const stream3 = drive.createReadStream('/LICENSE', { start: 1 })
+  t.is(await streamToString(stream3), 'IT')
+
+  const stream4 = drive.createReadStream('/LICENSE', { end: 1 })
+  t.is(await streamToString(stream4), 'MI')
 
   // const stream3 = drive.createReadStream('/LICENSE', { start: 0, end: Infinity, length: 0 })
   // t.is(await streamToString(stream3), 'MIT') // + it doesn't make sense to create a stream to read zero length?
 
-  const stream4 = drive.createReadStream('/LICENSE', { length: 1 })
-  t.is(await streamToString(stream4), 'M')
+  const stream5 = drive.createReadStream('/LICENSE', { length: 1 })
+  t.is(await streamToString(stream5), 'M')
 
-  const stream5 = drive.createReadStream('/LICENSE', { length: 2 })
-  t.is(await streamToString(stream5), 'MI')
+  const stream6 = drive.createReadStream('/LICENSE', { length: 2 })
+  t.is(await streamToString(stream6), 'MI')
 
-  const stream6 = drive.createReadStream('/LICENSE', { start: 1, length: 1 })
-  t.is(await streamToString(stream6), 'I')
+  const stream7 = drive.createReadStream('/LICENSE', { start: 1, length: 2 })
+  t.is(await streamToString(stream7), 'IT')
 })
 
 function createDrive (t) {
