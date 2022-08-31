@@ -60,7 +60,8 @@ Creates a file at `key` path in the drive. `options` are the same as in `createW
 
 #### `const buffer = await drive.get(key)`
 
-Returns the blob at `key` path in the drive. If no blob exists, returns null.\
+Returns the blob at `key` path in the drive. If no blob exists, returns null.
+
 It also returns null for symbolic links.
 
 #### `const entry = await drive.entry(key)`
@@ -101,14 +102,6 @@ Available `options`:
   start: Number,
   end: Number,
   length: Number
-}
-```
-
-Default `options`:
-```js
-{
-  start: 0,
-  end: Infinity
 }
 ```
 
