@@ -93,3 +93,10 @@ test('entry(key) permission denied', async function (t) {
     t.is(error.code, 'EACCES')
   }
 })
+
+test('entry(key) relative and absolute', async function (t) {
+  const drive = createDrive(t)
+
+  t.alike((await drive.entry('README.md')).key, '/README.md')
+  t.alike((await drive.entry('/README.md')).key, '/README.md')
+})
