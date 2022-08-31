@@ -65,6 +65,18 @@ test('createWriteStream(key) write and end', function (t) {
   }
 })
 
+test('createWriteStream(key) replace', async function (t) {
+  const drive = createDrive(t)
+
+  t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
+
+  const buffer = Buffer.from('ISC')
+  const ws = drive.createWriteStream('/LICENSE')
+  await bufferToStream(buffer, ws)
+
+  t.alike(await drive.get('/LICENSE'), buffer)
+})
+
 test('createWriteStream(key) on existing executable', async function (t) {
   const drive = createDrive(t)
 
