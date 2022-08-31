@@ -1,11 +1,10 @@
 {
   "name": "fs-drive",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "File system interoperable with Hyperdrive",
-  "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "standard && brittle test/*.js --coverage",
+    "test": "standard && brittle test/*.js",
     "lint": "standard"
   },
   "repository": {

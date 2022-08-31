@@ -18,19 +18,22 @@ module.exports = class Filedrive {
     }
 
     const entry = {
-      executable: isExecutable(stat.mode),
-      linkname: null,
-      blob: null,
-      metadata: null
+      key,
+      value: {
+        executable: isExecutable(stat.mode),
+        linkname: null,
+        blob: null,
+        metadata: null
+      }
     }
 
     if (stat.isSymbolicLink()) {
-      entry.linkname = await fsp.readlink(filename)
+      entry.value.linkname = await fsp.readlink(filename)
       return entry
     }
 
     if (stat.isFile()) {
-      entry.blob = { blockOffset: 0, blockLength: stat.blocks, byteOffset: 0, byteLength: stat.size }
+      entry.value.blob = { blockOffset: 0, blockLength: stat.blocks, byteOffset: 0, byteLength: stat.size }
       return entry
     }
 
@@ -39,7 +42,7 @@ module.exports = class Filedrive {
 
   async get (key) {
     const entry = await this.entry(key)
-    if (!entry || !entry.blob) return null // + get(key) will return null for symbolic links, is it ok?
+    if (!entry || !entry.value.blob) return null
 
     const filename = path.join(this.root, key)
     return fsp.readFile(filename)
@@ -60,7 +63,7 @@ module.exports = class Filedrive {
       }
 
       const entry = await this.entry(key)
-      if (entry) yield { key, entry }
+      if (entry) yield entry
     }
   }
 
