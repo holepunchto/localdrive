@@ -12,11 +12,17 @@ const Filedrive = require('fs-drive')
 
 const drive = new Filedrive('/home/user/my-project')
 
+await drive.put('/blob.txt', Buffer.from('example'))
+await drive.put('/images/logo.png', Buffer.from('...'))
+await drive.put('/images/old-logo.png', Buffer.from('...'))
+
+const buffer = await drive.get('/blob.txt')
+// => <Buffer ..> "example"
+
 const entry = await drive.entry('/blob.txt')
 // => { executable, linkname, blob, metadata }
 
-const buffer = await drive.get('/blob.txt')
-// => <Buffer ..>
+await drive.del('/images/old-logo.png')
 
 for await (const file of drive.list('/images')) {
   // file => { key, entry }
@@ -28,7 +34,7 @@ for await (const chunk of rs) {
 }
 
 const ws = drive.createWriteStream('/blob.txt')
-ws.write('new app')
+ws.write('new example')
 ws.end()
 ```
 
@@ -40,11 +46,11 @@ Minimal API that is similar to `Hyperdrive`.
 
 Creates a drive based on a root directory.
 
-#### `const entry = await drive.entry(key)`
+#### `await drive.put(key, buffer)`
 
 #### `const buffer = await drive.get(key)`
 
-#### `await drive.put(key, buffer)`
+#### `const entry = await drive.entry(key)`
 
 #### `await drive.del(key)`
 
