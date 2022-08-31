@@ -2,6 +2,7 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
 const unixPathResolve = require('unix-path-resolve')
+const { FileReadStream, FileWriteStream } = require('./streams.js')
 
 module.exports = class Filedrive {
   constructor (root, opts = {}) {
@@ -46,8 +47,12 @@ module.exports = class Filedrive {
     const entry = await this.entry(key)
     if (!entry || !entry.value.blob) return null
 
-    const filename = path.join(this.root, key)
-    return fsp.readFile(filename)
+    const rs = this.createReadStream(key)
+    const chunks = []
+    for await (const chunk of rs) {
+      chunks.push(chunk)
+    }
+    return Buffer.concat(chunks)
   }
 
   async * list (folder = '/') {
@@ -69,32 +74,18 @@ module.exports = class Filedrive {
     }
   }
 
-  createReadStream (key, opts = {}) {
-    if (typeof key === 'object') return this.createReadStream(key.key)
-
-    if (typeof opts.length === 'number' && opts.length > 0) {
-      const start = opts.start || 0
-      opts = { start, end: start + opts.length - 1 }
-    }
+  createReadStream (key, opts) {
+    if (typeof key === 'object') key = key.key
 
     const filename = path.join(this.root, key)
-    return fs.createReadStream(filename, opts)
+    return new FileReadStream(filename, opts)
   }
 
-  createWriteStream (key, opts = {}) {
-    if (typeof key === 'object') return this.createWriteStream(key.key)
+  createWriteStream (key, opts) {
+    if (typeof key === 'object') key = key.key
 
     const filename = path.join(this.root, key)
-    const stream = fs.createWriteStream(filename)
-
-    if (opts.executable) {
-      // + not sure about this
-      stream.on('open', function () {
-        fs.chmodSync(filename, '755')
-      })
-    }
-
-    return stream
+    return new FileWriteStream(filename, opts)
   }
 }
 
