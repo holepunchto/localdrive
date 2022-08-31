@@ -79,7 +79,7 @@ module.exports = class Filedrive {
       throw error
     }
 
-    await gcdir(this.root, path.dirname(filename))
+    await gcEmptyFolders(this.root, path.dirname(filename))
   }
 
   async * list (folder = '/', opts = {}) {
@@ -142,7 +142,7 @@ async function lstat (filename) {
   }
 }
 
-async function gcdir (root, dir) {
+async function gcEmptyFolders (root, dir) {
   try {
     while (dir !== root) {
       await fsp.rmdir(dir)
