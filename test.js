@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-test('entry(key) common', async function (t) {
+test('entry(key) basic', async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('README.md'), {
@@ -18,8 +18,8 @@ test('entry(key) common', async function (t) {
 test('entry(key) not found', async function (t) {
   const drive = createDrive(t)
 
-  t.alike(await drive.entry('not-exists.txt'), null)
-  t.alike(await drive.entry('not/exists.txt'), null)
+  t.is(await drive.entry('not-exists.txt'), null)
+  t.is(await drive.entry('not/exists.txt'), null)
 })
 
 test('entry(key) executable', async function (t) {
@@ -44,7 +44,7 @@ test('entry(key) symbolic link', async function (t) {
   })
 })
 
-test('entry(key) existing folder', async function (t) {
+test('entry(key) folder', async function (t) {
   const drive = createDrive(t)
 
   t.is(await drive.entry('examples'), null)
