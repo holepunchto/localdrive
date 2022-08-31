@@ -62,4 +62,3 @@ test('createWriteStream(key) write and end', async function (t) {
 
   t.alike(await drive.get('new-example.txt'), Buffer.from(data))
 })
-
