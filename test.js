@@ -94,14 +94,41 @@ test('list(folder) entries', async function (t) {
   }
 })
 
+test('createReadStream(key)', async function (t) {
+  const drive = createDrive(t)
+
+  const stream = drive.createReadStream('/LICENSE')
+  t.is(await streamToString(stream), 'MIT')
+})
+
+test('createReadStream(key) with options', async function (t) {
+  const drive = createDrive(t)
+
+  const stream1 = drive.createReadStream('/LICENSE', { start: 0, end: 0 })
+  t.is(await streamToString(stream1), 'M')
+
+  const stream2 = drive.createReadStream('/LICENSE', { start: 0, end: 1 })
+  t.is(await streamToString(stream2), 'MI')
+
+  // const stream3 = drive.createReadStream('/LICENSE', { start: 0, end: Infinity, length: 0 })
+  // t.is(await streamToString(stream3), 'MIT') // + it doesn't make sense to create a stream to read zero length?
+
+  const stream4 = drive.createReadStream('/LICENSE', { start: 0, length: 1 })
+  t.is(await streamToString(stream4), 'M')
+
+  const stream5 = drive.createReadStream('/LICENSE', { start: 0, length: 2 })
+  t.is(await streamToString(stream5), 'MI')
+
+  const stream6 = drive.createReadStream('/LICENSE', { start: 1, length: 1 })
+  t.is(await streamToString(stream6), 'I')
+})
+
 function createDrive (t) {
   const tmpdir = path.join(os.tmpdir(), 'filedrive-test-')
 
   const root = fs.mkdtempSync(tmpdir)
   t.teardown(() => fs.rmSync(root, { recursive: true }))
   generateTestFiles(root)
-
-  console.log('creating drive', { root })
 
   return new Filedrive(root)
 }
@@ -125,4 +152,12 @@ function generateTestFiles (root) {
 
   fs.chmodSync(fullpath('script.sh'), '755')
   fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
+}
+
+async function streamToString (stream) {
+  const chunks = []
+  for await (const chunk of stream) {
+    chunks.push(chunk)
+  }
+  return Buffer.concat(chunks).toString()
 }
