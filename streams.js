@@ -82,7 +82,7 @@ class FileReadStream extends Readable {
           this._missing = 0
           return cb(null)
         }
-        if (st.size > this._offset + this._missing) {
+        if (st.size < this._offset + this._missing) {
           this._missing = st.size - this._offset
           return cb(null)
         }
