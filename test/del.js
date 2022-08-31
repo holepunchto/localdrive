@@ -33,13 +33,13 @@ test('del(key) folder', async function (t) {
 
 test('del(key) gc empty folders', async function (t) {
   const drive = createDrive(t)
+  const folder = path.join(drive.root, 'examples', 'more')
 
-  t.ok(fs.existsSync(path.join(drive.root, 'examples', 'more')))
-
+  t.ok(fs.existsSync(folder))
   await drive.del('/examples/more/c.txt')
+  t.ok(fs.existsSync(folder))
   await drive.del('/examples/more/d.txt')
-
-  t.absent(fs.existsSync(path.join(drive.root, 'examples', 'more')))
+  t.absent(fs.existsSync(folder))
 })
 
 test('del(key) gc empty parent folders', async function (t) {
