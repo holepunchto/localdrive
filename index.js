@@ -78,6 +78,8 @@ module.exports = class Filedrive {
       if (error.code === 'ENOENT') return
       throw error
     }
+
+    await gcdir(this.root, filename)
   }
 
   async * list (folder = '/', opts = {}) {
@@ -137,5 +139,17 @@ async function lstat (filename) {
   } catch (error) {
     if (error.code === 'ENOENT') return null
     throw error
+  }
+}
+
+async function gcdir (root, fullname) {
+  const dirname = path.dirname(fullname)
+  if (root === dirname) return
+
+  try {
+    await fsp.rmdir(dirname)
+    await gcdir(root, dirname)
+  } catch {
+    // silent error
   }
 }
