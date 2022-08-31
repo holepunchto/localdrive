@@ -116,9 +116,6 @@ test('createReadStream(key) with options', async function (t) {
   const stream4 = drive.createReadStream('/LICENSE', { end: 1 })
   t.is(await streamToString(stream4), 'MI')
 
-  // const stream3 = drive.createReadStream('/LICENSE', { start: 0, end: Infinity, length: 0 })
-  // t.is(await streamToString(stream3), 'MIT') // + it doesn't make sense to create a stream to read zero length?
-
   const stream5 = drive.createReadStream('/LICENSE', { length: 1 })
   t.is(await streamToString(stream5), 'M')
 
@@ -127,6 +124,9 @@ test('createReadStream(key) with options', async function (t) {
 
   const stream7 = drive.createReadStream('/LICENSE', { start: 1, length: 2 })
   t.is(await streamToString(stream7), 'IT')
+
+  // const stream8 = drive.createReadStream('/LICENSE', { start: 0, end: Infinity, length: 0 })
+  // t.is(await streamToString(stream8), 'MIT')
 })
 
 function createDrive (t) {
