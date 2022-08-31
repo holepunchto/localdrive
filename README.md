@@ -10,24 +10,24 @@ npm i fs-drive
 ```javascript
 const Filedrive = require('fs-drive')
 
-const drive = new Filedrive('/home/user/my-folder')
+const drive = new Filedrive('/home/user/my-project')
 
-const entry = await drive.entry('/src/app.js')
+const entry = await drive.entry('/blob.txt')
 // => { executable, linkname, blob, metadata }
 
-const buffer = await drive.get('/src/app.js')
+const buffer = await drive.get('/blob.txt')
 // => <Buffer ..>
 
-for await (const file of drive.list('/src')) {
+for await (const file of drive.list('/images')) {
   // file => { key, entry }
 }
 
-const rs = drive.createReadStream('/src/app.js')
+const rs = drive.createReadStream('/blob.txt')
 for await (const chunk of rs) {
   // chunk => <Buffer ..>
 }
 
-const ws = drive.createWriteStream('/src/app.js')
+const ws = drive.createWriteStream('/blob.txt')
 ws.write('new app')
 ws.end()
 ```
