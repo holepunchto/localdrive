@@ -20,3 +20,9 @@ test('get(key) folder', async function (t) {
   t.is(await drive.get('/examples'), null)
   t.is(await drive.get('/examples/more'), null)
 })
+
+test('get(key) empty file', async function (t) {
+  const drive = createDrive(t)
+
+  t.alike(await drive.get('/empty.txt'), Buffer.from(''))
+})
