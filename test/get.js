@@ -4,7 +4,7 @@ const { createDrive } = require('./helpers/index.js')
 test('get(key) basic', async function (t) {
   const drive = createDrive(t)
 
-  t.alike((await drive.get('/LICENSE')).toString(), 'MIT')
+  t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
 })
 
 test('get(key) not found', async function (t) {
