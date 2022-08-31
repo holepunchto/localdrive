@@ -75,3 +75,12 @@ module.exports = class Filedrive {
 function isExecutable (mode) {
   return !!(mode & fs.constants.S_IXUSR)
 }
+
+async function lstat (filename) {
+  try {
+    return await fsp.lstat(filename)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
