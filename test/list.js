@@ -4,13 +4,13 @@ const { createDrive } = require('./helpers/index.js')
 test('list(folder) keys', async function (t) {
   const drive = createDrive(t)
 
+  const actualKeys = []
   const expectedKeys = [
-    '/README.md', '/script.sh', '/LICENSE',
+    '/README.md', '/script.sh', '/LICENSE', '/key.secret',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
     '/LICENSE.shortcut'
   ]
-  const actualKeys = []
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
