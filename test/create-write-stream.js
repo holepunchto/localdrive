@@ -9,10 +9,13 @@ test('createWriteStream(key)', async function (t) {
   await bufferToStream(buffer, writeStream)
 
   t.alike(await drive.entry('new-file.txt'), {
-    executable: false,
-    linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
-    metadata: null
+    key: '/new-file.txt',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
+      metadata: null
+    }
   })
   t.alike(await drive.get('new-file.txt'), buffer)
 })
@@ -25,10 +28,13 @@ test('createWriteStream(key) with options', async function (t) {
   await bufferToStream(buffer, writeStream)
 
   t.alike(await drive.entry('new-script.sh'), {
-    executable: true,
-    linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
-    metadata: null
+    key: '/new-script.sh',
+    value: {
+      executable: true,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+      metadata: null
+    }
   })
   t.alike(await drive.get('new-script.sh'), buffer)
 })
@@ -46,18 +52,24 @@ test('createWriteStream(key) write and end', async function (t) {
 
   // file exists but no data written yet
   t.alike(await drive.entry('new-example.txt'), {
-    executable: false,
-    linkname: null,
-    blob: { blockOffset: 0, blockLength: 0, byteOffset: 0, byteLength: 0 },
-    metadata: null
+    key: '/new-example.txt',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 0, byteOffset: 0, byteLength: 0 },
+      metadata: null
+    }
   })
 
   // file exists and data written
   t.alike(await drive.entry('new-example.txt'), {
-    executable: false,
-    linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
-    metadata: null
+    key: '/new-example.txt',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+      metadata: null
+    }
   })
 
   t.alike(await drive.get('new-example.txt'), Buffer.from(data))
