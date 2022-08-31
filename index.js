@@ -13,7 +13,7 @@ module.exports = class Filedrive {
     const filename = path.join(this.root, key)
     const stat = await lstat(filename)
 
-    if (!stat) {
+    if (!stat || stat.isDirectory()) {
       return null
     }
 
