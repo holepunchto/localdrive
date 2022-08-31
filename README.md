@@ -67,9 +67,14 @@ Returns the entry at `key` path in the drive. It looks like this:
 {
   key: '/blob.txt',
   value: {
-    executable: false,
+    executable: Boolean,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
+    blob: {
+      blockOffset: Number,
+      blockLength: Number,
+      byteOffset: Number,
+      byteLength: Number
+    },
     metadata: null
   }
 }
@@ -94,6 +99,15 @@ Default `options`:
 
 Returns a stream to read out the blob stored in the drive at `key` path.
 
+Available `options`:
+```js
+{
+  start: Number,
+  end: Number,
+  length: Number
+}
+```
+
 Default `options`:
 ```js
 {
@@ -102,15 +116,8 @@ Default `options`:
 }
 ```
 
-Instead of `end`, you could use `length`:
-```js
-{
-  start: 0,
-  length: 3
-}
-```
-
 `start` and `end` are inclusive.
+`length` overrides `end`, they're not meant to be used together.
 
 #### `const ws = drive.createWriteStream(key, [options])`
 
