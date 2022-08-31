@@ -5,9 +5,8 @@ const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 
 module.exports = class Filedrive {
-  constructor (root, opts = {}) {
+  constructor (root) {
     this.root = root
-    this.ignore = opts.ignore || new Set(['.git', '.github'])
   }
 
   async entry (key) {
@@ -81,12 +80,14 @@ module.exports = class Filedrive {
     }
   }
 
-  async * list (folder = '/') {
+  async * list (folder = '/', opts = {}) {
+    const ignore = opts.ignore || new Set(['.git', '.github'])
+
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
 
     for await (const dirent of iterator) {
-      if (this.ignore.has(dirent.name)) continue
+      if (ignore.has(dirent.name)) continue
 
       const key = unixPathResolve(folder, dirent.name)
 
