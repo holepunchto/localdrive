@@ -31,7 +31,4 @@ test('createReadStream(key) with options', async function (t) {
 
   const stream7 = drive.createReadStream('/LICENSE', { start: 1, length: 2 })
   t.is(await streamToString(stream7), 'IT')
-
-  // const stream8 = drive.createReadStream('/LICENSE', { start: 0, end: Infinity, length: 0 })
-  // t.is(await streamToString(stream8), 'MIT')
 })
