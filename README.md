@@ -44,11 +44,15 @@ Creates a drive based on a root directory.
 
 #### `const buffer = await drive.get(key)`
 
-#### `const iterator = drive.list(folder)`
+#### `await drive.put(key, buffer)`
 
-#### `const stream = drive.createReadStream(key)`
+#### `await drive.del(key)`
 
-#### `const stream = drive.createWriteStream(key, [options])`
+#### `const iterator = drive.list([folder])`
+
+#### `const rs = drive.createReadStream(key, [options])`
+
+#### `const ws = drive.createWriteStream(key, [options])`
 
 ## License
 MIT
