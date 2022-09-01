@@ -24,6 +24,8 @@ console.log(entry) // => { executable, linkname, blob, metadata }
 
 await drive.del('/images/old-logo.png')
 
+await drive.symlink('/images/old-logo.png', '/images/logo.png')
+
 for await (const file of drive.list('/images')) {
   console.log('list', file) // => { key, entry }
 }
