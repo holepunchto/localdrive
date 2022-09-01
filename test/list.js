@@ -22,14 +22,15 @@ test('list(folder) keys', async function (t) {
 test('list(folder) entries', async function (t) {
   const drive = createDrive(t)
 
-  for await (const { value } of drive.list('/')) {
+  for await (const { key, value } of drive.list('/')) {
     t.is(typeof value.executable, 'boolean')
     t.ok(value.linkname === null || typeof value.linkname === 'string')
     t.ok(value.blob === null || typeof value.blob === 'object')
     t.ok(value.metadata === null || typeof value.metadata === 'object')
 
     if (value.linkname) {
-      t.ok(value.linkname.startsWith(drive.root))
+      t.ok(key.endsWith('.shortcut'))
+      t.ok(key.startsWith(value.linkname))
     }
 
     if (value.blob) {

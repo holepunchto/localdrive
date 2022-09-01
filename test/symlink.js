@@ -1,6 +1,5 @@
 const test = require('brittle')
 const { createDrive } = require('./helpers/index.js')
-const path = require('path')
 
 test('symlink(key, linkname) basic', async function (t) {
   const drive = createDrive(t)
@@ -13,7 +12,7 @@ test('symlink(key, linkname) basic', async function (t) {
     key: '/README.shortcut',
     value: {
       executable: true,
-      linkname: path.join(drive.root, 'README.md'),
+      linkname: '/README.md',
       blob: null,
       metadata: null
     }

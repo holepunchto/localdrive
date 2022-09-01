@@ -1,6 +1,5 @@
 const test = require('brittle')
 const { createDrive } = require('./helpers/index.js')
-const path = require('path')
 
 test('entry(key) basic', async function (t) {
   const drive = createDrive(t)
@@ -44,7 +43,7 @@ test('entry(key) symbolic link', async function (t) {
     key: '/LICENSE.shortcut',
     value: {
       executable: true,
-      linkname: path.join(drive.root, 'LICENSE'),
+      linkname: '/LICENSE',
       blob: null,
       metadata: null
     }
