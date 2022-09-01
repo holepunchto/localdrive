@@ -22,7 +22,7 @@ module.exports = class Filedrive {
     const entry = {
       key,
       value: {
-        executable: isExecutable(stat.mode),
+        executable: false,
         linkname: null,
         blob: null,
         metadata: null
@@ -33,6 +33,8 @@ module.exports = class Filedrive {
       entry.value.linkname = (await fsp.readlink(filename)).slice(this.root.length)
       return entry
     }
+
+    entry.value.executable = isExecutable(stat.mode)
 
     if (stat.isFile()) {
       entry.value.blob = { blockOffset: 0, blockLength: stat.blocks, byteOffset: 0, byteLength: stat.size }

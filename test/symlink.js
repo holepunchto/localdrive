@@ -11,7 +11,7 @@ test('symlink(key, linkname) basic', async function (t) {
   t.alike(await drive.entry('/README.shortcut'), {
     key: '/README.shortcut',
     value: {
-      executable: true,
+      executable: false,
       linkname: '/README.md',
       blob: null,
       metadata: null
@@ -39,7 +39,7 @@ test('symlink(key, linkname) replace', async function (t) {
   t.alike(await drive.entry('/LICENSE'), {
     key: '/LICENSE',
     value: {
-      executable: true,
+      executable: false,
       linkname: '/LICENSE-V2',
       blob: null,
       metadata: null

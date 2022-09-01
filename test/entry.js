@@ -42,7 +42,7 @@ test('entry(key) symbolic link', async function (t) {
   t.alike(await drive.entry('/LICENSE.shortcut'), {
     key: '/LICENSE.shortcut',
     value: {
-      executable: true,
+      executable: false,
       linkname: '/LICENSE',
       blob: null,
       metadata: null
