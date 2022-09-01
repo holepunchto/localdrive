@@ -20,6 +20,26 @@ test('symlink(key, linkname) basic', async function (t) {
   })
 })
 
+test('symlink(key, linkname) replace', async function (t) {
+  const drive = createDrive(t)
+
+  t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
+  t.alike(await drive.get('/LICENSE-V2'), Buffer.from('ISC'))
+
+  await drive.symlink('/LICENSE', '/LICENSE-V2')
+
+  t.absent(await drive.get('/LICENSE'))
+  t.alike(await drive.entry('/LICENSE'), {
+    key: '/LICENSE',
+    value: {
+      executable: true,
+      linkname: path.join(drive.root, 'LICENSE-V2'),
+      blob: null,
+      metadata: null
+    }
+  })
+})
+
 test('symlink(key, linkname) not found', async function (t) {
   const drive = createDrive(t)
 

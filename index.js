@@ -84,6 +84,9 @@ module.exports = class Filedrive {
   }
 
   async symlink (key, linkname) {
+    const entry = await this.entry(key)
+    if (entry) await this.del(key)
+
     key = normalizePath(key)
     const pointer = path.join(this.root, key)
 
