@@ -88,6 +88,12 @@ Returns the entry at `key` path in the drive. It looks like this:
 
 Deletes the file at `key` path from the drive.
 
+#### `await drive.symlink(key, linkname)`
+
+Creates an entry in drive at `key` path that points to the entry at `linkname`.
+
+If a blob entry currently exists at `key` path then it will get overwritten and `drive.get(key)` will return null, while `drive.entry(key)` will return the entry with symlink information.
+
 #### `const iterator = drive.list([folder])`
 
 Returns a stream of all entries in the drive inside of specified `folder`.
