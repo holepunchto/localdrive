@@ -6,7 +6,7 @@ test('list(folder) keys', async function (t) {
 
   const actualKeys = []
   const expectedKeys = [
-    '/README.md', '/script.sh', '/LICENSE', '/key.secret', '/empty.txt',
+    '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
     '/LICENSE.shortcut'
@@ -47,7 +47,7 @@ test('list(folder) ignore', async function (t) {
   })
 
   const actualKeys = []
-  const expectedKeys = ['/README.md', '/script.sh', '/key.secret', '/empty.txt', '/LICENSE.shortcut']
+  const expectedKeys = ['/README.md', '/script.sh', 'LICENSE-V2', '/key.secret', '/empty.txt', '/LICENSE.shortcut']
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)

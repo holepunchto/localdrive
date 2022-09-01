@@ -35,6 +35,7 @@ function generateTestFiles (t, root) {
   createFile('README.md', '# example')
   createFile('script.sh', '#!/bin/bash')
   createFile('LICENSE', 'MIT')
+  createFile('LICENSE-V2', 'ISC')
   createFile('key.secret', '1234')
   createFile('empty.txt', '')
   // createFile('example.sock', '')
