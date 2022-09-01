@@ -71,3 +71,20 @@ test('del(key) should not gc root', async function (t) {
 
   t.ok(fs.existsSync(drive.root))
 })
+
+test('put(key, buffer) resolve key path', async function (t) {
+  const drive = createDrive(t)
+
+  const delAndEntry = async (key, expectedKey) => {
+    t.ok(await drive.entry(expectedKey))
+    await drive.del(key)
+    t.absent(await drive.entry(expectedKey))
+  }
+
+  await delAndEntry('README.md', '/README.md')
+  await delAndEntry('/../script.sh', '/script.sh')
+  await delAndEntry('../LICENSE', '/LICENSE')
+  await delAndEntry('../../../../key.secret', '/key.secret')
+  await delAndEntry('/examples/more/../a.txt', '/examples/a.txt')
+  await delAndEntry('\\examples\\more\\c.txt', '/examples/more/c.txt')
+})

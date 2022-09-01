@@ -26,3 +26,21 @@ test('get(key) empty file', async function (t) {
 
   t.alike(await drive.get('/empty.txt'), Buffer.from(''))
 })
+
+test('get(key) resolve key path', async function (t) {
+  const drive = createDrive(t)
+
+  const buffer = await drive.get('/README.md')
+  const a = await drive.get('/examples/a.txt')
+  const c = await drive.get('/examples/more/c.txt')
+  t.ok(buffer)
+  t.ok(a)
+  t.ok(c)
+
+  t.alike(await drive.get('README.md'), buffer)
+  t.alike(await drive.get('/../README.md'), buffer)
+  t.alike(await drive.get('../README.md'), buffer)
+  t.alike(await drive.get('../../../../README.md'), buffer)
+  t.alike(await drive.get('/examples/more/../a.txt'), a)
+  t.alike(await drive.get('\\examples\\more\\c.txt'), c)
+})
