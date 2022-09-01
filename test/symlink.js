@@ -20,7 +20,7 @@ test('symlink(key, linkname) basic', async function (t) {
   })
 })
 
-test.solo('symlink(key, linkname) replace', async function (t) {
+test('symlink(key, linkname) replace', async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.get('/LICENSE-V2'), Buffer.from('ISC'))
