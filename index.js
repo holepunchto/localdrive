@@ -30,7 +30,7 @@ module.exports = class Filedrive {
     }
 
     if (stat.isSymbolicLink()) {
-      entry.value.linkname = await fsp.readlink(filename)
+      entry.value.linkname = (await fsp.readlink(filename)).slice(this.root.length)
       return entry
     }
 
