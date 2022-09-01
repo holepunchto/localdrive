@@ -126,10 +126,8 @@ function isExecutable (mode) {
 }
 
 function normalizePath (name) {
-  if (!name.startsWith('/')) {
-    return unixPathResolve(path.join('/', name))
-  }
-  return name
+  name = path.resolve('/', name)
+  return unixPathResolve(name)
 }
 
 async function lstat (filename) {
