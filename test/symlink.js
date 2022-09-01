@@ -44,8 +44,7 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   const symlinkAndEntry = async (key, linkname, expectedKey) => {
     t.absent(await drive.entry(expectedKey))
     await drive.symlink(key, linkname)
-    const entry = await drive.entry(expectedKey)
-    t.is(entry.key, expectedKey)
+    t.ok(await drive.entry(expectedKey))
   }
 
   await symlinkAndEntry('b.txt.shortcut', '/b.txt', '/b.txt.shortcut')
