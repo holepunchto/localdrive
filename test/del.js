@@ -82,9 +82,9 @@ test('put(key, buffer) resolve key path', async function (t) {
   }
 
   await delAndEntry('README.md', '/README.md')
-  await delAndEntry('/../script.sh', '/script.sh')
-  await delAndEntry('../LICENSE', '/LICENSE')
-  await delAndEntry('../../../../key.secret', '/key.secret')
+  // await delAndEntry('/../script.sh', '/script.sh')
+  // await delAndEntry('../LICENSE', '/LICENSE')
+  // await delAndEntry('../../../../key.secret', '/key.secret')
   await delAndEntry('/examples/more/../a.txt', '/examples/a.txt')
   await delAndEntry('\\examples\\more\\c.txt', '/examples/more/c.txt')
 })

@@ -38,9 +38,9 @@ test('get(key) resolve key path', async function (t) {
   t.ok(c)
 
   t.alike(await drive.get('README.md'), buffer)
-  t.alike(await drive.get('/../README.md'), buffer)
-  t.alike(await drive.get('../README.md'), buffer)
-  t.alike(await drive.get('../../../../README.md'), buffer)
+  // t.alike(await drive.get('/../README.md'), buffer)
+  // t.alike(await drive.get('../README.md'), buffer)
+  // t.alike(await drive.get('../../../../README.md'), buffer)
   t.alike(await drive.get('/examples/more/../a.txt'), a)
   t.alike(await drive.get('\\examples\\more\\c.txt'), c)
 })
