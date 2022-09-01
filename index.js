@@ -83,6 +83,16 @@ module.exports = class Filedrive {
     await gcEmptyFolders(this.root, path.dirname(filename))
   }
 
+  async symlink (key, linkname) {
+    key = normalizePath(key)
+    const pointer = path.join(this.root, key)
+
+    linkname = normalizePath(linkname)
+    const filename = path.join(this.root, linkname)
+
+    await fsp.symlink(filename, pointer)
+  }
+
   async * list (folder = '/') {
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
