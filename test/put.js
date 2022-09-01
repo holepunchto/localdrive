@@ -59,21 +59,3 @@ test('put(key, buffer) empty file', async function (t) {
   await drive.put('/new-empty.txt', Buffer.from(''))
   t.alike(await drive.get('/new-empty.txt'), Buffer.from(''))
 })
-
-test('put(key, buffer) resolve key path', async function (t) {
-  const drive = createDrive(t)
-
-  const putAndEntry = async (key, expectedKey) => {
-    t.absent(await drive.entry(expectedKey))
-    await drive.put(key, Buffer.from(''))
-    const entry = await drive.entry(expectedKey)
-    t.is(entry.key, expectedKey)
-  }
-
-  await putAndEntry('b.txt', '/b.txt')
-  await putAndEntry('/../c.txt', '/c.txt')
-  await putAndEntry('../d.txt', '/d.txt')
-  await putAndEntry('../../../../e.txt', '/e.txt')
-  await putAndEntry('/examples/more/../f.txt', '/examples/f.txt')
-  await putAndEntry('\\examples\\more\\h.txt', '/examples/more/h.txt')
-})
