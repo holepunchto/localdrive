@@ -5,12 +5,8 @@ const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 
 module.exports = class Filedrive {
-  constructor (root, opts = {}) {
+  constructor (root) {
     this.root = root
-    this.ignore = new Set()
-
-    const ignore = opts.ignore || new Set(['.git', '.github'])
-    for (const key of ignore) this.ignore.add(normalizePath(key))
   }
 
   async entry (key) {
@@ -48,9 +44,6 @@ module.exports = class Filedrive {
   }
 
   async get (key) {
-    key = normalizePath(key)
-    if (this.ignore.has(key)) return null
-
     const entry = await this.entry(key)
     if (!entry || !entry.value.blob) return null
 
@@ -105,20 +98,22 @@ module.exports = class Filedrive {
     await fsp.symlink(filename, pointer)
   }
 
-  async * list (folder = '/') {
+  // drive.list('/', { filter: (key) =>  })
+  async * list (folder, opts = {}) {
+    folder = normalizePath(folder || '/')
+
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
 
     for await (const dirent of iterator) {
-      const namePath = normalizePath(dirent.name)
-      if (this.ignore.has(namePath)) continue
-
       const key = unixPathResolve(folder, dirent.name)
 
       if (dirent.isDirectory()) {
-        yield * this.list(key)
+        yield * this.list(key, opts)
         continue
       }
+
+      if (opts.filter && !opts.filter(key)) continue
 
       const entry = await this.entry(key)
       if (entry) yield entry

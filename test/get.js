@@ -7,14 +7,6 @@ test('get(key) basic', async function (t) {
   t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
 })
 
-test('get(key) ignore', async function (t) {
-  const drive = createDrive(t, {
-    ignore: new Set(['LICENSE'])
-  })
-
-  t.is(await drive.get('/LICENSE'), null)
-})
-
 test('get(key) not found', async function (t) {
   const drive = createDrive(t)
 
