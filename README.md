@@ -27,7 +27,7 @@ await drive.del('/images/old-logo.png')
 await drive.symlink('/images/logo.shortcut', '/images/logo.png')
 
 for await (const file of drive.list('/images')) {
-  console.log('list', file) // => { key, entry }
+  console.log('list', file) // => { key, value }
 }
 
 const rs = drive.createReadStream('/blob.txt')
