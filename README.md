@@ -45,16 +45,9 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Filedrive(root, [options])`
+#### `const drive = new Filedrive(root)`
 
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
-
-Default `options`:
-```js
-{
-  ignore: new Set(['.git', '.github'])
-}
-```
 
 #### `await drive.put(key, buffer, [options])`
 
@@ -96,9 +89,16 @@ Creates an entry in drive at `key` path that points to the entry at `linkname`.
 
 If a blob entry currently exists at `key` path then it will get overwritten and `drive.get(key)` will return null, while `drive.entry(key)` will return the entry with symlink information.
 
-#### `const iterator = drive.list([folder])`
+#### `const iterator = drive.list([folder], [options])`
 
 Returns a stream of all entries in the drive inside of specified `folder`.
+
+Default `options`:
+```js
+{
+  filter: (key) => true
+}
+```
 
 #### `const rs = drive.createReadStream(key, [options])`
 
