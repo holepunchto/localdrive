@@ -1,6 +1,7 @@
 const Filedrive = require('../../index.js')
 const path = require('path')
 const fs = require('fs')
+const fsp = require('fs/promises')
 const os = require('os')
 const net = require('net')
 const { promisify } = require('util')
@@ -14,14 +15,15 @@ module.exports = {
   bufferToStream
 }
 
-function createTmpDir () {
+function createTmpDir (t) {
   const tmpdir = path.join(os.tmpdir(), 'filedrive-test-')
-  return fs.mkdtempSync(tmpdir)
+  const dir = fs.mkdtempSync(tmpdir)
+  t.teardown(() => fsp.rm(dir, { recursive: true }))
+  return dir
 }
 
 function createDrive (t, opts, cfg = {}) {
-  const root = createTmpDir()
-  t.teardown(() => fs.rmSync(root, { recursive: true }))
+  const root = createTmpDir(t)
   if (!cfg.noTestFiles) generateTestFiles(t, root)
 
   return new Filedrive(root, opts)
