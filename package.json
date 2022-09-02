@@ -1,0 +1,28 @@
+{
+  "name": "fs-drive",
+  "version": "0.0.0",
+  "description": "File system interoperable with Hyperdrive",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && brittle test/*.js",
+    "lint": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holepunchto/fs-drive.git"
+  },
+  "author": "Lucas Barrena (@LuKks)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/holepunchto/fs-drive/issues"
+  },
+  "homepage": "https://github.com/holepunchto/fs-drive",
+  "dependencies": {
+    "streamx": "^2.12.5",
+    "unix-path-resolve": "^1.0.2"
+  },
+  "devDependencies": {
+    "brittle": "^3.1.0",
+    "standard": "^17.0.0"
+  }
+}
