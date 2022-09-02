@@ -1,16 +1,16 @@
-# fs-drive
+# localdrive
 
 File system interoperable with Hyperdrive.
 
 ```
-npm i fs-drive
+npm i localdrive
 ```
 
 ## Usage
 ```js
-import Filedrive from 'fs-drive'
+import Localdrive from 'localdrive'
 
-const drive = new Filedrive('my-project')
+const drive = new Localdrive('my-project')
 
 await drive.put('/blob.txt', Buffer.from('example'))
 await drive.put('/images/logo.png', Buffer.from('..'))
@@ -45,7 +45,7 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Filedrive(root)`
+#### `const drive = new Localdrive(root)`
 
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
 

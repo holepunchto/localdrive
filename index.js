@@ -4,7 +4,7 @@ const path = require('path')
 const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 
-module.exports = class Filedrive {
+module.exports = class Localdrive {
   constructor (root) {
     this.root = root
   }
