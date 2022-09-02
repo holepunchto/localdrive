@@ -107,12 +107,12 @@ module.exports = class Filedrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(folder, dirent.name)
 
+      if (opts.filter && !opts.filter(key)) continue
+
       if (dirent.isDirectory()) {
         yield * this.list(key, opts)
         continue
       }
-
-      if (opts.filter && !opts.filter(key)) continue
 
       const entry = await this.entry(key)
       if (entry) yield entry
