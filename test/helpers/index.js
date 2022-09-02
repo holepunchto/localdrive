@@ -40,7 +40,6 @@ function generateTestFiles (t, root) {
   createFile('LICENSE-V2', 'ISC')
   createFile('key.secret', '1234')
   createFile('empty.txt', '')
-  // createFile('example.sock', '')
 
   createFolder('examples/')
   createFile('examples/a.txt', '1st')

@@ -75,9 +75,6 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   }
 
   await symlinkAndEntry('b.txt.shortcut', '/b.txt', '/b.txt.shortcut')
-  // await symlinkAndEntry('/../c.txt.shortcut', '/c.txt', '/c.txt.shortcut')
-  // await symlinkAndEntry('../d.txt.shortcut', '/d.txt', '/d.txt.shortcut')
-  // await symlinkAndEntry('../../../../e.txt.shortcut', '/e.txt', '/e.txt.shortcut')
   await symlinkAndEntry('/examples/more/../f.txt.shortcut', '/examples/f.txt', '/examples/f.txt.shortcut')
   await symlinkAndEntry('\\examples\\more\\h.txt.shortcut', '/examples/more/h.txt', '/examples/more/h.txt.shortcut')
 })
