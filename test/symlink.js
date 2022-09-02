@@ -65,6 +65,14 @@ test('symlink(key, linkname) folder', async function (t) {
   t.ok(await drive.entry('/examples.shortcut'))
 })
 
+test('symlink(key, linkname) automatic folders creation', async function (t) {
+  const drive = createDrive(t)
+
+  const key = '/new/folder/files/name.txt'
+  await drive.symlink(key, '/LICENSE')
+  t.ok(await drive.entry(key))
+})
+
 test('symlink(key, linkname) resolve key path', async function (t) {
   const drive = createDrive(t)
 

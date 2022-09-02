@@ -101,6 +101,7 @@ module.exports = class Filedrive {
     linkname = normalizePath(linkname)
     const filename = path.join(this.root, linkname)
 
+    await fsp.mkdir(path.dirname(pointer), { recursive: true })
     await fsp.symlink(filename, pointer)
   }
 
