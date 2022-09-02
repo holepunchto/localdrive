@@ -58,6 +58,7 @@ function generateTestFiles (t, root) {
   const server = net.createServer().listen(sockpath)
   t.teardown(() => {
     server.close()
+    return new Promise(resolve => server.once('close', resolve))
   })
 }
 
