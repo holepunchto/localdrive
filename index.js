@@ -98,7 +98,6 @@ module.exports = class Filedrive {
     await fsp.symlink(filename, pointer)
   }
 
-  // drive.list('/', { filter: (key) =>  })
   async * list (folder, opts = {}) {
     folder = unixPathResolve('/', folder || '/')
 
