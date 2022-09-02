@@ -3,36 +3,40 @@ const fs = require('fs')
 const path = require('path')
 
 class FileWriteStream extends Writable {
-  constructor (filename, opts = {}) {
+  constructor (filename, opts = {}, lock) {
     super({ map })
 
     this.executable = !!opts.executable
     this.filename = filename
     this.fd = 0
+    this._lock = lock || (() => Promise.resolve()) // + do custom resolve to avoid waiting a tick?
   }
 
   _open (cb) {
-    fs.mkdir(path.dirname(this.filename), { recursive: true }, () => {
-      const mode = this.executable ? 0o744 : 0o644
+    this._lock().then((release) => {
+      fs.mkdir(path.dirname(this.filename), { recursive: true }, () => {
+        const mode = this.executable ? 0o744 : 0o644
 
-      fs.open(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode, (err, fd) => {
-        if (err) return cb(err)
+        fs.open(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode, (err, fd) => {
+          if (release) release()
+          if (err) return cb(err)
 
-        const onerror = (err) => fs.close(fd, () => cb(err))
+          const onerror = (err) => fs.close(fd, () => cb(err))
 
-        fs.fstat(fd, (err, st) => {
-          if (err) return onerror(err)
-
-          if (this.executable === !!(st.mode & fs.constants.S_IXUSR)) {
-            this.fd = fd
-            return cb(null)
-          }
-
-          // file was already made so above mode had no effect, chmod to adjust...
-          fs.fchmod(fd, mode, (err) => {
+          fs.fstat(fd, (err, st) => {
             if (err) return onerror(err)
-            this.fd = fd
-            cb(null)
+
+            if (this.executable === !!(st.mode & fs.constants.S_IXUSR)) {
+              this.fd = fd
+              return cb(null)
+            }
+
+            // file was already made so above mode had no effect, chmod to adjust...
+            fs.fchmod(fd, mode, (err) => {
+              if (err) return onerror(err)
+              this.fd = fd
+              cb(null)
+            })
           })
         })
       })
