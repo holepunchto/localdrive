@@ -48,6 +48,9 @@ module.exports = class Filedrive {
   }
 
   async get (key) {
+    key = normalizePath(key)
+    if (this.ignore.has(key)) return null
+
     const entry = await this.entry(key)
     if (!entry || !entry.value.blob) return null
 
