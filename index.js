@@ -55,7 +55,7 @@ module.exports = class Filedrive {
     return Buffer.concat(chunks)
   }
 
-  async put (key, buffer, opts) {
+  put (key, buffer, opts) {
     return new Promise((resolve, reject) => {
       const ws = this.createWriteStream(key, opts)
       let error = null
