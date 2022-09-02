@@ -10,7 +10,7 @@ module.exports = class Filedrive {
   }
 
   async entry (key) {
-    key = normalizePath(key)
+    key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
     const stat = await lstat(filename)
@@ -71,7 +71,7 @@ module.exports = class Filedrive {
   }
 
   async del (key) {
-    key = normalizePath(key)
+    key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
     try {
@@ -88,10 +88,10 @@ module.exports = class Filedrive {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
-    key = normalizePath(key)
+    key = unixPathResolve('/', key)
     const pointer = path.join(this.root, key)
 
-    linkname = normalizePath(linkname)
+    linkname = unixPathResolve('/', linkname)
     const filename = path.join(this.root, linkname)
 
     await fsp.mkdir(path.dirname(pointer), { recursive: true })
@@ -100,7 +100,7 @@ module.exports = class Filedrive {
 
   // drive.list('/', { filter: (key) =>  })
   async * list (folder, opts = {}) {
-    folder = normalizePath(folder || '/')
+    folder = unixPathResolve('/', folder || '/')
 
     const fulldir = path.join(this.root, folder)
     const iterator = await fsp.opendir(fulldir)
@@ -123,7 +123,7 @@ module.exports = class Filedrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = normalizePath(key)
+    key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
     return new FileReadStream(filename, opts)
@@ -132,7 +132,7 @@ module.exports = class Filedrive {
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = normalizePath(key)
+    key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
     return new FileWriteStream(filename, opts)
@@ -141,10 +141,6 @@ module.exports = class Filedrive {
 
 function isExecutable (mode) {
   return !!(mode & fs.constants.S_IXUSR)
-}
-
-function normalizePath (name) {
-  return unixPathResolve('/', name)
 }
 
 async function lstat (filename) {
