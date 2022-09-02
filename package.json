@@ -1,5 +1,5 @@
 {
-  "name": "fs-drive",
+  "name": "localdrive",
   "version": "0.0.0",
   "description": "File system interoperable with Hyperdrive",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/holepunchto/fs-drive.git"
+    "url": "https://github.com/holepunchto/localdrive.git"
   },
   "author": "Lucas Barrena (@LuKks)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/holepunchto/fs-drive/issues"
+    "url": "https://github.com/holepunchto/localdrive/issues"
   },
-  "homepage": "https://github.com/holepunchto/fs-drive",
+  "homepage": "https://github.com/holepunchto/localdrive",
   "dependencies": {
     "streamx": "^2.12.5",
     "unix-path-resolve": "^1.0.2"

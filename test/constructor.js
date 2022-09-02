@@ -1,9 +1,9 @@
 const test = require('brittle')
-const Filedrive = require('../index.js')
+const Localdrive = require('../index.js')
 const { createTmpDir } = require('./helpers/index.js')
 
-test('new Filedrive()', async function (t) {
+test('new Localdrive()', async function (t) {
   const root = createTmpDir(t)
-  const drive = new Filedrive(root)
+  const drive = new Localdrive(root)
   t.is(drive.root, root)
 })

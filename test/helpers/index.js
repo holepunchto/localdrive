@@ -1,4 +1,4 @@
-const Filedrive = require('../../index.js')
+const Localdrive = require('../../index.js')
 const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
@@ -16,7 +16,7 @@ module.exports = {
 }
 
 function createTmpDir (t) {
-  const tmpdir = path.join(os.tmpdir(), 'filedrive-test-')
+  const tmpdir = path.join(os.tmpdir(), 'localdrive-test-')
   const dir = fs.mkdtempSync(tmpdir)
   t.teardown(() => fsp.rm(dir, { recursive: true }))
   return dir
@@ -26,7 +26,7 @@ function createDrive (t, opts, cfg = {}) {
   const root = createTmpDir(t)
   if (!cfg.noTestFiles) generateTestFiles(t, root)
 
-  return new Filedrive(root, opts)
+  return new Localdrive(root, opts)
 }
 
 function generateTestFiles (t, root) {
