@@ -7,7 +7,10 @@ const { FileReadStream, FileWriteStream } = require('./streams.js')
 module.exports = class Filedrive {
   constructor (root, opts = {}) {
     this.root = root
-    this.ignore = opts.ignore || new Set(['.git', '.github'])
+    this.ignore = new Set()
+
+    const ignore = opts.ignore || new Set(['.git', '.github'])
+    for (const key of ignore) this.ignore.add(normalizePath(key))
   }
 
   async entry (key) {
@@ -103,7 +106,8 @@ module.exports = class Filedrive {
     const iterator = await fsp.opendir(fulldir)
 
     for await (const dirent of iterator) {
-      if (this.ignore.has(dirent.name)) continue
+      const namePath = normalizePath(dirent.name)
+      if (this.ignore.has(namePath)) continue
 
       const key = unixPathResolve(folder, dirent.name)
 
