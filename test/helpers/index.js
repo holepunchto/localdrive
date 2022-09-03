@@ -49,6 +49,9 @@ function generateTestFiles (t, root) {
   createFile('examples/more/c.txt', '3rd')
   createFile('examples/more/d.txt', '4th')
 
+  createFolder('solo/')
+  createFile('solo/one.txt', '5th')
+
   fs.chmodSync(fullpath('key.secret'), '222')
   fs.chmodSync(fullpath('script.sh'), '755')
   fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))

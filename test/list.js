@@ -9,6 +9,7 @@ test('list(folder) keys', async function (t) {
     '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
+    '/solo/one.txt',
     '/LICENSE.shortcut'
   ]
 
@@ -50,6 +51,7 @@ test('list(folder) filter', async function (t) {
   const expectedKeys = [
     '/README.md', '/script.sh', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
+    '/solo/one.txt',
     '/LICENSE.shortcut'
   ]
 
