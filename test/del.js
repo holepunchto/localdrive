@@ -72,7 +72,7 @@ test('del(key) should not gc root', async function (t) {
   t.ok(fs.existsSync(drive.root))
 })
 
-test('del(key) gc mutex', async function (t) {
+test('del(key) mutex', async function (t) {
   const drive = createDrive(t)
 
   await drive.del('/examples/more/c.txt')
