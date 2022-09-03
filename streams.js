@@ -10,7 +10,7 @@ class FileWriteStream extends Writable {
     this.executable = !!opts.executable
     this.filename = filename
     this.fd = 0
-    this._lock = lock || (() => Promise.resolve()) // + do custom resolve to avoid waiting a tick?
+    this._lock = lock || (() => Promise.resolve())
   }
 
   _open (cb) {
