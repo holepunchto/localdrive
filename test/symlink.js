@@ -92,7 +92,7 @@ test('symlink(key, linkname) resolve key path', async function (t) {
 test.solo('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
-  t.ok(await drive.entry('/solo/one.txt'))
+  t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 
   const symlink = drive.symlink('/solo/two.txt', '/LICENSE')
   const del = drive.del('/solo/one.txt')

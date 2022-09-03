@@ -75,14 +75,13 @@ test('del(key) should not gc root', async function (t) {
 test('del(key) mutex', async function (t) {
   const drive = createDrive(t)
 
-  await drive.del('/examples/more/c.txt')
-  t.ok(fs.existsSync(path.join(drive.root, 'examples', 'more')))
+  t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 
-  const lastDelete = drive.del('/examples/more/d.txt')
-  const newPut = drive.put('/examples/more/e.txt', Buffer.from('e'))
-  await Promise.all([lastDelete, newPut])
+  const del = drive.del('/solo/one.txt')
+  const put = drive.put('/solo/two.txt', Buffer.from('new file'))
+  await Promise.all([del, put])
 
-  t.ok(fs.existsSync(path.join(drive.root, 'examples', 'more')))
+  t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 })
 
 test('put(key, buffer) resolve key path', async function (t) {
