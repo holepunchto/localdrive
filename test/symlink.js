@@ -89,7 +89,7 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   await symlinkAndEntry('\\examples\\more\\h.txt.shortcut', '/examples/more/h.txt', '/examples/more/h.txt.shortcut')
 })
 
-test.solo('symlink(key, linkname) mutex', async function (t) {
+test('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
   t.ok(fs.existsSync(path.join(drive.root, 'solo')))
