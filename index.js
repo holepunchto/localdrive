@@ -101,8 +101,13 @@ module.exports = class Localdrive {
     linkname = unixPathResolve('/', linkname)
     const filename = path.join(this.root, linkname)
 
-    await fsp.mkdir(path.dirname(pointer), { recursive: true })
-    await fsp.symlink(filename, pointer)
+    const release = await this._lock()
+    try {
+      await fsp.mkdir(path.dirname(pointer), { recursive: true })
+      await fsp.symlink(filename, pointer)
+    } finally {
+      release()
+    }
   }
 
   async * list (folder, opts = {}) {
