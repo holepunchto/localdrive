@@ -4,13 +4,13 @@ const fsp = require('fs/promises')
 const path = require('path')
 
 class FileWriteStream extends Writable {
-  constructor (filename, opts = {}, lock) {
+  constructor (filename, lock, opts = {}) {
     super({ map })
 
     this.executable = !!opts.executable
     this.filename = filename
     this.fd = 0
-    this._lock = lock || (() => Promise.resolve(() => {}))
+    this._lock = lock
   }
 
   _open (cb) {

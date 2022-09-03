@@ -146,7 +146,7 @@ module.exports = class Localdrive {
     key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
-    return new FileWriteStream(filename, opts, this._lock)
+    return new FileWriteStream(filename, this._lock, opts)
   }
 }
 
