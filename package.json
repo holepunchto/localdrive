@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/holepunchto/localdrive",
   "dependencies": {
+    "mutexify": "^1.4.0",
     "streamx": "^2.12.5",
     "unix-path-resolve": "^1.0.2"
   },

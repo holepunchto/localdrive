@@ -1,42 +1,46 @@
 const { Readable, Writable } = require('streamx')
 const fs = require('fs')
+const fsp = require('fs/promises')
 const path = require('path')
 
 class FileWriteStream extends Writable {
-  constructor (filename, opts = {}) {
+  constructor (filename, lock, opts = {}) {
     super({ map })
 
     this.executable = !!opts.executable
     this.filename = filename
     this.fd = 0
+    this._lock = lock
   }
 
   _open (cb) {
-    fs.mkdir(path.dirname(this.filename), { recursive: true }, () => {
-      const mode = this.executable ? 0o744 : 0o644
+    this._openp().then(cb, cb)
+  }
 
-      fs.open(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode, (err, fd) => {
-        if (err) return cb(err)
+  async _openp () {
+    let fd = 0
 
-        const onerror = (err) => fs.close(fd, () => cb(err))
+    const release = await this._lock()
+    const mode = this.executable ? 0o744 : 0o644
 
-        fs.fstat(fd, (err, st) => {
-          if (err) return onerror(err)
+    try {
+      await fsp.mkdir(path.dirname(this.filename), { recursive: true })
+      fd = await openFilePromise(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+    } finally {
+      release()
+    }
 
-          if (this.executable === !!(st.mode & fs.constants.S_IXUSR)) {
-            this.fd = fd
-            return cb(null)
-          }
+    try {
+      const st = await fstatPromise(fd)
+      if (this.executable !== !!(st.mode & fs.constants.S_IXUSR)) {
+        await fchmodPromise(fd, mode)
+      }
+    } catch (err) {
+      await closeFilePromise(fd)
+      throw err
+    }
 
-          // file was already made so above mode had no effect, chmod to adjust...
-          fs.fchmod(fd, mode, (err) => {
-            if (err) return onerror(err)
-            this.fd = fd
-            cb(null)
-          })
-        })
-      })
-    })
+    this.fd = fd
   }
 
   _writev (datas, cb) {
@@ -128,4 +132,40 @@ module.exports = { FileWriteStream, FileReadStream }
 
 function map (s) {
   return typeof s === 'string' ? Buffer.from(s) : s
+}
+
+function openFilePromise (filename, flags, mode) {
+  return new Promise((resolve, reject) => {
+    fs.open(filename, flags, mode, function (error, fd) {
+      if (error) reject(error)
+      else resolve(fd)
+    })
+  })
+}
+
+function fstatPromise (fd) {
+  return new Promise((resolve, reject) => {
+    fs.fstat(fd, function (error, stats) {
+      if (error) reject(error)
+      else resolve(stats)
+    })
+  })
+}
+
+function fchmodPromise (fd, mode) {
+  return new Promise((resolve, reject) => {
+    fs.fchmod(fd, mode, function (error) {
+      if (error) reject(error)
+      else resolve()
+    })
+  })
+}
+
+function closeFilePromise (fd) {
+  return new Promise((resolve, reject) => {
+    fs.close(fd, function (error) {
+      if (error) reject(error)
+      else resolve()
+    })
+  })
 }

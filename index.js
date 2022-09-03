@@ -3,10 +3,12 @@ const fsp = require('fs/promises')
 const path = require('path')
 const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
+const mutexify = require('mutexify/promise')
 
 module.exports = class Localdrive {
   constructor (root) {
     this.root = root
+    this._lock = mutexify()
   }
 
   async entry (key) {
@@ -81,7 +83,12 @@ module.exports = class Localdrive {
       throw error
     }
 
-    await gcEmptyFolders(this.root, path.dirname(filename))
+    const release = await this._lock()
+    try {
+      await gcEmptyFolders(this.root, path.dirname(filename))
+    } finally {
+      release()
+    }
   }
 
   async symlink (key, linkname) {
@@ -94,8 +101,13 @@ module.exports = class Localdrive {
     linkname = unixPathResolve('/', linkname)
     const filename = path.join(this.root, linkname)
 
-    await fsp.mkdir(path.dirname(pointer), { recursive: true })
-    await fsp.symlink(filename, pointer)
+    const release = await this._lock()
+    try {
+      await fsp.mkdir(path.dirname(pointer), { recursive: true })
+      await fsp.symlink(filename, pointer)
+    } finally {
+      release()
+    }
   }
 
   async * list (folder, opts = {}) {
@@ -134,7 +146,7 @@ module.exports = class Localdrive {
     key = unixPathResolve('/', key)
     const filename = path.join(this.root, key)
 
-    return new FileWriteStream(filename, opts)
+    return new FileWriteStream(filename, this._lock, opts)
   }
 }
 

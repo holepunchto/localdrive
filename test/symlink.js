@@ -1,5 +1,7 @@
 const test = require('brittle')
 const { createDrive } = require('./helpers/index.js')
+const fs = require('fs')
+const path = require('path')
 
 test('symlink(key, linkname) basic', async function (t) {
   const drive = createDrive(t)
@@ -85,4 +87,16 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   await symlinkAndEntry('b.txt.shortcut', '/b.txt', '/b.txt.shortcut')
   await symlinkAndEntry('/examples/more/../f.txt.shortcut', '/examples/f.txt', '/examples/f.txt.shortcut')
   await symlinkAndEntry('\\examples\\more\\h.txt.shortcut', '/examples/more/h.txt', '/examples/more/h.txt.shortcut')
+})
+
+test('symlink(key, linkname) mutex', async function (t) {
+  const drive = createDrive(t)
+
+  t.ok(fs.existsSync(path.join(drive.root, 'solo')))
+
+  const symlink = drive.symlink('/solo/two.txt', '/LICENSE')
+  const del = drive.del('/solo/one.txt')
+  await Promise.all([symlink, del])
+
+  t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 })
