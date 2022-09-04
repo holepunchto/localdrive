@@ -21,7 +21,7 @@ class FileWriteStream extends Writable {
     let fd = 0
 
     const release = await this._lock()
-    const mode = this.executable ? 0o744 : 0o644
+    const mode = this.executable ? 0o755 : 0o644
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
