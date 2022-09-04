@@ -22,13 +22,13 @@ test('entry(key) not found', async function (t) {
   t.is(await drive.entry('/not/exists.txt'), null)
 })
 
-test('entry(key) executable', async function (t) {
+test('entry(key) executable', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('/script.sh'), {
     key: '/script.sh',
     value: {
-      executable: !isWin,
+      executable: true,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
       metadata: null
