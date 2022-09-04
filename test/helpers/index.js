@@ -55,13 +55,6 @@ function generateTestFiles (t, root) {
   fs.chmodSync(fullpath('key.secret'), '222')
   fs.chmodSync(fullpath('script.sh'), '755')
   fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
-
-  const sockpath = fullpath('example.sock')
-  const server = net.createServer().listen(sockpath)
-  t.teardown(() => {
-    server.close()
-    return new Promise(resolve => server.once('close', resolve))
-  })
 }
 
 async function streamToString (stream) {
