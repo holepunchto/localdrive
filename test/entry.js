@@ -28,7 +28,7 @@ test('entry(key) executable', async function (t) {
   t.alike(await drive.entry('/script.sh'), {
     key: '/script.sh',
     value: {
-      executable: isWin ? false : true,
+      executable: !isWin,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
       metadata: null
