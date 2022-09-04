@@ -77,7 +77,7 @@ test('createWriteStream(key) replace', async function (t) {
   t.alike(await drive.get('/LICENSE'), buffer)
 })
 
-test('createWriteStream(key) replace existing executable', async function (t) {
+test('createWriteStream(key) replace existing executable', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.ok((await drive.entry('/script.sh')).value.executable)
