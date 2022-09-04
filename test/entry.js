@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { createDrive } = require('./helpers/index.js')
+const { createDrive, isWin } = require('./helpers/index.js')
 
 test('entry(key) basic', async function (t) {
   const drive = createDrive(t)
@@ -22,7 +22,7 @@ test('entry(key) not found', async function (t) {
   t.is(await drive.entry('/not/exists.txt'), null)
 })
 
-test('entry(key) executable', async function (t) {
+test('entry(key) executable', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('/script.sh'), {
@@ -36,7 +36,7 @@ test('entry(key) executable', async function (t) {
   })
 })
 
-test('entry(key) symbolic link', async function (t) {
+test('entry(key) symbolic link', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('/LICENSE.shortcut'), {
@@ -87,7 +87,7 @@ test('entry(key) permission denied', async function (t) {
   // + should we ignore permission errors and just return null?
   try {
     await drive.get('/key.secret')
-    t.fail('should have given error')
+    if (!isWin) t.fail('should have given error')
   } catch (error) {
     t.is(error.code, 'EACCES')
   }

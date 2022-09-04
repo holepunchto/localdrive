@@ -3,16 +3,18 @@ const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const os = require('os')
-const net = require('net')
 const { promisify } = require('util')
 let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
+
+const isWin = os.platform() === 'win32'
 
 module.exports = {
   createTmpDir,
   createDrive,
   streamToString,
-  bufferToStream
+  bufferToStream,
+  isWin
 }
 
 function createTmpDir (t) {
@@ -52,16 +54,9 @@ function generateTestFiles (t, root) {
   createFolder('solo/')
   createFile('solo/one.txt', '5th')
 
-  fs.chmodSync(fullpath('key.secret'), '222')
-  fs.chmodSync(fullpath('script.sh'), '755')
-  fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
-
-  const sockpath = fullpath('example.sock')
-  const server = net.createServer().listen(sockpath)
-  t.teardown(() => {
-    server.close()
-    return new Promise(resolve => server.once('close', resolve))
-  })
+  fs.chmodSync(fullpath('key.secret'), 0o222)
+  fs.chmodSync(fullpath('script.sh'), 0o755)
+  if (!isWin) fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
 }
 
 async function streamToString (stream) {

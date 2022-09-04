@@ -30,14 +30,15 @@ module.exports = class Localdrive {
     }
 
     if (stat.isSymbolicLink()) {
-      entry.value.linkname = (await fsp.readlink(filename)).slice(this.root.length)
+      const link = (await fsp.readlink(filename)).slice(this.root.length)
+      entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
 
     entry.value.executable = isExecutable(stat.mode)
 
     if (stat.isFile()) {
-      const blockLength = stat.blocks ? stat.blocks : Math.ceil(stat.size / 4096) * 8
+      const blockLength = stat.blocks || Math.ceil(stat.size / stat.blksize) * 8
       entry.value.blob = { blockOffset: 0, blockLength, byteOffset: 0, byteLength: stat.size }
       return entry
     }
