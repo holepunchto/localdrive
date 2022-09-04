@@ -54,8 +54,8 @@ function generateTestFiles (t, root) {
   createFolder('solo/')
   createFile('solo/one.txt', '5th')
 
-  fs.chmodSync(fullpath('key.secret'), '222')
-  fs.chmodSync(fullpath('script.sh'), '755')
+  fs.chmodSync(fullpath('key.secret'), 0o222)
+  fs.chmodSync(fullpath('script.sh'), 0o755)
   if (!isWin) fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
 }
 
