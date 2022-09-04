@@ -27,7 +27,7 @@ test('del(key) folder', async function (t) {
     await drive.del('/examples')
     t.fail('should have given error')
   } catch (error) {
-    t.is(error.code, 'EISDIR')
+    t.ok(['EISDIR', 'EPERM'].indexOf(error.code) !== -1)
   }
 })
 
