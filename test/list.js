@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { createDrive } = require('./helpers/index.js')
+const { createDrive, isWin } = require('./helpers/index.js')
 
 test('list(folder) keys', async function (t) {
   const drive = createDrive(t)
@@ -9,9 +9,9 @@ test('list(folder) keys', async function (t) {
     '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
-    '/solo/one.txt',
-    '/LICENSE.shortcut'
+    '/solo/one.txt'
   ]
+  if (!isWin) expectedKeys.push('/LICENSE.shortcut')
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
@@ -51,9 +51,9 @@ test('list(folder) filter', async function (t) {
   const expectedKeys = [
     '/README.md', '/script.sh', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
-    '/solo/one.txt',
-    '/LICENSE.shortcut'
+    '/solo/one.txt'
   ]
+  if (!isWin) expectedKeys.push('/LICENSE.shortcut')
 
   for await (const { key } of drive.list('/', { filter })) {
     actualKeys.push(key)
