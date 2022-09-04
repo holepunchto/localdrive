@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { createDrive } = require('./helpers/index.js')
+const { createDrive, isWin } = require('./helpers/index.js')
 
 test('entry(key) basic', async function (t) {
   const drive = createDrive(t)
@@ -28,7 +28,7 @@ test('entry(key) executable', async function (t) {
   t.alike(await drive.entry('/script.sh'), {
     key: '/script.sh',
     value: {
-      executable: true,
+      executable: isWin ? false : true,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
       metadata: null

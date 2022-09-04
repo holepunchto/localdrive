@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { createDrive, bufferToStream } = require('./helpers/index.js')
+const { createDrive, bufferToStream, isWin } = require('./helpers/index.js')
 
 test('createWriteStream(key)', async function (t) {
   const drive = createDrive(t)
@@ -30,7 +30,7 @@ test('createWriteStream(key) with options', async function (t) {
   t.alike(await drive.entry('/new-script.sh'), {
     key: '/new-script.sh',
     value: {
-      executable: true,
+      executable: isWin ? false : true,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
       metadata: null
