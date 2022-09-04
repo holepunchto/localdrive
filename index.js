@@ -12,8 +12,7 @@ module.exports = class Localdrive {
   }
 
   async entry (key) {
-    key = unixPathResolve('/', key)
-    const filename = path.join(this.root, key)
+    const { keyname, filename } = keyResolve(this.root, key)
 
     const stat = await lstat(filename)
     if (!stat || stat.isDirectory()) {
@@ -21,7 +20,7 @@ module.exports = class Localdrive {
     }
 
     const entry = {
-      key,
+      key: keyname,
       value: {
         executable: false,
         linkname: null,
@@ -73,8 +72,7 @@ module.exports = class Localdrive {
   }
 
   async del (key) {
-    key = unixPathResolve('/', key)
-    const filename = path.join(this.root, key)
+    const { filename } = keyResolve(this.root, key)
 
     try {
       await fsp.unlink(filename)
@@ -95,29 +93,24 @@ module.exports = class Localdrive {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
-    key = unixPathResolve('/', key)
-    const pointer = path.join(this.root, key)
-
-    linkname = unixPathResolve('/', linkname)
-    const filename = path.join(this.root, linkname)
+    const { filename: pointer } = keyResolve(this.root, key)
+    const { filename: target } = keyResolve(this.root, linkname)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
-      await fsp.symlink(filename, pointer)
+      await fsp.symlink(target, pointer)
     } finally {
       release()
     }
   }
 
   async * list (folder, opts = {}) {
-    folder = unixPathResolve('/', folder || '/')
-
-    const fulldir = path.join(this.root, folder)
+    const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
     const iterator = await fsp.opendir(fulldir)
 
     for await (const dirent of iterator) {
-      const key = unixPathResolve(folder, dirent.name)
+      const key = unixPathResolve(keyname, dirent.name)
 
       if (opts.filter && !opts.filter(key)) continue
 
@@ -134,20 +127,22 @@ module.exports = class Localdrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = unixPathResolve('/', key)
-    const filename = path.join(this.root, key)
-
+    const { filename } = keyResolve(this.root, key)
     return new FileReadStream(filename, opts)
   }
 
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    key = unixPathResolve('/', key)
-    const filename = path.join(this.root, key)
-
+    const { filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, this._lock, opts)
   }
+}
+
+function keyResolve (root, key) {
+  const keyname = unixPathResolve('/', key)
+  const filename = path.join(root, keyname)
+  return { keyname, filename }
 }
 
 function isExecutable (mode) {
