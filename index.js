@@ -37,7 +37,8 @@ module.exports = class Localdrive {
     entry.value.executable = isExecutable(stat.mode)
 
     if (stat.isFile()) {
-      entry.value.blob = { blockOffset: 0, blockLength: stat.blocks, byteOffset: 0, byteLength: stat.size }
+      const blockLength = stat.blocks ? stat.blocks : ceil(stat.size / 4096) * 8
+      entry.value.blob = { blockOffset: 0, blockLength, byteOffset: 0, byteLength: stat.size }
       return entry
     }
 
