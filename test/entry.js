@@ -36,7 +36,7 @@ test('entry(key) executable', { skip: isWin }, async function (t) {
   })
 })
 
-test('entry(key) symbolic link', async function (t) {
+test('entry(key) symbolic link', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.entry('/LICENSE.shortcut'), {
