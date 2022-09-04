@@ -7,11 +7,14 @@ const { promisify } = require('util')
 let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
 
+const isWin = os.platform() === 'win32'
+
 module.exports = {
   createTmpDir,
   createDrive,
   streamToString,
-  bufferToStream
+  bufferToStream,
+  isWin
 }
 
 function createTmpDir (t) {
@@ -53,7 +56,7 @@ function generateTestFiles (t, root) {
 
   fs.chmodSync(fullpath('key.secret'), '222')
   fs.chmodSync(fullpath('script.sh'), '755')
-  fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
+  if (!isWin) fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
 }
 
 async function streamToString (stream) {
