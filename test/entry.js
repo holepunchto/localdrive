@@ -87,7 +87,7 @@ test('entry(key) permission denied', async function (t) {
   // + should we ignore permission errors and just return null?
   try {
     await drive.get('/key.secret')
-    t.fail('should have given error')
+    if (!isWin) t.fail('should have given error')
   } catch (error) {
     t.is(error.code, 'EACCES')
   }
