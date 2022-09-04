@@ -30,7 +30,8 @@ module.exports = class Localdrive {
     }
 
     if (stat.isSymbolicLink()) {
-      entry.value.linkname = (await fsp.readlink(filename)).slice(this.root.length)
+      const link = (await fsp.readlink(filename)).slice(this.root.length)
+      entry.value.linkname = unixPathResolve('/', link)
       return entry
     }
 
