@@ -147,7 +147,8 @@ function keyResolve (root, key) {
 }
 
 function isExecutable (mode) {
-  return !!(mode & fs.constants.S_IXUSR)
+  const S_IXUGO = fs.constants.S_IXUSR | fs.constants.S_IXGRP | fs.constants.S_IXOTH
+  return !!(mode & S_IXUGO)
 }
 
 async function lstat (filename) {
