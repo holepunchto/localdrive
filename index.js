@@ -13,6 +13,14 @@ module.exports = class Localdrive {
 
   async ready () {}
 
+  fromPath (filename) {
+    return filename.slice(this.root.length)
+  }
+
+  toPath (key) {
+    return keyResolve(this.root, key).filename
+  }
+
   async entry (key) {
     const { keyname, filename } = keyResolve(this.root, key)
 
