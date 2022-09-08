@@ -8,16 +8,14 @@ const mutexify = require('mutexify/promise')
 module.exports = class Localdrive {
   constructor (root, opts = {}) {
     this.root = root
-    this.metadata = opts.metadata || new Map()
+    this.metadata = opts.metadata || {}
     this._lock = mutexify()
-
-    if (this.metadata instanceof Map) defaultMapToNull(this.metadata)
   }
 
   async ready () {}
 
   fromPath (filename) {
-    return filename.slice(this.root.length)
+    return unixPathResolve('/', filename.slice(this.root.length))
   }
 
   toPath (key) {
@@ -152,8 +150,8 @@ module.exports = class Localdrive {
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    const { filename } = keyResolve(this.root, key)
-    return new FileWriteStream(filename, this, opts)
+    const { keyname, filename } = keyResolve(this.root, key)
+    return new FileWriteStream(filename, keyname, this, opts)
   }
 }
 
@@ -185,9 +183,4 @@ async function gcEmptyFolders (root, dir) {
   } catch {
     // silent error
   }
-}
-
-function defaultMapToNull (map) {
-  const get = map.get
-  map.get = (key) => map.has(key) ? get(key) : null
 }

@@ -4,13 +4,14 @@ const fsp = require('fs/promises')
 const path = require('path')
 
 class FileWriteStream extends Writable {
-  constructor (filename, drive, opts = {}) {
+  constructor (filename, key, drive, opts = {}) {
     super({ map })
 
     this.filename = filename
+    this.key = key
     this.drive = drive
     this.executable = !!opts.executable
-    this.metadata = opts.metadata
+    this.metadata = opts.metadata || null
     this.fd = 0
   }
 
@@ -50,11 +51,14 @@ class FileWriteStream extends Writable {
 
   _destroy (cb) {
     if (!this.fd) return cb(null)
+
     fs.close(this.fd, async () => {
-      if (this.metadata !== undefined) {
-        if (this.drive.metadata.set) {
-          const key = this.drive.fromPath(this.filename)
-          await this.drive.metadata.set(key, this.metadata)
+      if (this.drive.metadata.set) {
+        try {
+          await this.drive.metadata.set(this.key, this.metadata)
+        } catch (error) {
+          cb(error)
+          return
         }
       }
 
