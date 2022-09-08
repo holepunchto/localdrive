@@ -14,8 +14,9 @@ module.exports = class Localdrive {
 
   async ready () {}
 
-  fromPath (filename) {
-    return unixPathResolve('/', filename.slice(this.root.length))
+  toKey (filename) {
+    if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
+    return unixPathResolve('/', filename)
   }
 
   toPath (key) {
