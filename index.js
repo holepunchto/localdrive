@@ -6,8 +6,9 @@ const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
 
 module.exports = class Localdrive {
-  constructor (root) {
+  constructor (root, opts = {}) {
     this.root = root
+    this.metadata = opts.metadata || new Map()
     this._lock = mutexify()
   }
 
@@ -46,6 +47,7 @@ module.exports = class Localdrive {
     }
 
     entry.value.executable = isExecutable(stat.mode)
+    if (this.metadata.get) entry.value.metadata = await this.metadata.get(keyname)
 
     if (stat.isFile()) {
       const blockLength = stat.blocks || Math.ceil(stat.size / stat.blksize) * 8
@@ -84,7 +86,7 @@ module.exports = class Localdrive {
   }
 
   async del (key) {
-    const { filename } = keyResolve(this.root, key)
+    const { keyname, filename } = keyResolve(this.root, key)
 
     try {
       await fsp.unlink(filename)
@@ -99,6 +101,8 @@ module.exports = class Localdrive {
     } finally {
       release()
     }
+
+    if (this.metadata.delete) await this.metadata.delete(keyname)
   }
 
   async symlink (key, linkname) {
@@ -147,7 +151,7 @@ module.exports = class Localdrive {
     if (typeof key === 'object') key = key.key
 
     const { filename } = keyResolve(this.root, key)
-    return new FileWriteStream(filename, this._lock, opts)
+    return new FileWriteStream(filename, this, opts)
   }
 }
 
