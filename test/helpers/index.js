@@ -56,7 +56,7 @@ function generateTestFiles (t, root) {
 
   fs.chmodSync(fullpath('key.secret'), 0o222)
   fs.chmodSync(fullpath('script.sh'), 0o755)
-  if (!isWin) fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
+  if (!isWin) fs.symlinkSync('/LICENSE', fullpath('LICENSE.shortcut'))
 }
 
 async function streamToString (stream) {
