@@ -102,7 +102,7 @@ module.exports = class Localdrive {
       release()
     }
 
-    if (this.metadata.delete) await this.metadata.delete(keyname)
+    if (this.metadata.del) await this.metadata.del(keyname)
   }
 
   async symlink (key, linkname) {
