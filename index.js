@@ -11,10 +11,7 @@ module.exports = class Localdrive {
     this.metadata = opts.metadata || new Map()
     this._lock = mutexify()
 
-    if (this.metadata instanceof Map) {
-      const get = this.metadata.get
-      this.metadata.get = (key) => this.metadata.has(key) ? get(key) : null
-    }
+    if (this.metadata instanceof Map) defaultMapToNull(this.metadata)
   }
 
   async ready () {}
@@ -188,4 +185,9 @@ async function gcEmptyFolders (root, dir) {
   } catch {
     // silent error
   }
+}
+
+function defaultMapToNull (map) {
+  const get = map.get
+  map.get = (key) => map.has(key) ? get(key) : null
 }
