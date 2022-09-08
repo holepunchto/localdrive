@@ -7,7 +7,7 @@ const mutexify = require('mutexify/promise')
 
 module.exports = class Localdrive {
   constructor (root, opts = {}) {
-    this.root = root
+    this.root = path.resolve(root)
     this.metadata = opts.metadata || {}
     this._lock = mutexify()
   }
@@ -41,7 +41,8 @@ module.exports = class Localdrive {
     }
 
     if (stat.isSymbolicLink()) {
-      const link = (await fsp.readlink(filename)).slice(this.root.length)
+      let link = await fsp.readlink(filename)
+      if (link.startsWith(this.root)) link = link.slice(this.root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
