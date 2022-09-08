@@ -11,6 +11,8 @@ module.exports = class Localdrive {
     this._lock = mutexify()
   }
 
+  async ready () {}
+
   async entry (key) {
     const { keyname, filename } = keyResolve(this.root, key)
 
