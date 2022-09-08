@@ -10,6 +10,11 @@ module.exports = class Localdrive {
     this.root = root
     this.metadata = opts.metadata || new Map()
     this._lock = mutexify()
+
+    if (this.metadata instanceof Map) {
+      const get = this.metadata.get
+      this.metadata.get = (key) => this.metadata.has(key) ? get(key) : null
+    }
   }
 
   async ready () {}
