@@ -30,8 +30,9 @@ module.exports = class Localdrive {
     }
 
     if (stat.isSymbolicLink()) {
-      const link = (await fsp.readlink(filename)).slice(this.root.length)
-      entry.value.linkname = link.replace(/\\/g, '/')
+      const readlink = path.resolve(await fsp.readlink(filename))
+      const linkWithoutRoot = readlink.slice(this.root.length)
+      entry.value.linkname = linkWithoutRoot.replace(/\\/g, '/')
       return entry
     }
 
