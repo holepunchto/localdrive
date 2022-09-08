@@ -7,7 +7,7 @@ const mutexify = require('mutexify/promise')
 
 module.exports = class Localdrive {
   constructor (root) {
-    this.root = root
+    this.root = path.resolve(root)
     this._lock = mutexify()
   }
 
