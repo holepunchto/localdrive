@@ -60,7 +60,7 @@ class FileWriteStream extends Writable {
   }
 
   async _metadatap () {
-    await this.drive.metadata.put(key, this.metadata)
+    await this.drive.metadata.put(this.key, this.metadata)
   }
 }
 
