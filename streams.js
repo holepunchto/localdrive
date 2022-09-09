@@ -61,7 +61,7 @@ class FileWriteStream extends Writable {
   async _finalp () {
     const { del, put } = this.drive.metadata
     if (this.metadata === null) {
-      if (del) await del(this.key, this.metadata)
+      if (del) await del(this.key)
     } else if (put) await put(this.key, this.metadata)
   }
 }
