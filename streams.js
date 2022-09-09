@@ -4,13 +4,15 @@ const fsp = require('fs/promises')
 const path = require('path')
 
 class FileWriteStream extends Writable {
-  constructor (filename, lock, opts = {}) {
+  constructor (filename, key, drive, opts = {}) {
     super({ map })
 
-    this.executable = !!opts.executable
     this.filename = filename
+    this.key = key
+    this.drive = drive
+    this.executable = !!opts.executable
+    this.metadata = opts.metadata || null
     this.fd = 0
-    this._lock = lock
   }
 
   _open (cb) {
@@ -20,7 +22,7 @@ class FileWriteStream extends Writable {
   async _openp () {
     let fd = 0
 
-    const release = await this._lock()
+    const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
 
     try {
@@ -50,6 +52,17 @@ class FileWriteStream extends Writable {
   _destroy (cb) {
     if (!this.fd) return cb(null)
     fs.close(this.fd, () => cb(null))
+  }
+
+  _final (cb) {
+    this._finalp().then(cb, cb)
+  }
+
+  async _finalp () {
+    const { del, put } = this.drive.metadata
+    if (this.metadata === null) {
+      if (del) await del(this.key)
+    } else if (put) await put(this.key, this.metadata)
   }
 }
 

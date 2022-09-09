@@ -8,6 +8,7 @@ let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
 
 const isWin = os.platform() === 'win32'
+const isRelativeTmpDir = process.argv.indexOf('--relative-tmp-dir') > -1
 
 module.exports = {
   createTmpDir,
@@ -24,8 +25,15 @@ function createTmpDir (t) {
   return dir
 }
 
+function createRelativeTmpDir (t) {
+  const tmpdir = path.join('./localdrive-test-' + Math.floor(Math.random() * 100000))
+  fs.mkdirSync(tmpdir)
+  t.teardown(() => fsp.rm(tmpdir, { recursive: true }))
+  return tmpdir
+}
+
 function createDrive (t, opts, cfg = {}) {
-  const root = createTmpDir(t)
+  const root = isRelativeTmpDir ? createRelativeTmpDir(t) : createTmpDir(t)
   if (!cfg.noTestFiles) generateTestFiles(t, root)
 
   return new Localdrive(root, opts)
@@ -56,7 +64,7 @@ function generateTestFiles (t, root) {
 
   fs.chmodSync(fullpath('key.secret'), 0o222)
   fs.chmodSync(fullpath('script.sh'), 0o755)
-  if (!isWin) fs.symlinkSync(fullpath('LICENSE'), fullpath('LICENSE.shortcut'))
+  if (!isWin) fs.symlinkSync('/LICENSE', fullpath('LICENSE.shortcut'))
 }
 
 async function streamToString (stream) {

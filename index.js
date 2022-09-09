@@ -6,9 +6,23 @@ const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
 
 module.exports = class Localdrive {
-  constructor (root) {
-    this.root = root
+  constructor (root, opts = {}) {
+    this.root = path.resolve(root)
+    this.metadata = opts.metadata || {}
     this._lock = mutexify()
+  }
+
+  async ready () {
+    // No-op because this method is only for compatibility
+  }
+
+  toKey (filename) {
+    if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
+    return unixPathResolve('/', filename)
+  }
+
+  toPath (key) {
+    return keyResolve(this.root, key).filename
   }
 
   async entry (key) {
@@ -30,12 +44,14 @@ module.exports = class Localdrive {
     }
 
     if (stat.isSymbolicLink()) {
-      const link = (await fsp.readlink(filename)).slice(this.root.length)
+      let link = await fsp.readlink(filename)
+      if (link.startsWith(this.root)) link = link.slice(this.root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
 
     entry.value.executable = isExecutable(stat.mode)
+    if (this.metadata.get) entry.value.metadata = await this.metadata.get(keyname)
 
     if (stat.isFile()) {
       const blockLength = stat.blocks || Math.ceil(stat.size / stat.blksize) * 8
@@ -74,7 +90,7 @@ module.exports = class Localdrive {
   }
 
   async del (key) {
-    const { filename } = keyResolve(this.root, key)
+    const { keyname, filename } = keyResolve(this.root, key)
 
     try {
       await fsp.unlink(filename)
@@ -89,6 +105,8 @@ module.exports = class Localdrive {
     } finally {
       release()
     }
+
+    if (this.metadata.del) await this.metadata.del(keyname)
   }
 
   async symlink (key, linkname) {
@@ -136,8 +154,8 @@ module.exports = class Localdrive {
   createWriteStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    const { filename } = keyResolve(this.root, key)
-    return new FileWriteStream(filename, this._lock, opts)
+    const { keyname, filename } = keyResolve(this.root, key)
+    return new FileWriteStream(filename, keyname, this, opts)
   }
 }
 

@@ -4,7 +4,7 @@
   "description": "File system interoperable with Hyperdrive",
   "main": "index.js",
   "scripts": {
-    "test": "standard && brittle test/*.js",
+    "test": "standard && brittle test/*.js && brittle test/*.js --relative-tmp-dir",
     "lint": "standard"
   },
   "repository": {
