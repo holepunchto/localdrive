@@ -45,7 +45,7 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Localdrive(root, [opts])`
+#### `const drive = new Localdrive(root, [options])`
 
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
 
