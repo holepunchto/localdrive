@@ -35,3 +35,47 @@ test('metadata backed by map', async function (t) {
   await bufferToStream(Buffer.from('ISC'), ws)
   t.alike((await drive.entry('/A-NEW-LICENSE')).value.metadata, [1, 2, 3])
 })
+
+test('metadata.get() hook call', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  drive.metadata.get = () => t.pass()
+  drive.metadata.put = () => t.fail('metadata.put() was called')
+  drive.metadata.del = () => t.fail('metadata.del() was called')
+
+  await drive.entry('/LICENSE')
+})
+
+test('metadata.put() hook call', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  drive.metadata.get = () => t.fail('metadata.get() was called')
+  drive.metadata.put = () => t.pass()
+  drive.metadata.del = () => t.fail('metadata.del() was called')
+
+  await drive.put('/A-NEW-LICENSE', Buffer.from('ISC'), { metadata: 1337 })
+})
+
+test('metadata.del() hook call', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  drive.metadata.get = () => t.fail('metadata.get() was called')
+  drive.metadata.put = () => t.fail('metadata.put() was called')
+  drive.metadata.del = () => t.pass()
+
+  await drive.del('/LICENSE')
+})
+
+test('metadata.del() hook call', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  drive.metadata.get = () => t.fail('metadata.get() was called')
+  drive.metadata.put = () => t.fail('metadata.put() was called')
+  drive.metadata.del = () => t.pass()
+
+  await drive.put('/LICENSE', Buffer.from('ISC'))
+})
