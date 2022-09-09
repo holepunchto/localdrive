@@ -143,6 +143,8 @@ Available `options`:
 ## Examples
 
 ### Metadata hooks
+You can define them in the constructor options or write them over the property.
+
 Metadata backed by `Map`:
 ```js
 const drive = new Localdrive('./my-app')
