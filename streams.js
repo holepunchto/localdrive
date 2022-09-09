@@ -51,19 +51,16 @@ class FileWriteStream extends Writable {
 
   _destroy (cb) {
     if (!this.fd) return cb(null)
+    fs.close(this.fd, () => cb(null))
+  }
 
-    fs.close(this.fd, async () => {
-      if (this.drive.metadata.put) {
-        try {
-          await this.drive.metadata.put(this.key, this.metadata)
-        } catch (error) {
-          cb(error)
-          return
-        }
-      }
+  _final (cb) {
+    if (this.drive.metadata.put) this._metadatap().then(cb, cb)
+    else cb()
+  }
 
-      cb(null)
-    })
+  async _metadatap () {
+    await this.drive.metadata.put(key, this.metadata)
   }
 }
 
