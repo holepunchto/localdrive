@@ -31,7 +31,7 @@ test('metadata backed by map', async function (t) {
   await drive.del('/LICENSE')
   t.absent(meta.has('/LICENSE'))
 
-  const ws = drive.createWriteStream('/ANOTHER-LICENSE', { metadata: [1, 2, 3] })
+  const ws = drive.createWriteStream('/A-NEW-LICENSE', { metadata: [1, 2, 3] })
   await bufferToStream(Buffer.from('ISC'), ws)
-  t.alike((await drive.entry('/ANOTHER-LICENSE')).value.metadata, [1, 2, 3])
+  t.alike((await drive.entry('/A-NEW-LICENSE')).value.metadata, [1, 2, 3])
 })
