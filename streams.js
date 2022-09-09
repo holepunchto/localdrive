@@ -55,12 +55,14 @@ class FileWriteStream extends Writable {
   }
 
   _final (cb) {
-    if (this.drive.metadata.put) this._metadatap().then(cb, cb)
-    else cb()
+    this._finalp().then(cb, cb)
   }
 
-  async _metadatap () {
-    await this.drive.metadata.put(this.key, this.metadata)
+  async _finalp () {
+    const { del, put } = this.drive.metadata
+    if (this.metadata === null) {
+      if (del) await del(this.key, this.metadata)
+    } else if (put) await put(this.key, this.metadata)
   }
 }
 
