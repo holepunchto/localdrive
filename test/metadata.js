@@ -79,3 +79,17 @@ test('metadata backed by map', async function (t) {
   await bufferToStream(Buffer.from('ISC'), ws)
   t.alike((await drive.entry('/A-NEW-LICENSE')).value.metadata, [1, 2, 3])
 })
+
+test('metadata hooks defined in constructor', async function (t) {
+  const drive = createDrive(t, {
+    metadata: { get, put, del }
+  })
+
+  function get () {}
+  function put () {}
+  function del () {}
+
+  t.is(drive.metadata.get, get)
+  t.is(drive.metadata.put, put)
+  t.is(drive.metadata.del, del)
+})
