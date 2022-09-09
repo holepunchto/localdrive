@@ -45,9 +45,22 @@ Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
-#### `const drive = new Localdrive(root)`
+#### `const drive = new Localdrive(root, [opts])`
 
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
+
+Available `options`:
+```js
+{
+  metadata: {
+    get (key) {},
+    put (key) {},
+    del (key) {}
+  }
+}
+```
+
+`metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
 
 #### `await drive.put(key, buffer, [options])`
 
@@ -125,6 +138,26 @@ Available `options`:
 {
   executable: Boolean
 }
+```
+
+## Examples
+
+### Metadata hooks
+Metadata backed by `Map`:
+```js
+const drive = new Localdrive('./my-app')
+
+const meta = new Map()
+drive.metadata.get = (key) => meta.has(key) ? meta.get(key) : null
+drive.metadata.put = (key, value) => meta.set(key, value)
+drive.metadata.del = (key) => meta.delete(key)
+
+// ...
+```
+
+Note: `metadata.del()` will **also** be called when metadata is `null`:
+```js
+await drive.put('/file.txt', Buffer.from('a')) // Default metadata is null
 ```
 
 ## License
