@@ -157,7 +157,7 @@ const drive = new Localdrive('./my-app', { metadata })
 // ...
 ```
 
-Note: `metadata.del()` will **also** be called when metadata is `null`:
+Note: `metadata.del()` will also be called when metadata is `null`:
 ```js
 await drive.put('/file.txt', Buffer.from('a')) // Default metadata is null
 ```
