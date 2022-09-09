@@ -77,12 +77,5 @@ async function streamToString (stream) {
 
 async function bufferToStream (buffer, writeStream) {
   const readable = Readable.from(buffer)
-  writeStream.once('close', () => console.log('writeStream close'))
   await pipeline(readable, writeStream)
-  await sleep(500)
-  console.log('after pipeline')
-}
-
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
