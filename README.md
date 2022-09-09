@@ -143,16 +143,16 @@ Available `options`:
 ## Examples
 
 ### Metadata hooks
-You can define them in the constructor options or write them over the property.
-
 Metadata backed by `Map`:
 ```js
-const drive = new Localdrive('./my-app')
-
 const meta = new Map()
-drive.metadata.get = (key) => meta.has(key) ? meta.get(key) : null
-drive.metadata.put = (key, value) => meta.set(key, value)
-drive.metadata.del = (key) => meta.delete(key)
+const metadata = {
+  get: (key) => meta.has(key) ? meta.get(key) : null,
+  put: (key) => meta.set(key, value),
+  del: (key) => meta.delete(key)
+}
+
+const drive = new Localdrive('./my-app', { metadata })
 
 // ...
 ```
