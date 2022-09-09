@@ -4,7 +4,7 @@ const { createDrive, bufferToStream } = require('./helpers/index.js')
 test('metadata basic', async function (t) {
   const drive = createDrive(t)
 
-  drive.metadata.entry = function (key) {
+  drive.metadata.get = function (key) {
     if (key === '/LICENSE') return 'custom'
     return null
   }
@@ -17,7 +17,7 @@ test('metadata backed by map', async function (t) {
   const drive = createDrive(t)
 
   const meta = new Map()
-  drive.metadata.entry = (key) => meta.has(key) ? meta.get(key) : null
+  drive.metadata.get = (key) => meta.has(key) ? meta.get(key) : null
   drive.metadata.put = (key, value) => meta.set(key, value)
   drive.metadata.del = (key) => meta.delete(key)
 
