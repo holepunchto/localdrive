@@ -21,7 +21,7 @@ test('symlink(key, linkname) basic', { skip: isWin }, async function (t) {
   })
 })
 
-test('symlink(key, linkname) basic inside a folder', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) absolute inside a folder', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/examples/README.shortcut'))
@@ -39,7 +39,7 @@ test('symlink(key, linkname) basic inside a folder', { skip: isWin }, async func
   })
 })
 
-test('symlink(key, linkname) basic relative inside a folder', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) relative inside a folder', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/examples/README.shortcut'))
