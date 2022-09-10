@@ -111,7 +111,6 @@ module.exports = class Localdrive {
   }
 
   async symlink (key, linkname) {
-    // { key: '/README.shortcut', linkname: '/README.md' }
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
@@ -123,8 +122,6 @@ module.exports = class Localdrive {
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
       const target = path.relative(this.root, filename)
-      // target => 'README.md'
-      // pointer => '/tmp/localdrive-test-dZqS6C/README.shortcut'
       await fsp.symlink(target, pointer)
     } finally {
       release()
