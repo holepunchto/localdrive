@@ -9,6 +9,7 @@ module.exports = class Localdrive {
   constructor (root, opts = {}) {
     this.root = path.resolve(root)
     this.metadata = opts.metadata || {}
+    this.followLinks = opts.followLinks || false
     this._lock = mutexify()
   }
 
@@ -28,8 +29,8 @@ module.exports = class Localdrive {
   async entry (key) {
     const { keyname, filename } = keyResolve(this.root, key)
 
-    const stat = await lstat(filename)
-    if (!stat || stat.isDirectory()) {
+    const st = await (this.followLinks ? stat : lstat)(filename)
+    if (!st || st.isDirectory()) {
       return null
     }
 
@@ -43,19 +44,19 @@ module.exports = class Localdrive {
       }
     }
 
-    if (stat.isSymbolicLink()) {
+    if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
       if (link.startsWith(this.root)) link = link.slice(this.root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
 
-    entry.value.executable = isExecutable(stat.mode)
+    entry.value.executable = isExecutable(st.mode)
     if (this.metadata.get) entry.value.metadata = await this.metadata.get(keyname)
 
-    if (stat.isFile()) {
-      const blockLength = stat.blocks || Math.ceil(stat.size / stat.blksize) * 8
-      entry.value.blob = { blockOffset: 0, blockLength, byteOffset: 0, byteLength: stat.size }
+    if (st.isFile()) {
+      const blockLength = st.blocks || Math.ceil(st.size / st.blksize) * 8
+      entry.value.blob = { blockOffset: 0, blockLength, byteOffset: 0, byteLength: st.size }
       return entry
     }
 
@@ -172,6 +173,15 @@ function isExecutable (mode) {
 async function lstat (filename) {
   try {
     return await fsp.lstat(filename)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
+async function stat (filename) {
+  try {
+    return await fsp.stat(filename)
   } catch (error) {
     if (error.code === 'ENOENT') return null
     throw error
