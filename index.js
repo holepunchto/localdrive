@@ -121,7 +121,8 @@ module.exports = class Localdrive {
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
-      const target = path.relative(this.root, filename)
+
+      const target = path.isAbsolute(linkname) ? filename : path.relative(this.root, filename)
       await fsp.symlink(target, pointer)
     } finally {
       release()
