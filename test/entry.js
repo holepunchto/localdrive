@@ -43,7 +43,7 @@ test('entry(key) symbolic link', { skip: isWin }, async function (t) {
     key: '/LICENSE.shortcut',
     value: {
       executable: false,
-      linkname: '/LICENSE',
+      linkname: 'LICENSE',
       blob: null,
       metadata: null
     }

@@ -31,7 +31,7 @@ test('list(folder) entries', async function (t) {
 
     if (value.linkname) {
       t.ok(key.endsWith('.shortcut'))
-      t.ok(key.startsWith(value.linkname))
+      t.ok(key.substring(1).startsWith(value.linkname))
     }
 
     if (value.blob) {
