@@ -35,7 +35,7 @@ test('symlink(key, linkname) replace', { skip: isWin }, async function (t) {
     }
   })
 
-  await drive.symlink('/LICENSE', '/LICENSE-V2') 
+  await drive.symlink('/LICENSE', '/LICENSE-V2')
 
   t.absent(await drive.get('/LICENSE'))
   t.alike(await drive.entry('/LICENSE'), {
