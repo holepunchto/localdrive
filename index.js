@@ -115,11 +115,12 @@ module.exports = class Localdrive {
     if (entry) await this.del(key)
 
     const { filename: pointer } = keyResolve(this.root, key)
+    const { filename } = keyResolve(this.root, linkname)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
-      await fsp.symlink(linkname, pointer)
+      await fsp.symlink(target, pointer)
     } finally {
       release()
     }
