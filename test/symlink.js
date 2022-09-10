@@ -136,3 +136,19 @@ test('symlink(key, linkname) mutex', { skip: isWin }, async function (t) {
 
   t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 })
+
+test('symlink(key, linkname) follow links', { skip: isWin }, async function (t) {
+  const drive = createDrive(t, {
+    followLinks: true
+  })
+
+  t.alike(await drive.entry('/LICENSE.shortcut'), {
+    key: '/LICENSE.shortcut',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
+      metadata: null
+    }
+  })
+})
