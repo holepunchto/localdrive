@@ -21,6 +21,42 @@ test('symlink(key, linkname) basic', { skip: isWin }, async function (t) {
   })
 })
 
+test('symlink(key, linkname) absolute inside a folder', { skip: isWin }, async function (t) {
+  const drive = createDrive(t)
+
+  t.absent(await drive.entry('/examples/README.shortcut'))
+
+  await drive.symlink('/examples/README.shortcut', '/examples/more/c.txt')
+
+  t.alike(await drive.entry('/examples/README.shortcut'), {
+    key: '/examples/README.shortcut',
+    value: {
+      executable: false,
+      linkname: '/examples/more/c.txt',
+      blob: null,
+      metadata: null
+    }
+  })
+})
+
+test('symlink(key, linkname) relative inside a folder', { skip: isWin }, async function (t) {
+  const drive = createDrive(t)
+
+  t.absent(await drive.entry('/examples/README.shortcut'))
+
+  await drive.symlink('/examples/README.shortcut', 'more/c.txt')
+
+  t.alike(await drive.entry('/examples/README.shortcut'), {
+    key: '/examples/README.shortcut',
+    value: {
+      executable: false,
+      linkname: 'more/c.txt',
+      blob: null,
+      metadata: null
+    }
+  })
+})
+
 test('symlink(key, linkname) replace', { skip: isWin }, async function (t) {
   const drive = createDrive(t)
 

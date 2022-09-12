@@ -52,6 +52,7 @@ Creates a drive based on a `root` directory. `root` can be relative or absolute.
 Available `options`:
 ```js
 {
+  followLinks: false,
   metadata: {
     get (key) {},
     put (key) {},
@@ -59,6 +60,8 @@ Available `options`:
   }
 }
 ```
+
+`followLinks` does `entry(key)` to follow the `linkname`.
 
 `metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
 

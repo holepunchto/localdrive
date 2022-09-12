@@ -43,8 +43,24 @@ test('entry(key) symbolic link', { skip: isWin }, async function (t) {
     key: '/LICENSE.shortcut',
     value: {
       executable: false,
-      linkname: '/LICENSE',
+      linkname: 'LICENSE',
       blob: null,
+      metadata: null
+    }
+  })
+})
+
+test('entry(key) follow links', { skip: isWin }, async function (t) {
+  const drive = createDrive(t, {
+    followLinks: true
+  })
+
+  t.alike(await drive.entry('/LICENSE.shortcut'), {
+    key: '/LICENSE.shortcut',
+    value: {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
       metadata: null
     }
   })
