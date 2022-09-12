@@ -148,7 +148,7 @@ Metadata backed by `Map`:
 const meta = new Map()
 const metadata = {
   get: (key) => meta.has(key) ? meta.get(key) : null,
-  put: (key) => meta.set(key, value),
+  put: (key, value) => meta.set(key, value),
   del: (key) => meta.delete(key)
 }
 
