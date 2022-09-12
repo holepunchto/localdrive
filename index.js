@@ -9,7 +9,7 @@ module.exports = class Localdrive {
   constructor (root, opts = {}) {
     this.root = path.resolve(root)
     this.metadata = opts.metadata || {}
-    this.followLinks = opts.followLinks || false
+    this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
   }
 
@@ -29,7 +29,7 @@ module.exports = class Localdrive {
   async entry (key) {
     const { keyname, filename } = keyResolve(this.root, key)
 
-    const st = await (this.followLinks ? stat : lstat)(filename)
+    const st = await this._stat(filename)
     if (!st || st.isDirectory()) {
       return null
     }
@@ -116,13 +116,15 @@ module.exports = class Localdrive {
 
     // note: drive has reversed args compared with fs.symlink
     const { filename: pointer } = keyResolve(this.root, key)
-    const { filename } = keyResolve(this.root, linkname)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
 
-      const target = path.isAbsolute(linkname) ? filename : path.relative(this.root, filename)
+      const target = linkname.startsWith('/')
+        ? keyResolve(this.root, linkname).filename
+        : linkname.replace(/\//g, path.sep)
+
       await fsp.symlink(target, pointer)
     } finally {
       release()
