@@ -114,7 +114,6 @@ module.exports = class Localdrive {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
-    // note: drive has reversed args compared with fs.symlink
     const { filename: pointer } = keyResolve(this.root, key)
 
     const release = await this._lock()
