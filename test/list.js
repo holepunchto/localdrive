@@ -1,3 +1,4 @@
+const fsp = require('fs/promises')
 const test = require('brittle')
 const { createDrive, isWin } = require('./helpers/index.js')
 
@@ -60,4 +61,16 @@ test('list(folder) filter', async function (t) {
   }
 
   t.alike(actualKeys.sort(), expectedKeys.sort())
+})
+
+test('list(folder) root does not exists', async function (t) {
+  const drive = createDrive(t)
+
+  await fsp.rm(drive.root, { recursive: true })
+
+  for await (const { key } of drive.list()) {
+    t.fail('should not have given entry: ' + key)
+  }
+
+  await fsp.mkdir(drive.root, { recursive: true })
 })

@@ -131,7 +131,9 @@ module.exports = class Localdrive {
 
   async * list (folder, opts = {}) {
     const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
-    const iterator = await fsp.opendir(fulldir)
+    const iterator = await opendir(fulldir)
+
+    if (!iterator) return
 
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
@@ -185,6 +187,15 @@ async function lstat (filename) {
 async function stat (filename) {
   try {
     return await fsp.stat(filename)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
+async function opendir (dir) {
+  try {
+    return await fsp.opendir(dir)
   } catch (error) {
     if (error.code === 'ENOENT') return null
     throw error
