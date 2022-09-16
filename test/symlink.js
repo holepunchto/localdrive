@@ -1,9 +1,9 @@
 const test = require('brittle')
-const { createDrive, isWin } = require('./helpers/index.js')
+const { createDrive } = require('./helpers/index.js')
 const fs = require('fs')
 const path = require('path')
 
-test('symlink(key, linkname) basic', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) basic', async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/README.shortcut'))
@@ -21,7 +21,7 @@ test('symlink(key, linkname) basic', { skip: isWin }, async function (t) {
   })
 })
 
-test('symlink(key, linkname) absolute inside a folder', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) absolute inside a folder', async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/examples/README.shortcut'))
@@ -39,7 +39,7 @@ test('symlink(key, linkname) absolute inside a folder', { skip: isWin }, async f
   })
 })
 
-test('symlink(key, linkname) relative inside a folder', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) relative inside a folder', async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/examples/README.shortcut'))
@@ -57,7 +57,7 @@ test('symlink(key, linkname) relative inside a folder', { skip: isWin }, async f
   })
 })
 
-test('symlink(key, linkname) replace', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) replace', async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
@@ -85,7 +85,7 @@ test('symlink(key, linkname) replace', { skip: isWin }, async function (t) {
   })
 })
 
-test('symlink(key, linkname) not found', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) not found', async function (t) {
   const drive = createDrive(t)
 
   t.absent(await drive.entry('/not-exists.txt'))
@@ -96,14 +96,14 @@ test('symlink(key, linkname) not found', { skip: isWin }, async function (t) {
   t.absent(await drive.entry('/not-exists.txt'))
 })
 
-test('symlink(key, linkname) folder', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) folder', async function (t) {
   const drive = createDrive(t)
 
   await drive.symlink('/examples.shortcut', '/examples')
   t.ok(await drive.entry('/examples.shortcut'))
 })
 
-test('symlink(key, linkname) automatic folders creation', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) automatic folders creation', async function (t) {
   const drive = createDrive(t)
 
   const key = '/new/folder/files/name.txt'
@@ -111,7 +111,7 @@ test('symlink(key, linkname) automatic folders creation', { skip: isWin }, async
   t.ok(await drive.entry(key))
 })
 
-test('symlink(key, linkname) resolve key path', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) resolve key path', async function (t) {
   const drive = createDrive(t)
 
   const symlinkAndEntry = async (key, linkname, expectedKey) => {
@@ -125,7 +125,7 @@ test('symlink(key, linkname) resolve key path', { skip: isWin }, async function 
   await symlinkAndEntry('\\examples\\more\\h.txt.shortcut', '/examples/more/h.txt', '/examples/more/h.txt.shortcut')
 })
 
-test('symlink(key, linkname) mutex', { skip: isWin }, async function (t) {
+test('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
   t.ok(fs.existsSync(path.join(drive.root, 'solo')))
