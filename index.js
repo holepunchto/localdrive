@@ -13,9 +13,8 @@ module.exports = class Localdrive {
     this._lock = mutexify()
   }
 
-  async ready () {
-    // No-op because this method is only for compatibility
-  }
+  async ready () { /* No-op, compatibility */ }
+  async close () { /* No-op, compatibility */ }
 
   toKey (filename) {
     if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
