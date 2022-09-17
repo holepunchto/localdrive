@@ -65,6 +65,10 @@ Available `options`:
 
 `metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
 
+#### `drive.root`
+
+String with the resolved (absolute) drive path.
+
 #### `drive.supportsMetadata`
 
 Boolean that indicates if the drive handles or not metadata. Default `false`.
