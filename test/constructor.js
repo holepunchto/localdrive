@@ -6,4 +6,11 @@ test('new Localdrive()', async function (t) {
   const root = createTmpDir(t)
   const drive = new Localdrive(root)
   t.is(drive.root, root)
+  t.is(drive.supportsMetadata, false)
+})
+
+test('supportsMetadata', async function (t) {
+  const root = createTmpDir(t)
+  const drive = new Localdrive(root, { metadata: { get (k) {}, put (k, v) {}, del (k) {} } })
+  t.is(drive.supportsMetadata, true)
 })

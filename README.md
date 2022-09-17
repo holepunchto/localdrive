@@ -65,6 +65,16 @@ Available `options`:
 
 `metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
 
+#### `drive.root`
+
+String with the resolved (absolute) drive path.
+
+#### `drive.supportsMetadata`
+
+Boolean that indicates if the drive handles or not metadata. Default `false`.
+
+If you pass `opts.metadata` hooks then `supportsMetadata` becomes true.
+
 #### `await drive.put(key, buffer, [options])`
 
 Creates a file at `key` path in the drive. `options` are the same as in `createWriteStream`.

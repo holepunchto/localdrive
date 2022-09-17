@@ -9,6 +9,8 @@ module.exports = class Localdrive {
   constructor (root, opts = {}) {
     this.root = path.resolve(root)
     this.metadata = opts.metadata || {}
+    this.supportsMetadata = !!opts.metadata
+
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
   }
