@@ -53,7 +53,6 @@ Available `options`:
 ```js
 {
   followLinks: false,
-  supportsMetadata: false,
   metadata: {
     get (key) {},
     put (key) {},
@@ -64,9 +63,13 @@ Available `options`:
 
 `followLinks` does `entry(key)` to follow the `linkname`.
 
-`supportsMetadata` indicates if the drive handles or not metadata.
-
 `metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
+
+#### `drive.supportsMetadata`
+
+Boolean that indicates if the drive handles or not metadata. Default `false`.
+
+If you pass `opts.metadata` hooks then `supportsMetadata` becomes true.
 
 #### `await drive.put(key, buffer, [options])`
 
