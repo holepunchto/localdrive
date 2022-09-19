@@ -8,7 +8,7 @@ const mutexify = require('mutexify/promise')
 module.exports = class Localdrive {
   constructor (root, opts = {}) {
     this.root = path.resolve(root)
-    this.metadata = opts.metadata || {}
+    this.metadata = handleMetadataHooks(opts.metadata) || {}
     this.supportsMetadata = !!opts.metadata
 
     this._stat = opts.followLinks ? stat : lstat
@@ -165,6 +165,18 @@ module.exports = class Localdrive {
     const { keyname, filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, keyname, this, opts)
   }
+}
+
+function handleMetadataHooks (metadata) {
+  if (metadata instanceof Map) {
+    return {
+      get: (key) => metadata.has(key) ? metadata.get(key) : null,
+      put: (key, value) => metadata.set(key, value),
+      del: (key) => metadata.delete(key)
+    }
+  }
+
+  return metadata
 }
 
 function keyResolve (root, key) {

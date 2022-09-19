@@ -80,6 +80,25 @@ test('metadata backed by map', async function (t) {
   t.alike((await drive.entry('/A-NEW-LICENSE')).value.metadata, [1, 2, 3])
 })
 
+test('metadata automatic map', async function (t) {
+  const meta = new Map()
+  const drive = createDrive(t, { metadata: meta })
+
+  t.is((await drive.entry('/LICENSE')).value.metadata, null)
+
+  await drive.put('/LICENSE', Buffer.from('MIT'), { metadata: 'Typical license' })
+
+  t.is((await drive.entry('/LICENSE')).value.metadata, 'Typical license')
+
+  t.ok(meta.has('/LICENSE'))
+  await drive.del('/LICENSE')
+  t.absent(meta.has('/LICENSE'))
+
+  const ws = drive.createWriteStream('/A-NEW-LICENSE', { metadata: [1, 2, 3] })
+  await bufferToStream(Buffer.from('ISC'), ws)
+  t.alike((await drive.entry('/A-NEW-LICENSE')).value.metadata, [1, 2, 3])
+})
+
 test('metadata hooks defined in constructor', async function (t) {
   const drive = createDrive(t, {
     metadata: { get, put, del }
