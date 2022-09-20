@@ -28,6 +28,8 @@ module.exports = class Localdrive {
   }
 
   async entry (key) {
+    if (typeof key === 'object') key = key.key
+
     const { keyname, filename } = keyResolve(this.root, key)
 
     const st = await this._stat(filename)
