@@ -160,8 +160,6 @@ module.exports = class Localdrive {
   }
 
   createWriteStream (key, opts) {
-    if (typeof key === 'object') key = key.key
-
     const { keyname, filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, keyname, this, opts)
   }
