@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { createDrive, streamToString, bufferToStream } = require('./helpers/index.js')
+const { createDrive, streamToString } = require('./helpers/index.js')
 
 test('entry(object)', async function (t) {
   const drive = createDrive(t)
