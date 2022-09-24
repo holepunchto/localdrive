@@ -2,14 +2,14 @@ const test = require('brittle')
 const Localdrive = require('../index.js')
 const { createDrive, createTmpDir } = require('./helpers/index.js')
 
-test('new Localdrive()', async function (t) {
+test('new Localdrive()', function (t) {
   const root = createTmpDir(t)
   const drive = new Localdrive(root)
   t.is(drive.root, root)
   t.is(drive.supportsMetadata, false)
 })
 
-test('supportsMetadata', async function (t) {
+test('supportsMetadata', function (t) {
   const root = createTmpDir(t)
   const drive = new Localdrive(root, { metadata: { get (k) {}, put (k, v) {}, del (k) {} } })
   t.is(drive.supportsMetadata, true)
@@ -45,7 +45,7 @@ test('flush()', async function (t) {
   await promise
 })
 
-test('batch()', async function (t) {
+test('batch()', function (t) {
   const drive = createDrive(t)
 
   const batch = drive.batch()
