@@ -15,6 +15,26 @@ test('supportsMetadata', async function (t) {
   t.is(drive.supportsMetadata, true)
 })
 
+test('ready()', async function (t) {
+  const drive = createDrive(t)
+
+  const promise = drive.ready()
+  t.ok(promise.then)
+  t.ok(promise.catch)
+  t.ok(promise.finally)
+  await promise
+})
+
+test('close()', async function (t) {
+  const drive = createDrive(t)
+
+  const promise = drive.close()
+  t.ok(promise.then)
+  t.ok(promise.catch)
+  t.ok(promise.finally)
+  await promise
+})
+
 test('flush()', async function (t) {
   const drive = createDrive(t)
 
