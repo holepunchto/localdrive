@@ -17,6 +17,11 @@ module.exports = class Localdrive {
 
   async ready () { /* No-op, compatibility */ }
   async close () { /* No-op, compatibility */ }
+  async flush () { /* No-op, compatibility */ }
+
+  batch () {
+    return this
+  }
 
   toKey (filename) {
     if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
