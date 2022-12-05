@@ -2,6 +2,7 @@ const { Readable, Writable } = require('streamx')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
+const b4a = require('b4a')
 
 class FileWriteStream extends Writable {
   constructor (filename, key, drive, opts = {}) {
@@ -115,7 +116,7 @@ class FileReadStream extends Readable {
       return cb(null)
     }
 
-    const data = Buffer.allocUnsafe(Math.min(this._missing, 65536))
+    const data = b4a.allocUnsafe(Math.min(this._missing, 65536))
 
     fs.read(this.fd, data, 0, data.byteLength, this._offset, (err, read) => {
       if (err) return cb(err)
@@ -144,7 +145,7 @@ class FileReadStream extends Readable {
 module.exports = { FileWriteStream, FileReadStream }
 
 function map (s) {
-  return typeof s === 'string' ? Buffer.from(s) : s
+  return typeof s === 'string' ? b4a.from(s) : s
 }
 
 function openFilePromise (filename, flags, mode) {
