@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/holepunchto/localdrive",
   "dependencies": {
+    "b4a": "^1.6.1",
+    "mirror-drive": "^1.2.0",
     "mutexify": "^1.4.0",
     "streamx": "^2.12.5",
     "unix-path-resolve": "^1.0.2"

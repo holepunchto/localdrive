@@ -126,6 +126,12 @@ Default `options`:
 }
 ```
 
+#### `const mirror = drive.mirror(out, [options])`
+
+Efficiently mirror this drive into another. Returns a [`MirrorDrive`](https://github.com/holepunchto/mirror-drive#api) instance constructed with `options`.
+
+Call `await mirror.done()` to wait for the mirroring to finish.
+
 #### `const rs = drive.createReadStream(key, [options])`
 
 Returns a stream to read out the blob stored in the drive at `key` path.
