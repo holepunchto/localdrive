@@ -1,9 +1,11 @@
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
+const b4a = require('b4a')
 const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
+const MirrorDrive = require('mirror-drive')
 
 module.exports = class Localdrive {
   constructor (root, opts = {}) {
@@ -80,7 +82,7 @@ module.exports = class Localdrive {
     for await (const chunk of rs) {
       chunks.push(chunk)
     }
-    return Buffer.concat(chunks)
+    return b4a.concat(chunks)
   }
 
   put (key, buffer, opts) {
@@ -157,6 +159,10 @@ module.exports = class Localdrive {
       const entry = await this.entry(key)
       if (entry) yield entry
     }
+  }
+
+  mirror (out, opts) {
+    return new MirrorDrive(this, out, opts)
   }
 
   createReadStream (key, opts) {
