@@ -115,16 +115,9 @@ Creates an entry in drive at `key` path that points to the entry at `linkname`.
 
 If a blob entry currently exists at `key` path then it will get overwritten and `drive.get(key)` will return null, while `drive.entry(key)` will return the entry with symlink information.
 
-#### `const iterator = drive.list([folder], [options])`
+#### `const iterator = drive.list([folder])`
 
 Returns a stream of all entries in the drive inside of specified `folder`.
-
-Default `options`:
-```js
-{
-  filter: (key) => true
-}
-```
 
 #### `const mirror = drive.mirror(out, [options])`
 
