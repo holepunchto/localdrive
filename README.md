@@ -10,7 +10,7 @@ npm i localdrive
 ```js
 import Localdrive from 'localdrive'
 
-const drive = new Localdrive('my-project')
+const drive = new Localdrive('./my-project')
 
 await drive.put('/blob.txt', Buffer.from('example'))
 await drive.put('/images/logo.png', Buffer.from('..'))
