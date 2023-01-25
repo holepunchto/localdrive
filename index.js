@@ -149,8 +149,6 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
-      if (opts.filter && !opts.filter(key)) continue
-
       if (dirent.isDirectory()) {
         yield * this.list(key, opts)
         continue

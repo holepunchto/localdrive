@@ -44,25 +44,6 @@ test('list(folder) entries', async function (t) {
   }
 })
 
-test('list(folder) filter', async function (t) {
-  const drive = createDrive(t)
-  const filter = (key) => key !== '/LICENSE' && !key.startsWith('/examples/more')
-
-  const actualKeys = []
-  const expectedKeys = [
-    '/README.md', '/script.sh', '/LICENSE-V2', '/key.secret', '/empty.txt',
-    '/examples/a.txt', '/examples/b.txt',
-    '/solo/one.txt'
-  ]
-  if (!isWin) expectedKeys.push('/LICENSE.shortcut')
-
-  for await (const { key } of drive.list('/', { filter })) {
-    actualKeys.push(key)
-  }
-
-  t.alike(actualKeys.sort(), expectedKeys.sort())
-})
-
 test('list(folder) root does not exists', async function (t) {
   const drive = createDrive(t)
 
