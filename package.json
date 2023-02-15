@@ -1,6 +1,6 @@
 {
   "name": "localdrive",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "File system interoperable with Hyperdrive",
   "main": "index.js",
   "scripts": {
