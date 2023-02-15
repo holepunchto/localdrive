@@ -25,6 +25,10 @@ module.exports = class Localdrive {
     return this
   }
 
+  checkout () {
+    return this
+  }
+
   toKey (filename) {
     if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
     return unixPathResolve('/', filename)
