@@ -174,6 +174,11 @@ module.exports = class Localdrive {
     const { keyname, filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, keyname, this, opts)
   }
+
+  checkout () {
+    // Dummy, for compatibility (no versioning with localdrive)
+    return this
+  }
 }
 
 function handleMetadataHooks (metadata) {

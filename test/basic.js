@@ -52,3 +52,10 @@ test('batch()', function (t) {
   t.ok(batch.flush)
   t.ok(batch.close)
 })
+
+test('checkout()', function (t) {
+  const drive = createDrive(t)
+  const checkedOut = drive.checkout()
+
+  t.is(checkedOut, drive)
+})
