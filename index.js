@@ -25,6 +25,10 @@ module.exports = class Localdrive {
     return this
   }
 
+  checkout () {
+    return this
+  }
+
   toKey (filename) {
     if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
     return unixPathResolve('/', filename)
@@ -173,11 +177,6 @@ module.exports = class Localdrive {
   createWriteStream (key, opts) {
     const { keyname, filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, keyname, this, opts)
-  }
-
-  checkout () {
-    // Dummy, for compatibility (no versioning with localdrive)
-    return this
   }
 }
 
