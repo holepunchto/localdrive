@@ -144,7 +144,7 @@ module.exports = class Localdrive {
     }
   }
 
-  async * list (folder, opts = {}) {
+  async * list (folder) {
     const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
     const iterator = await opendir(fulldir)
 
@@ -154,12 +154,43 @@ module.exports = class Localdrive {
       const key = unixPathResolve(keyname, dirent.name)
 
       if (dirent.isDirectory()) {
-        yield * this.list(key, opts)
+        yield * this.list(key)
         continue
       }
 
       const entry = await this.entry(key)
       if (entry) yield entry
+    }
+  }
+
+  async * readdir (folder) {
+    const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
+    const iterator = await readdir(fulldir)
+
+    if (!iterator) return
+
+    for await (const dirent of iterator) {
+      const key = unixPathResolve(keyname, dirent.name)
+
+      let suffix = key.slice(keyname.length)
+      const i = suffix.indexOf('/')
+      suffix = i === -1 ? suffix : suffix.slice(i + 1)
+
+      if (dirent.isDirectory()) {
+        let empty = true
+        for await (const entry of this.list(key)) { // eslint-disable-line
+          empty = false
+          break
+        }
+        if (empty) continue
+
+        yield suffix
+
+        continue
+      }
+
+      const entry = await this.entry(key)
+      if (entry) yield suffix
     }
   }
 
@@ -223,6 +254,15 @@ async function stat (filename) {
 async function opendir (dir) {
   try {
     return await fsp.opendir(dir)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
+async function readdir (dir) {
+  try {
+    return await fsp.readdir(dir, { withFileTypes: true })
   } catch (error) {
     if (error.code === 'ENOENT') return null
     throw error
