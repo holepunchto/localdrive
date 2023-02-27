@@ -1,8 +1,9 @@
 const fsp = require('fs/promises')
+const path = require('path')
 const test = require('brittle')
 const { createDrive } = require('./helpers/index.js')
 
-test('readdir(folder) names', async function (t) {
+test('readdir() names', async function (t) {
   const drive = createDrive(t, undefined, { noTestFiles: true })
 
   const buffer = Buffer.from('hi')
@@ -23,7 +24,7 @@ test('readdir(folder) names', async function (t) {
   t.alike(actual.sort(), expected.sort())
 })
 
-test('readdir(folder) prefix', async function (t) {
+test('readdir(prefix)', async function (t) {
   const drive = createDrive(t, undefined, { noTestFiles: true })
 
   const buffer = Buffer.from('hi')
@@ -44,7 +45,26 @@ test('readdir(folder) prefix', async function (t) {
   t.alike(actual.sort(), expected.sort())
 })
 
-test('readdir(folder) root does not exists', async function (t) {
+test('readdir() but sub-folder is empty', async function (t) {
+  const drive = createDrive(t, undefined, { noTestFiles: true })
+
+  const buffer = Buffer.from('hi')
+  await drive.put('/file1.txt', buffer)
+  await drive.put('/file2.txt', buffer)
+
+  await fsp.mkdir(path.join(drive.root, 'folder')) // Simulates creating folder externally
+
+  const actual = []
+  const expected = ['file1.txt', 'file2.txt']
+
+  for await (const name of drive.readdir()) {
+    actual.push(name)
+  }
+
+  t.alike(actual.sort(), expected.sort())
+})
+
+test('readdir() root does not exists', async function (t) {
   const drive = createDrive(t)
 
   await fsp.rm(drive.root, { recursive: true })
