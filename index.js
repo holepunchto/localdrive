@@ -179,8 +179,8 @@ module.exports = class Localdrive {
       if (dirent.isDirectory()) {
         if (!(await isEmptyDirectory(this, key))) {
           yield suffix
-          continue
         }
+        continue
       }
 
       const entry = await this.entry(key)
