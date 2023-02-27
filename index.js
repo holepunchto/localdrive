@@ -174,7 +174,7 @@ module.exports = class Localdrive {
 
       let suffix = key.slice(keyname.length)
       const i = suffix.indexOf('/')
-      suffix = i === -1 ? suffix : suffix.slice(i + 1)
+      if (i > -1) suffix = suffix.slice(i + 1)
 
       if (dirent.isDirectory()) {
         if (!(await isEmptyDirectory(this, key))) {
