@@ -177,16 +177,10 @@ module.exports = class Localdrive {
       suffix = i === -1 ? suffix : suffix.slice(i + 1)
 
       if (dirent.isDirectory()) {
-        let empty = true
-        for await (const entry of this.list(key)) { // eslint-disable-line
-          empty = false
-          break
+        if (!(await isEmptyDirectory(this, key))) {
+          yield suffix
+          continue
         }
-        if (empty) continue
-
-        yield suffix
-
-        continue
       }
 
       const entry = await this.entry(key)
@@ -278,4 +272,11 @@ async function gcEmptyFolders (root, dir) {
   } catch {
     // silent error
   }
+}
+
+async function isEmptyDirectory (drive, key) {
+  for await (const entry of drive.list(key)) { // eslint-disable-line
+    return false
+  }
+  return true
 }
