@@ -21,7 +21,7 @@ module.exports = {
 function createTmpDir (t) {
   const tmpdir = path.join(os.tmpdir(), 'localdrive-test-')
   const dir = fs.mkdtempSync(tmpdir)
-  t.teardown(() => fsp.rm(dir, { recursive: true, force: true }))
+  t.teardown(() => fsp.rm(dir, { recursive: true }))
   return dir
 }
 

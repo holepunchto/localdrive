@@ -73,5 +73,7 @@ test('readdir() root does not exists', async function (t) {
     t.fail('should not have given entry: ' + key)
   }
 
+  await fsp.mkdir(drive.root, { recursive: true })
+
   t.pass()
 })
