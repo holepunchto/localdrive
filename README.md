@@ -119,6 +119,10 @@ If a blob entry currently exists at `key` path then it will get overwritten and 
 
 Returns a stream of all entries in the drive inside of specified `folder`.
 
+#### `const iterator = drive.readdir([folder])`
+
+Returns a stream of all subpaths of entries in drive stored at paths prefixed by `folder`.
+
 #### `const mirror = drive.mirror(out, [options])`
 
 Efficiently mirror this drive into another. Returns a [`MirrorDrive`](https://github.com/holepunchto/mirror-drive#api) instance constructed with `options`.

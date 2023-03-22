@@ -1,7 +1,6 @@
 const Localdrive = require('../../index.js')
 const path = require('path')
 const fs = require('fs')
-const fsp = require('fs/promises')
 const os = require('os')
 const { promisify } = require('util')
 let { pipeline, Readable } = require('stream')
@@ -21,14 +20,14 @@ module.exports = {
 function createTmpDir (t) {
   const tmpdir = path.join(os.tmpdir(), 'localdrive-test-')
   const dir = fs.mkdtempSync(tmpdir)
-  t.teardown(() => fsp.rm(dir, { recursive: true }))
+  t.teardown(() => rmdir(dir))
   return dir
 }
 
 function createRelativeTmpDir (t) {
   const tmpdir = path.join('./localdrive-test-' + Math.floor(Math.random() * 100000))
   fs.mkdirSync(tmpdir)
-  t.teardown(() => fsp.rm(tmpdir, { recursive: true }))
+  t.teardown(() => rmdir(tmpdir))
   return tmpdir
 }
 
@@ -78,4 +77,13 @@ async function streamToString (stream) {
 async function bufferToStream (buffer, writeStream) {
   const readable = Readable.from(buffer)
   await pipeline(readable, writeStream)
+}
+
+async function rmdir (dir) {
+  try {
+    await fs.promises.rm(dir, { recursive: true })
+  } catch (error) {
+    if (error.code === 'ENOENT') return
+    throw error
+  }
 }

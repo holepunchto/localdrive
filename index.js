@@ -144,7 +144,7 @@ module.exports = class Localdrive {
     }
   }
 
-  async * list (folder, opts = {}) {
+  async * list (folder) {
     const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
     const iterator = await opendir(fulldir)
 
@@ -154,12 +154,37 @@ module.exports = class Localdrive {
       const key = unixPathResolve(keyname, dirent.name)
 
       if (dirent.isDirectory()) {
-        yield * this.list(key, opts)
+        yield * this.list(key)
         continue
       }
 
       const entry = await this.entry(key)
       if (entry) yield entry
+    }
+  }
+
+  async * readdir (folder) {
+    const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
+    const iterator = await readdir(fulldir)
+
+    if (!iterator) return
+
+    for await (const dirent of iterator) {
+      const key = unixPathResolve(keyname, dirent.name)
+
+      let suffix = key.slice(keyname.length)
+      const i = suffix.indexOf('/')
+      if (i > -1) suffix = suffix.slice(i + 1)
+
+      if (dirent.isDirectory()) {
+        if (!(await isEmptyDirectory(this, key))) {
+          yield suffix
+        }
+        continue
+      }
+
+      const entry = await this.entry(key)
+      if (entry) yield suffix
     }
   }
 
@@ -229,6 +254,15 @@ async function opendir (dir) {
   }
 }
 
+async function readdir (dir) {
+  try {
+    return await fsp.readdir(dir, { withFileTypes: true })
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
 async function gcEmptyFolders (root, dir) {
   try {
     while (dir !== root) {
@@ -238,4 +272,11 @@ async function gcEmptyFolders (root, dir) {
   } catch {
     // silent error
   }
+}
+
+async function isEmptyDirectory (drive, key) {
+  for await (const entry of drive.list(key)) { // eslint-disable-line
+    return false
+  }
+  return true
 }

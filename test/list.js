@@ -52,6 +52,4 @@ test('list(folder) root does not exists', async function (t) {
   for await (const { key } of drive.list()) {
     t.fail('should not have given entry: ' + key)
   }
-
-  await fsp.mkdir(drive.root, { recursive: true })
 })
