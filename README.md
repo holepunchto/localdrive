@@ -8,7 +8,7 @@ npm i localdrive
 
 ## Usage
 ```js
-import Localdrive from 'localdrive'
+const Localdrive = require('localdrive')
 
 const drive = new Localdrive('./my-project')
 
