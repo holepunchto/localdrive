@@ -289,10 +289,9 @@ class Watcher {
 
     this._unwatch = recursiveWatch(folder, this._onchange.bind(this))
 
+    this._closing = null
     this._opening = this._ready()
     this._opening.catch(safetyCatch)
-
-    this._closing = null
   }
 
   ready () {
