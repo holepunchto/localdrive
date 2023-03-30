@@ -1,12 +1,14 @@
 const test = require('brittle')
 const { createDrive, eventFlush } = require('./helpers/index.js')
 
-test('basic watch iterator', async function (t) {
+test('basic watch', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t)
   const watcher = drive.watch()
   t.teardown(() => watcher.destroy())
+
+  await watcher.ready()
 
   eventFlush().then(async () => {
     await drive.put('/a.txt', Buffer.from('hi'))
