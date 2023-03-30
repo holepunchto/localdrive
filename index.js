@@ -291,6 +291,8 @@ class Watcher {
 
     this._opening = this._ready()
     this._opening.catch(safetyCatch)
+
+    this._closing = null
   }
 
   ready () {
@@ -360,6 +362,12 @@ class Watcher {
   }
 
   async destroy () {
+    if (this._closing) return this._closing
+    this._closing = this._destroy()
+    return this._closing
+  }
+
+  async _destroy () {
     if (this.closed) return
     this.closed = true
 
