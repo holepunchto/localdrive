@@ -289,11 +289,15 @@ class Watcher {
 
     this._unwatch = recursiveWatch(folder, this._onchange.bind(this))
 
-    this._opening = this.ready()
+    this._opening = this._ready()
     this._opening.catch(safetyCatch)
   }
 
-  async ready () {
+  ready () {
+    return this._opening
+  }
+
+  async _ready () {
     // Waits for the internal fs.lstat call of recursive-watch
     // Eventually we refactor recursive-watch to have its own ready() etc
     await new Promise(resolve => setImmediate(resolve))
