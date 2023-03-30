@@ -20,7 +20,7 @@ const buffer = await drive.get('/blob.txt')
 console.log(buffer) // => <Buffer ..> "example"
 
 const entry = await drive.entry('/blob.txt')
-console.log(entry) // => { executable, linkname, blob, metadata }
+console.log(entry) // => { key, value: { executable, linkname, blob, metadata } }
 
 await drive.del('/images/old-logo.png')
 
