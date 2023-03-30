@@ -90,7 +90,7 @@ It also returns null for symbolic links.
 Returns the entry at `key` path in the drive. It looks like this:
 ```js
 {
-  key: '/blob.txt',
+  key: String,
   value: {
     executable: Boolean,
     linkname: null,
