@@ -63,6 +63,10 @@ Available `options`:
 
 The metadata hook `del()` could be called with non-existing metadata keys.
 
+#### `await drive.close()`
+
+Closes the drive, in this case will destroy all watchers.
+
 #### `drive.root`
 
 String with the resolved (absolute) drive path.
@@ -140,6 +144,27 @@ Returns a stream of all subpaths of entries in drive stored at paths prefixed by
 Efficiently mirror this drive into another. Returns a [`MirrorDrive`](https://github.com/holepunchto/mirror-drive#api) instance constructed with `options`.
 
 Call `await mirror.done()` to wait for the mirroring to finish.
+
+#### `const watcher = db.watch([folder])`
+
+Listens to changes that are on `folder`, by default `/`.
+
+Usage example:
+```js
+for await (const diff of watcher) {
+  console.log(diff) // => {}
+}
+```
+
+Returns a new value after a change, it will be an empty object.
+
+`await watcher.ready()`
+
+Waits until the watcher is loaded and detecting changes.
+
+`await watcher.destroy()`
+
+Stops the watcher. You could also stop it by using `break` in the loop.
 
 #### `const rs = drive.createReadStream(key, [options])`
 
