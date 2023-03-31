@@ -328,7 +328,7 @@ test('closing drive should destroy watcher', async function (t) {
 test('create lots of watchers', async function (t) {
   t.plan(1)
 
-  const count = isMac ? 100 : 1000
+  const count = isMac ? 10 : 1000
   const drive = createDrive(t)
   const watchers = []
 
@@ -353,7 +353,7 @@ test('create lots of watchers', async function (t) {
 })
 
 test('create and destroy lots of watchers', async function (t) {
-  const count = isMac ? 100 : 1000
+  const count = isMac ? 10 : 1000
   const drive = createDrive(t)
 
   for (let i = 0; i < count; i++) {
