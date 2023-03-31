@@ -186,11 +186,15 @@ test('watch on folder', async function (t) {
   onchange = () => t.fail('should not trigger changes')
   await drive.put('/b.txt', buf)
   await eventFlush()
+  await eventFlush()
+  await eventFlush()
   await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
   onchange = null
 
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
+  await eventFlush()
+  await eventFlush()
   await eventFlush()
   await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
   onchange = null
