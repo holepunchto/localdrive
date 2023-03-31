@@ -355,6 +355,7 @@ test('create and destroy lots of watchers', async function (t) {
     await eventFlush()
     await eventFlush()
     await eventFlush() // Sometimes it needs more than one flushes, probably due recursive-watch, not critical for now
+    await new Promise(resolve => setImmediate(resolve)) // + should not be needed
 
     if (!changed) {
       t.fail('should have changed')
