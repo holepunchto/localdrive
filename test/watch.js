@@ -390,7 +390,7 @@ test('create and destroy lots of watchers', async function (t) {
   }
 })
 
-test.solo('watch after a put', async function (t) {
+test('watch after a put', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t)
@@ -402,10 +402,6 @@ test.solo('watch after a put', async function (t) {
   await eventFlush()
   await new Promise(resolve => setImmediate(resolve))
   await new Promise(resolve => setTimeout(resolve, 5000))
-
-  /* eventFlush().then(() => {
-    watcher.destroy()
-  }) */
 
   const id = setTimeout(() => {
     watcher.destroy()
