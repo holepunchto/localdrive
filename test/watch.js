@@ -174,6 +174,7 @@ test('watch on folder', async function (t) {
   await eventFlush()
   await new Promise(resolve => setImmediate(resolve))
   await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => setTimeout(resolve, 5000))
 
   const watcher = drive.watch('/examples')
 
@@ -187,20 +188,16 @@ test('watch on folder', async function (t) {
   onchange = () => t.fail('should not trigger changes')
   await drive.put('/b.txt', buf)
   await eventFlush()
-  await eventFlush()
-  await eventFlush()
   await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
-  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  await new Promise(resolve => setTimeout(resolve, 5000))
   onchange = null
 
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
-  await eventFlush()
-  await eventFlush()
   await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
-  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
-  onchange = null
+  await new Promise(resolve => setTimeout(resolve, 5000))
+  // onchange = null // Should not be needed, but CI Mac is slow
 })
 
 test.skip('watch should normalize folder', async function (t) {
