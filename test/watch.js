@@ -77,13 +77,10 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.alike(value, {})
   }
 
-  // + due drive.put?
-  /* await eventFlush()
+  // Should not be needed, but CI Mac throws ENOTEMPTY, probably because the dir is still being used i.e. fs leak
   await eventFlush()
-  await eventFlush() */
-
   await eventFlush()
-  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  await eventFlush()
 })
 
 test('watch multiple next() on parallel - done', async function (t) {
