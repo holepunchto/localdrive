@@ -183,6 +183,8 @@ test('watch on folder', async function (t) {
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
+  await eventFlush()
+  await eventFlush()
   onchange = noop
 })
 
