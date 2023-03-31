@@ -302,8 +302,10 @@ class Watcher {
 
   async _ready () {
     // Mac requires this minimal delay to avoid mistakenly triggering a past change
-    await fullEventFlush()
-    await fullEventFlush()
+    if (process.platform === 'darwin') {
+      await fullEventFlush()
+      await fullEventFlush()
+    }
 
     this._unwatch = recursiveWatch(this.range, this._onchange.bind(this))
 
