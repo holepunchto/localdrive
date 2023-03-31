@@ -301,17 +301,12 @@ class Watcher {
   }
 
   async _ready () {
-    // Mac requires this minimal delay to avoid mistakenly triggering a past change
-    if (process.platform === 'darwin') {
-      await fullEventFlush()
-      await fullEventFlush()
-    }
-
     this._unwatch = recursiveWatch(this.range, this._onchange.bind(this))
 
     // Waits for the internal fs.lstat call of recursive-watch
     // Eventually we refactor recursive-watch to have its own ready() etc
-    await fullEventFlush()
+    await new Promise(resolve => setImmediate(resolve))
+    // + recursive-watch needs its own .ready()
 
     this.opened = true
   }
@@ -392,11 +387,6 @@ class Watcher {
     const release = await this._lock()
     release()
   }
-}
-
-async function fullEventFlush () {
-  await new Promise(resolve => setImmediate(resolve))
-  await new Promise(resolve => setTimeout(resolve, 1))
 }
 
 function handleMetadataHooks (metadata) {
