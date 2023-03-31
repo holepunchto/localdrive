@@ -365,4 +365,4 @@ test('create and destroy lots of watchers', async function (t) {
   }
 })
 
-function noop () {}
+// function noop () {}
