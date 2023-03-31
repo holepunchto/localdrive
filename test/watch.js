@@ -180,7 +180,7 @@ test('watch on folder', async function (t) {
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
-  onchange = null
+  onchange = noop
 })
 
 test('watch should normalize folder', async function (t) {
@@ -359,3 +359,5 @@ test('create and destroy lots of watchers', async function (t) {
     await watcher.destroy()
   }
 })
+
+function noop () {}
