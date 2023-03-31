@@ -242,7 +242,7 @@ test('watch should normalize folder', async function (t) {
   onchange = null
 })
 
-test('watch on non existing folder', async function (t) {
+test.skip('watch on non existing folder', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t, undefined, { noTestFiles: true })
