@@ -75,7 +75,10 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.alike(value, {})
   }
 
-  await eventFlush() // + due drive.put?
+  // + due drive.put?
+  await eventFlush()
+  await eventFlush()
+  await eventFlush()
 })
 
 test('watch multiple next() on parallel - done', async function (t) {
