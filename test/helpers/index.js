@@ -85,7 +85,7 @@ async function bufferToStream (buffer, writeStream) {
 
 async function rmdir (dir) {
   try {
-    await fs.promises.rm(dir, { recursive: true })
+    await fs.promises.rm(dir, { force: true, recursive: true })
   } catch (error) {
     if (error.code === 'ENOENT') return
     throw error
