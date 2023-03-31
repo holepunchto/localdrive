@@ -200,7 +200,7 @@ test('watch on folder', async function (t) {
   onchange = null // Should not be needed, but CI Mac is slow
 })
 
-test.skip('watch should normalize folder', async function (t) {
+test('watch should normalize folder', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t, undefined, { noTestFiles: true })
@@ -209,6 +209,14 @@ test.skip('watch should normalize folder', async function (t) {
   await drive.put('/README.md', buf)
   await drive.put('/examples/a.txt', buf)
   await drive.put('/examples/more/a.txt', buf)
+
+  // Flush file system events?
+  await eventFlush()
+  await eventFlush()
+  await eventFlush()
+  await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => setTimeout(resolve, 5000))
 
   const watcher = drive.watch('examples//more//')
 
@@ -222,16 +230,19 @@ test.skip('watch should normalize folder', async function (t) {
   onchange = () => t.fail('should not trigger changes')
   await drive.put('/examples/a.txt', buf)
   await eventFlush()
+  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  await new Promise(resolve => setTimeout(resolve, 5000))
   onchange = null
 
   onchange = () => t.pass('change')
   await drive.put('/examples/more/a.txt', buf)
   await eventFlush()
   await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  await new Promise(resolve => setTimeout(resolve, 5000))
   onchange = null
 })
 
-test.skip('watch on non existing folder', async function (t) {
+test('watch on non existing folder', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t, undefined, { noTestFiles: true })
@@ -249,6 +260,8 @@ test.skip('watch on non existing folder', async function (t) {
   onchange = () => t.pass('change')
   await drive.put('/examples/more/a.txt', buf)
   await eventFlush()
+  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  await new Promise(resolve => setTimeout(resolve, 5000))
   onchange = null
 })
 
@@ -376,5 +389,3 @@ test('create and destroy lots of watchers', async function (t) {
     await watcher.destroy()
   }
 })
-
-// function noop () {}
