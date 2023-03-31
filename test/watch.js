@@ -184,7 +184,6 @@ test('watch on folder', async function (t) {
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
   // await eventFlush()
-  // await eventFlush()
   // onchange = noop // + should uncomment this
 })
 
@@ -214,8 +213,8 @@ test('watch should normalize folder', async function (t) {
 
   onchange = () => t.pass('change')
   await drive.put('/examples/more/a.txt', buf)
-  await eventFlush()
-  onchange = null
+  // await eventFlush()
+  // onchange = null // + should uncomment this
 })
 
 test.skip('watch on non existing folder', async function (t) {
