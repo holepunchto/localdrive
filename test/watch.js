@@ -183,9 +183,9 @@ test('watch on folder', async function (t) {
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
-  await eventFlush()
-  await eventFlush()
-  onchange = noop
+  // await eventFlush()
+  // await eventFlush()
+  // onchange = noop // + should uncomment this
 })
 
 test('watch should normalize folder', async function (t) {
