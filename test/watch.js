@@ -78,9 +78,12 @@ test('watch multiple next() on parallel - value', async function (t) {
   }
 
   // + due drive.put?
+  /* await eventFlush()
   await eventFlush()
+  await eventFlush() */
+
   await eventFlush()
-  await eventFlush()
+  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
 })
 
 test('watch multiple next() on parallel - done', async function (t) {
@@ -185,8 +188,8 @@ test('watch on folder', async function (t) {
   onchange = () => t.pass('change')
   await drive.put('/examples/b.txt', buf)
   await eventFlush()
-  // await eventFlush()
-  // onchange = noop // + should uncomment this
+  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  onchange = null
 })
 
 test('watch should normalize folder', async function (t) {
@@ -215,8 +218,9 @@ test('watch should normalize folder', async function (t) {
 
   onchange = () => t.pass('change')
   await drive.put('/examples/more/a.txt', buf)
-  // await eventFlush()
-  // onchange = null // + should uncomment this
+  await eventFlush()
+  await new Promise(resolve => setImmediate(resolve)) // Flush file system events?
+  onchange = null
 })
 
 test.skip('watch on non existing folder', async function (t) {
@@ -355,9 +359,7 @@ test('create and destroy lots of watchers', async function (t) {
 
     await drive.put('/a', Buffer.from('hi'))
     await eventFlush()
-    await eventFlush()
-    await eventFlush() // Sometimes it needs more than one flushes, probably due recursive-watch, not critical for now
-    await next // + should not be needed
+    await next // Sometimes it needs more than one flushes, probably due how recursive-watch works, not critical for now
 
     if (!changed) {
       t.fail('should have changed')
