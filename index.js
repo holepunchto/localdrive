@@ -372,7 +372,7 @@ class Watcher {
 
     this.drive._watchers.delete(this)
 
-    this._unwatch()
+    await this._unwatch()
 
     this._onchange() // Continue execution being closed
 
