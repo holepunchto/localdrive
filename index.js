@@ -381,6 +381,8 @@ class Watcher {
     if (this.closed) return
     this.closed = true
 
+    if (!this.opened) await this._opening.catch(safetyCatch)
+
     this.drive._watchers.delete(this)
 
     await this._unwatch()
