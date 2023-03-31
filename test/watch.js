@@ -389,3 +389,29 @@ test('create and destroy lots of watchers', async function (t) {
     await watcher.destroy()
   }
 })
+
+test('watch after a put', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  await drive.put('/a.txt', Buffer.from('hi'))
+
+  const watcher = drive.watch()
+  const a = watcher.next()
+
+  await eventFlush()
+  await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => setTimeout(resolve, 5000))
+
+  /* eventFlush().then(() => {
+    watcher.destroy()
+  }) */
+
+  const id = setTimeout(() => {
+    watcher.destroy()
+  }, 5000)
+
+  t.alike(await a, { done: true, value: undefined })
+
+  clearTimeout(id)
+})
