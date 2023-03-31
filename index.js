@@ -302,12 +302,7 @@ class Watcher {
 
   async _ready () {
     this._unwatch = recursiveWatch(this.range, this._onchange.bind(this))
-
-    // Waits for the internal fs.lstat call of recursive-watch
-    // Eventually we refactor recursive-watch to have its own ready() etc
-    await new Promise(resolve => setImmediate(resolve))
-    // + recursive-watch needs its own .ready()
-
+    await this._unwatch.ready()
     this.opened = true
   }
 
