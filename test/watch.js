@@ -170,6 +170,8 @@ test('watch on folder', async function (t) {
 
   // Flush file system events?
   await eventFlush()
+  await eventFlush()
+  await eventFlush()
   await new Promise(resolve => setImmediate(resolve))
 
   const watcher = drive.watch('/examples')
