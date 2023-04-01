@@ -315,11 +315,13 @@ test('closing drive should destroy watcher', async function (t) {
 test('create lots of watchers', async function (t) {
   t.plan(1)
 
-  const count = isMac ? 100 : 1000
   const drive = createDrive(t)
   const watchers = []
 
-  for (let i = 0; i < count; i++) {
+  const max = isMac ? 100 : 1000
+  let count = 0
+
+  for (let i = 0; i < max; i++) {
     const watcher = drive.watch()
     t.teardown(() => watcher.destroy())
 
@@ -330,7 +332,7 @@ test('create lots of watchers', async function (t) {
         t.fail('wrong value')
       }
 
-      if (i === count - 1) {
+      if (++count === max) {
         t.pass()
       }
     })
@@ -340,10 +342,11 @@ test('create lots of watchers', async function (t) {
 })
 
 test('create and destroy lots of watchers', async function (t) {
-  const count = isMac ? 100 : 1000
   const drive = createDrive(t)
 
-  for (let i = 0; i < count; i++) {
+  const max = isMac ? 100 : 1000
+
+  for (let i = 0; i < max; i++) {
     let changed = false
 
     const watcher = drive.watch()
