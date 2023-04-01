@@ -76,11 +76,6 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.is(done, false)
     t.alike(value, {})
   }
-
-  // Should not be needed, but CI Mac throws ENOTEMPTY, probably because the dir is still being used i.e. fs leak
-  await eventFlush()
-  await eventFlush()
-  await eventFlush()
 })
 
 test('watch multiple next() on parallel - done', async function (t) {
