@@ -1,6 +1,6 @@
 # localdrive
 
-File system interoperable with Hyperdrive.
+File system API that is similar to Hyperdrive
 
 ```
 npm i localdrive
@@ -40,8 +40,6 @@ ws.write('new example')
 ws.end()
 ws.once('close', () => console.log('file saved'))
 ```
-
-Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
