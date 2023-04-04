@@ -6,7 +6,7 @@ const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
 const MirrorDrive = require('mirror-drive')
-const recursiveWatch = require('recursive-watch')
+const RecursiveWatch = require('recursive-watch')
 const safetyCatch = require('safety-catch')
 
 module.exports = class Localdrive {
@@ -289,7 +289,7 @@ class Watcher {
     this._resolveOnChange = null
     this._lostChange = false
 
-    this._unwatch = null
+    this._watcher = null
 
     this._closing = null
     this._opening = this._ready()
@@ -301,8 +301,8 @@ class Watcher {
   }
 
   async _ready () {
-    this._unwatch = recursiveWatch(this.range, this._onchange.bind(this))
-    await this._unwatch.ready()
+    this._watcher = new RecursiveWatch(this.range, this._onchange.bind(this))
+    await this._watcher.ready()
     this.opened = true
   }
 
@@ -375,7 +375,7 @@ class Watcher {
 
     this.drive._watchers.delete(this)
 
-    await this._unwatch()
+    if (this._watcher) await this._watcher.close()
 
     this._onchange() // Continue execution being closed
 
