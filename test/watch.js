@@ -12,14 +12,17 @@ test('basic watch', async function (t) {
 
   await watcher.ready()
 
+  let put = null
   eventFlush().then(async () => {
-    await drive.put('/a.txt', Buffer.from('hi'))
+    put = drive.put('/a.txt', Buffer.from('hi'))
   })
 
   for await (const diff of watcher) { // eslint-disable-line no-unreachable-loop
     t.alike(diff, {})
     break
   }
+
+  await put
 })
 
 test('basic watch next', async function (t) {
@@ -29,14 +32,17 @@ test('basic watch next', async function (t) {
   const watcher = drive.watch()
   t.teardown(() => watcher.destroy())
 
+  let put = null
   eventFlush().then(async () => {
-    await drive.put('/a.txt', Buffer.from('hi'))
+    put = drive.put('/a.txt', Buffer.from('hi'))
   })
 
   const { done, value } = await watcher.next()
 
   t.is(done, false)
   t.alike(value, {})
+
+  await put
 })
 
 test('watch multiple next() on parallel - value', async function (t) {
@@ -50,7 +56,7 @@ test('watch multiple next() on parallel - value', async function (t) {
   const b = watcher.next()
   const c = watcher.next()
 
-  drive.put('/a', Buffer.from('hi')) // Run on background
+  const put1 = drive.put('/a', Buffer.from('hi')) // Run on background
 
   {
     const { done, value } = await a
@@ -59,7 +65,7 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.alike(value, {})
   }
 
-  drive.put('/b', Buffer.from('hi')) // Run on background
+  const put2 = drive.put('/b', Buffer.from('hi')) // Run on background
 
   {
     const { done, value } = await b
@@ -68,7 +74,7 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.alike(value, {})
   }
 
-  drive.put('/c', Buffer.from('hi')) // Run on background
+  const put3 = drive.put('/c', Buffer.from('hi')) // Run on background
 
   {
     const { done, value } = await c
@@ -76,6 +82,10 @@ test('watch multiple next() on parallel - value', async function (t) {
     t.is(done, false)
     t.alike(value, {})
   }
+
+  await put1
+  await put2
+  await put3
 })
 
 test('watch multiple next() on parallel - done', async function (t) {
@@ -111,14 +121,17 @@ test('watch waits for new change', async function (t) {
   const watcher = drive.watch()
   t.teardown(() => watcher.destroy())
 
+  let put = null
   eventFlush().then(async () => {
-    await drive.put('/b', Buffer.from('hi')) // Run on background
+    put = drive.put('/b', Buffer.from('hi')) // Run on background
   })
 
   const { done, value } = await watcher.next()
 
   t.is(done, false)
   t.alike(value, {})
+
+  await put
 })
 
 test('watch does not lose changes if next() was not called yet', async function (t) {
