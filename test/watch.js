@@ -346,7 +346,7 @@ test('watcher iterator throwing an error', async function (t) {
   })
 
   try {
-    for await (const diff of watcher) { // eslint-disable-line no-unreachable-loop
+    for await (const diff of watcher) { // eslint-disable-line
       break
     }
     t.fail('should have failed')
