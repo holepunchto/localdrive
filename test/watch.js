@@ -320,6 +320,43 @@ test('closing drive should destroy watcher', async function (t) {
   t.ok(watcher.closed)
 })
 
+test('watcher ready throwing an error', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  const watcher = drive.watch('/this-does-not-exists')
+
+  try {
+    await watcher.ready()
+    t.fail('should have failed')
+  } catch (err) {
+    t.is(err.code, 'ENOENT')
+  }
+})
+
+test('watcher iterator throwing an error', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  const watcher = drive.watch('/this-does-not-exists')
+
+  let put = null
+  eventFlush().then(async () => {
+    put = drive.put('/a.txt', Buffer.from('hi'))
+  })
+
+  try {
+    for await (const diff of watcher) { // eslint-disable-line no-unreachable-loop
+      break
+    }
+    t.fail('should have failed')
+  } catch (err) {
+    t.is(err.code, 'ENOENT')
+  }
+
+  await put
+})
+
 test('create lots of watchers', async function (t) {
   t.plan(1)
 
