@@ -1,6 +1,6 @@
 # localdrive
 
-File system interoperable with Hyperdrive.
+File system API that is similar to Hyperdrive
 
 ```
 npm i localdrive
@@ -8,7 +8,7 @@ npm i localdrive
 
 ## Usage
 ```js
-import Localdrive from 'localdrive'
+const Localdrive = require('localdrive')
 
 const drive = new Localdrive('./my-project')
 
@@ -20,7 +20,7 @@ const buffer = await drive.get('/blob.txt')
 console.log(buffer) // => <Buffer ..> "example"
 
 const entry = await drive.entry('/blob.txt')
-console.log(entry) // => { executable, linkname, blob, metadata }
+console.log(entry) // => { key, value: { executable, linkname, blob, metadata } }
 
 await drive.del('/images/old-logo.png')
 
@@ -40,8 +40,6 @@ ws.write('new example')
 ws.end()
 ws.once('close', () => console.log('file saved'))
 ```
-
-Minimal API that is similar to `Hyperdrive`.
 
 ## API
 
@@ -90,7 +88,7 @@ It also returns null for symbolic links.
 Returns the entry at `key` path in the drive. It looks like this:
 ```js
 {
-  key: '/blob.txt',
+  key: String,
   value: {
     executable: Boolean,
     linkname: null,
