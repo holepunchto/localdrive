@@ -177,4 +177,4 @@ await drive.put('/file.txt', Buffer.from('a')) // Default metadata is null
 ```
 
 ## License
-MIT
+Apache-2.0
