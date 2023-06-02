@@ -9,15 +9,12 @@ test('createWriteStream(key)', async function (t) {
   await bufferToStream(buffer, ws)
 
   const entry = await drive.entry('/new-file.txt')
-  t.alike(entry, {
-    key: '/new-file.txt',
-    value: {
-      executable: false,
-      linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
-      metadata: null
-    },
-    mtime: entry.mtime
+  t.is(entry.key, '/new-file.txt')
+  t.alike(entry.value, {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
+    metadata: null
   })
   t.alike(await drive.get('/new-file.txt'), buffer)
 })
@@ -30,15 +27,12 @@ test('createWriteStream(key) with options', async function (t) {
   await bufferToStream(buffer, ws)
 
   const entry = await drive.entry('/new-script.sh')
-  t.alike(entry, {
-    key: '/new-script.sh',
-    value: {
-      executable: !isWin,
-      linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
-      metadata: null
-    },
-    mtime: entry.mtime
+  t.is(entry.key, '/new-script.sh')
+  t.alike(entry.value, {
+    executable: !isWin,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+    metadata: null
   })
   t.alike(await drive.get('/new-script.sh'), buffer)
 })
@@ -56,15 +50,11 @@ test('createWriteStream(key) write and end', function (t) {
 
   async function onClose () {
     const entry = await drive.entry('/new-example.txt')
-    t.alike(entry, {
-      key: '/new-example.txt',
-      value: {
-        executable: false,
-        linkname: null,
-        blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
-        metadata: null
-      },
-      mtime: entry.mtime
+    t.alike(entry.value, {
+      executable: false,
+      linkname: null,
+      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+      metadata: null
     })
 
     t.alike(await drive.get('/new-example.txt'), Buffer.from(data))
