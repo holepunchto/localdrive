@@ -14,5 +14,6 @@ test('compare(a, b) basic', async function (t) {
 
   t.is(drive.compare(a, b), -1)
   t.is(drive.compare(a, a), 0)
+  t.is(drive.compare(b, b), 0)
   t.is(drive.compare(b, a), 1)
 })
