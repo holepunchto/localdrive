@@ -9,16 +9,19 @@ test('symlink(key, linkname) basic', async function (t) {
   t.absent(await drive.entry('/README.shortcut'))
 
   await drive.symlink('/README.shortcut', '/README.md')
+  const entry = await drive.entry('/README.shortcut')
 
-  t.alike(await drive.entry('/README.shortcut'), {
+  t.alike(entry, {
     key: '/README.shortcut',
     value: {
       executable: false,
       linkname: '/README.md',
       blob: null,
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
+  t.is(typeof entry.mtime, 'number')
 })
 
 test('symlink(key, linkname) absolute inside a folder', async function (t) {
@@ -27,15 +30,17 @@ test('symlink(key, linkname) absolute inside a folder', async function (t) {
   t.absent(await drive.entry('/examples/README.shortcut'))
 
   await drive.symlink('/examples/README.shortcut', '/examples/more/c.txt')
+  const entry = await drive.entry('/examples/README.shortcut')
 
-  t.alike(await drive.entry('/examples/README.shortcut'), {
+  t.alike(entry, {
     key: '/examples/README.shortcut',
     value: {
       executable: false,
       linkname: '/examples/more/c.txt',
       blob: null,
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
 })
 
@@ -45,15 +50,17 @@ test('symlink(key, linkname) relative inside a folder', async function (t) {
   t.absent(await drive.entry('/examples/README.shortcut'))
 
   await drive.symlink('/examples/README.shortcut', 'more/c.txt')
+  const entry = await drive.entry('/examples/README.shortcut')
 
-  t.alike(await drive.entry('/examples/README.shortcut'), {
+  t.alike(entry, {
     key: '/examples/README.shortcut',
     value: {
       executable: false,
       linkname: 'more/c.txt',
       blob: null,
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
 })
 
@@ -61,27 +68,33 @@ test('symlink(key, linkname) replace', async function (t) {
   const drive = createDrive(t)
 
   t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
-  t.alike(await drive.entry('/LICENSE'), {
+  const entry = await drive.entry('/LICENSE')
+
+  t.alike(entry, {
     key: '/LICENSE',
     value: {
       executable: false,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
 
   await drive.symlink('/LICENSE', '/LICENSE-V2')
 
   t.absent(await drive.get('/LICENSE'))
-  t.alike(await drive.entry('/LICENSE'), {
+  const entry2 = await drive.entry('/LICENSE')
+
+  t.alike(entry2, {
     key: '/LICENSE',
     value: {
       executable: false,
       linkname: '/LICENSE-V2',
       blob: null,
       metadata: null
-    }
+    },
+    mtime: entry2.mtime
   })
 })
 

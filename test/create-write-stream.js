@@ -8,14 +8,16 @@ test('createWriteStream(key)', async function (t) {
   const ws = drive.createWriteStream('/new-file.txt')
   await bufferToStream(buffer, ws)
 
-  t.alike(await drive.entry('/new-file.txt'), {
+  const entry = await drive.entry('/new-file.txt')
+  t.alike(entry, {
     key: '/new-file.txt',
     value: {
       executable: false,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
   t.alike(await drive.get('/new-file.txt'), buffer)
 })
@@ -27,14 +29,16 @@ test('createWriteStream(key) with options', async function (t) {
   const ws = drive.createWriteStream('/new-script.sh', { executable: true })
   await bufferToStream(buffer, ws)
 
-  t.alike(await drive.entry('/new-script.sh'), {
+  const entry = await drive.entry('/new-script.sh')
+  t.alike(entry, {
     key: '/new-script.sh',
     value: {
       executable: !isWin,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
   t.alike(await drive.get('/new-script.sh'), buffer)
 })
@@ -51,14 +55,16 @@ test('createWriteStream(key) write and end', function (t) {
   ws.end()
 
   async function onClose () {
-    t.alike(await drive.entry('/new-example.txt'), {
+    const entry = await drive.entry('/new-example.txt')
+    t.alike(entry, {
       key: '/new-example.txt',
       value: {
         executable: false,
         linkname: null,
         blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
         metadata: null
-      }
+      },
+      mtime: entry.mtime
     })
 
     t.alike(await drive.get('/new-example.txt'), Buffer.from(data))

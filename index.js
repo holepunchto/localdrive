@@ -55,7 +55,8 @@ module.exports = class Localdrive {
         linkname: null,
         blob: null,
         metadata: null
-      }
+      },
+      mtime: st.mtimeMs
     }
 
     if (st.isSymbolicLink()) {
@@ -142,6 +143,10 @@ module.exports = class Localdrive {
     } finally {
       release()
     }
+  }
+
+  compare (a, b) {
+    return a.mtime - b.mtime
   }
 
   async * list (folder) {
