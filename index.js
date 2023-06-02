@@ -146,7 +146,8 @@ module.exports = class Localdrive {
   }
 
   compare (a, b) {
-    return a.mtime - b.mtime
+    const diff = a.mtime - b.mtime
+    return diff > 0 ? 1 : (diff < 0 ? -1 : 0)
   }
 
   async * list (folder) {

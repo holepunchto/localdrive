@@ -115,7 +115,7 @@ If a blob entry currently exists at `key` path then it will get overwritten and 
 
 #### `const comparison = drive.compare(entryA, entryB)`
 
-Returns the `mtime` difference between both entries.
+Returns `0` if entries are the same, `1` if `entryA` is older, and `-1` if `entryB` is older.
 
 #### `const iterator = drive.list([folder])`
 
