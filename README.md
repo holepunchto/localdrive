@@ -99,7 +99,8 @@ Returns the entry at `key` path in the drive. It looks like this:
       byteLength: Number
     },
     metadata: null
-  }
+  },
+  mtime: Number
 }
 ```
 
