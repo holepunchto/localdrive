@@ -13,15 +13,19 @@ test('put(key, buffer) basic', async function (t) {
   await drive.put(key, buffer)
 
   t.alike(await drive.get(key), buffer)
-  t.alike(await drive.entry(key), {
+  const entry = await drive.entry(key)
+
+  t.alike(entry, {
     key: '/new-thing.txt',
     value: {
       executable: false,
       linkname: null,
       blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 9 },
       metadata: null
-    }
+    },
+    mtime: entry.mtime
   })
+  t.is(typeof entry.mtime, 'number')
 })
 
 test('put(key, buffer) replace', async function (t) {

@@ -99,7 +99,8 @@ Returns the entry at `key` path in the drive. It looks like this:
       byteLength: Number
     },
     metadata: null
-  }
+  },
+  mtime: Number
 }
 ```
 
@@ -112,6 +113,10 @@ Deletes the file at `key` path from the drive.
 Creates an entry in drive at `key` path that points to the entry at `linkname`.
 
 If a blob entry currently exists at `key` path then it will get overwritten and `drive.get(key)` will return null, while `drive.entry(key)` will return the entry with symlink information.
+
+#### `const comparison = drive.compare(entryA, entryB)`
+
+Returns `0` if entries are the same, `1` if `entryA` is older, and `-1` if `entryB` is older.
 
 #### `const iterator = drive.list([folder])`
 
