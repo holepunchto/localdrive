@@ -83,7 +83,7 @@ Returns the blob at `key` path in the drive. If no blob exists, returns null.
 
 It also returns null for symbolic links.
 
-#### `const entry = await drive.entry(key)`
+#### `const entry = await drive.entry(key, [options])`
 
 Returns the entry at `key` path in the drive. It looks like this:
 ```js
@@ -101,6 +101,13 @@ Returns the entry at `key` path in the drive. It looks like this:
     metadata: null
   },
   mtime: Number
+}
+```
+
+Available `options`:
+```js
+{
+  follow: false // Follow symlinks, 16 max or throws an error
 }
 ```
 

@@ -38,7 +38,20 @@ module.exports = class Localdrive {
     return keyResolve(this.root, key).filename
   }
 
-  async entry (key) {
+  async entry (name, opts) {
+    if (!opts || !opts.follow) return this._entry(name, opts)
+
+    for (let i = 0; i < 16; i++) {
+      const node = await this._entry(name, opts)
+      if (!node || !node.value.linkname) return node
+
+      name = unixPathResolve(node.key, node.value.linkname)
+    }
+
+    throw new Error('Recursive symlink')
+  }
+
+  async _entry (key) {
     if (typeof key === 'object') key = key.key
 
     const { keyname, filename } = keyResolve(this.root, key)
