@@ -129,3 +129,69 @@ test('entry(key) resolve key path', async function (t) {
   t.alike((await drive.entry('/examples/more/../a.txt')).key, '/examples/a.txt')
   t.alike((await drive.entry('\\examples\\more\\c.txt')).key, '/examples/more/c.txt')
 })
+
+test('basic follow entry', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.put('/file.txt', 'hi')
+  await drive.symlink('/file.shortcut', '/file.txt')
+
+  t.is((await drive.entry('/file.shortcut')).value.linkname, '/file.txt')
+
+  const entry = await drive.entry('/file.shortcut', { follow: true })
+  t.is(entry.key, '/file.txt')
+  t.alike(entry.value, {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 2 },
+    metadata: null
+  })
+})
+
+test('multiple follow entry', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.put('/file.txt', 'hi')
+  await drive.symlink('/file.shortcut', '/file.txt')
+  await drive.symlink('/file.shortcut.shortcut', '/file.shortcut')
+
+  t.is((await drive.entry('/file.shortcut.shortcut')).value.linkname, '/file.shortcut')
+
+  const entry = await drive.entry('/file.shortcut.shortcut', { follow: true })
+  t.is(entry.key, '/file.txt')
+  t.alike(entry.value, {
+    executable: false,
+    linkname: null,
+    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 2 },
+    metadata: null
+  })
+})
+
+test('max follow entry', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.put('/file.0.txt', 'hi')
+
+  for (let i = 1; i <= 17; i++) {
+    await drive.symlink('/file.' + i + '.txt', '/file.' + (i - 1) + '.txt')
+  }
+
+  t.is((await drive.entry('/file.0.txt')).value.linkname, null)
+  t.is((await drive.entry('/file.1.txt')).value.linkname, '/file.0.txt')
+  t.is((await drive.entry('/file.16.txt')).value.linkname, '/file.15.txt')
+
+  try {
+    await drive.entry('/file.16.txt', { follow: true })
+    t.fail('Should have failed')
+  } catch {
+    t.pass()
+  }
+})
+
+test('non-existing follow entry', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.put('/file.txt', 'hi')
+
+  t.is(await drive.entry('/file.random.shortcut', { follow: true }), null)
+})
