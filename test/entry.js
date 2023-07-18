@@ -10,7 +10,7 @@ test('entry(key) basic', async function (t) {
     value: {
       executable: false,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 9 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 9 },
       metadata: null
     },
     mtime: entry.mtime
@@ -34,7 +34,7 @@ test('entry(key) executable', { skip: isWin }, async function (t) {
     value: {
       executable: true,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 11 },
       metadata: null
     },
     mtime: entry.mtime
@@ -68,7 +68,7 @@ test('entry(key) follow links', { skip: isWin }, async function (t) {
     value: {
       executable: false,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 3 },
       metadata: null
     },
     mtime: entry.mtime
@@ -91,7 +91,7 @@ test('entry(key) file inside a folder', async function (t) {
     value: {
       executable: false,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 3 },
       metadata: null
     },
     mtime: entry.mtime
@@ -107,7 +107,7 @@ test('entry(key) permission denied', async function (t) {
     value: {
       executable: false,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 4 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 4 },
       metadata: null
     },
     mtime: entry.mtime
@@ -143,7 +143,7 @@ test('basic follow entry', async function (t) {
   t.alike(entry.value, {
     executable: false,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 2 },
+    blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 2 },
     metadata: null
   })
 })
@@ -162,7 +162,7 @@ test('multiple follow entry', async function (t) {
   t.alike(entry.value, {
     executable: false,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 2 },
+    blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 2 },
     metadata: null
   })
 })

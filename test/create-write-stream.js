@@ -13,7 +13,7 @@ test('createWriteStream(key)', async function (t) {
   t.alike(entry.value, {
     executable: false,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 7 },
+    blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 7 },
     metadata: null
   })
   t.alike(await drive.get('/new-file.txt'), buffer)
@@ -31,7 +31,7 @@ test('createWriteStream(key) with options', async function (t) {
   t.alike(entry.value, {
     executable: !isWin,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+    blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 11 },
     metadata: null
   })
   t.alike(await drive.get('/new-script.sh'), buffer)
@@ -53,7 +53,7 @@ test('createWriteStream(key) write and end', function (t) {
     t.alike(entry.value, {
       executable: false,
       linkname: null,
-      blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 11 },
+      blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 11 },
       metadata: null
     })
 

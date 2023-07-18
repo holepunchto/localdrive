@@ -68,7 +68,7 @@ test('symlink(key, linkname) replace', async function (t) {
   t.alike(entry.value, {
     executable: false,
     linkname: null,
-    blob: { blockOffset: 0, blockLength: 8, byteOffset: 0, byteLength: 3 },
+    blob: { byteOffset: 0, blockOffset: 0, blockLength: 8, byteLength: 3 },
     metadata: null
   })
 
