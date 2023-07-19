@@ -25,6 +25,10 @@ class FileWriteStream extends Writable {
     this._openp().then(cb, cb)
   }
 
+  _final (cb) {
+    this._finalp().then(cb, cb)
+  }
+
   _destroy (cb) {
     this._destroyp().then(cb, cb)
   }
@@ -54,10 +58,6 @@ class FileWriteStream extends Writable {
   async _destroyp (cb) {
     if (this.fd) await closeFilePromise(this.fd)
     if (this.atomic && !this._renamed && this._cleanup) await this._cleanupAtomicFile()
-  }
-
-  _final (cb) {
-    this._finalp().then(cb, cb)
   }
 
   async _finalp () {
