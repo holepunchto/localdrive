@@ -3,11 +3,21 @@ const fs = require('fs')
 const path = require('path')
 const { createDrive } = require('./helpers/index.js')
 
-test('double atomic put', async function (t) {
+test('sequential put with atomic enabled', async function (t) {
   const drive = createDrive(t, { atomic: true })
 
   await drive.put('/new-file.txt', Buffer.from('hello world'))
   await drive.put('/new-file.txt', Buffer.from('hello'))
+
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('hello'))
+})
+
+test('parallel put with atomic enabled', async function (t) {
+  const drive = createDrive(t, { atomic: true })
+
+  const put1 = drive.put('/new-file.txt', Buffer.from('hello world'))
+  const put2 = drive.put('/new-file.txt', Buffer.from('hello'))
+  await Promise.all([put1, put2])
 
   t.alike(await drive.get('/new-file.txt'), Buffer.from('hello'))
 })

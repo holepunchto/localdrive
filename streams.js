@@ -70,7 +70,11 @@ class FileWriteStream extends Writable {
     await closeFilePromise(fd)
 
     if (this.atomic) {
-      await renameFilePromise(this.atomicFilename, this.filename)
+      try {
+        await renameFilePromise(this.atomicFilename, this.filename)
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err
+      }
       this._shouldCleanup = false
     }
   }
