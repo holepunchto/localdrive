@@ -9,15 +9,21 @@ class FileWriteStream extends Writable {
     super({ map })
 
     this.filename = filename
+    this.atomicFilename = opts.atomic ? this.filename + '.localdrive.tmp' : this.filename
     this.key = key
     this.drive = drive
     this.executable = !!opts.executable
     this.metadata = opts.metadata || null
+    this.atomic = opts.atomic
     this.fd = 0
   }
 
   _open (cb) {
     this._openp().then(cb, cb)
+  }
+
+  _destroy (cb) {
+    this._destroyp().then(cb, cb)
   }
 
   async _openp () {
@@ -28,7 +34,7 @@ class FileWriteStream extends Writable {
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
-      fd = await openFilePromise(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+      fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
     } finally {
       release()
     }
@@ -40,6 +46,7 @@ class FileWriteStream extends Writable {
       }
     } catch (err) {
       await closeFilePromise(fd)
+      await this._cleanupAtomicFile()
       throw err
     }
 
@@ -50,9 +57,19 @@ class FileWriteStream extends Writable {
     fs.writev(this.fd, datas, cb)
   }
 
-  _destroy (cb) {
-    if (!this.fd) return cb(null)
-    fs.close(this.fd, () => cb(null))
+  async _destroyp (cb) {
+    if (!this.fd) return
+
+    try {
+      await closeFilePromise(this.fd)
+
+      if (this.atomic) {
+        await renameFilePromise(this.atomicFilename, this.filename)
+      }
+    } catch (err) {
+      await this._cleanupAtomicFile()
+      throw err
+    }
   }
 
   _final (cb) {
@@ -64,6 +81,11 @@ class FileWriteStream extends Writable {
     if (this.metadata === null) {
       if (del) await del(this.key)
     } else if (put) await put(this.key, this.metadata)
+  }
+
+  async _cleanupAtomicFile () {
+    if (!this.atomic) return
+    await fsp.unlink(this.atomicFilename)
   }
 }
 
@@ -179,6 +201,15 @@ function closeFilePromise (fd) {
   return new Promise((resolve, reject) => {
     fs.close(fd, function (error) {
       if (error) reject(error)
+      else resolve()
+    })
+  })
+}
+
+function renameFilePromise (oldPath, newPath) {
+  return new Promise((resolve, reject) => {
+    fs.rename(oldPath, newPath, function (err) {
+      if (err) reject(err)
       else resolve()
     })
   })

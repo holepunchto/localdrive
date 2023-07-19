@@ -15,6 +15,7 @@ module.exports = class Localdrive {
 
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
+    this._atomic = !!opts.atomic
   }
 
   async ready () { /* No-op, compatibility */ }
@@ -220,7 +221,7 @@ module.exports = class Localdrive {
 
   createWriteStream (key, opts) {
     const { keyname, filename } = keyResolve(this.root, key)
-    return new FileWriteStream(filename, keyname, this, opts)
+    return new FileWriteStream(filename, keyname, this, { atomic: this._atomic, ...opts })
   }
 }
 

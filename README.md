@@ -50,18 +50,17 @@ Creates a drive based on a `root` directory. `root` can be relative or absolute.
 Available `options`:
 ```js
 {
-  followLinks: false,
-  metadata: {
+  followLinks: false, // If enabled then `entry(key)` will follow the `linkname`
+  metadata: { // Hook functions are called accordingly
     get (key) {},
     put (key) {},
     del (key) {}
-  }
+  },
+  atomic: false // Enable atomicity for file writing (tmp file and rename)
 }
 ```
 
-`followLinks` does `entry(key)` to follow the `linkname`.
-
-`metadata` hook functions are called accordingly. `del()` could be called with non-existing metadata keys.
+The metadata hook `del()` could be called with non-existing metadata keys.
 
 #### `drive.root`
 
