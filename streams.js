@@ -17,6 +17,7 @@ class FileWriteStream extends Writable {
     this.atomic = opts.atomic
     this.fd = 0
 
+    this._cleanup = false
     this._renamed = false
   }
 
@@ -29,30 +30,21 @@ class FileWriteStream extends Writable {
   }
 
   async _openp () {
-    let fd = 0
-
     const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
-      fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+      this.fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+      this._cleanup = true
     } finally {
       release()
     }
 
-    try {
-      const st = await fstatPromise(fd)
-      if (this.executable !== !!(st.mode & fs.constants.S_IXUSR)) {
-        await fchmodPromise(fd, mode)
-      }
-    } catch (err) {
-      await closeFilePromise(fd)
-      if (this.atomic) await this._cleanupAtomicFile()
-      throw err
+    const st = await fstatPromise(this.fd)
+    if (this.executable !== !!(st.mode & fs.constants.S_IXUSR)) {
+      await fchmodPromise(this.fd, mode)
     }
-
-    this.fd = fd
   }
 
   _writev (datas, cb) {
@@ -61,7 +53,7 @@ class FileWriteStream extends Writable {
 
   async _destroyp (cb) {
     if (this.fd) await closeFilePromise(this.fd)
-    if (this.atomic && !this._renamed) await this._cleanupAtomicFile()
+    if (this.atomic && !this._renamed && this._cleanup) await this._cleanupAtomicFile()
   }
 
   _final (cb) {
