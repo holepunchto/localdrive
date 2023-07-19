@@ -17,7 +17,7 @@ class FileWriteStream extends Writable {
     this.atomic = opts.atomic
     this.fd = 0
 
-    this._ended = false
+    this._renamed = false
   }
 
   _open (cb) {
@@ -60,25 +60,8 @@ class FileWriteStream extends Writable {
   }
 
   async _destroyp (cb) {
-    if (!this.fd) return
-
-    let error = null
-
-    try {
-      await closeFilePromise(this.fd)
-
-      if (this.atomic && this._ended) {
-        await renameFilePromise(this.atomicFilename, this.filename)
-      }
-    } catch (err) {
-      error = err
-    }
-
-    // TODO: this assumes that if there is an error at closing the fd or renaming then that should leave the atomic file hanging that now we delete
-    if (this.atomic && (error || !this._ended)) {
-      await this._cleanupAtomicFile()
-      if (error) throw error
-    }
+    if (this.fd) await closeFilePromise(this.fd)
+    if (this.atomic && !this._renamed) await this._cleanupAtomicFile()
   }
 
   _final (cb) {
@@ -86,12 +69,19 @@ class FileWriteStream extends Writable {
   }
 
   async _finalp () {
-    this._ended = true
-
     const { del, put } = this.drive.metadata
     if (this.metadata === null) {
       if (del) await del(this.key)
     } else if (put) await put(this.key, this.metadata)
+
+    const fd = this.fd
+    this.fd = 0
+    await closeFilePromise(fd)
+
+    if (this.atomic) {
+      await renameFilePromise(this.atomicFilename, this.filename)
+      this._renamed = true
+    }
   }
 
   async _cleanupAtomicFile () {
