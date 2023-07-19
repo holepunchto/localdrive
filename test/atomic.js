@@ -3,6 +3,15 @@ const fs = require('fs')
 const path = require('path')
 const { createDrive } = require('./helpers/index.js')
 
+test('double atomic put', async function (t) {
+  const drive = createDrive(t, { atomic: true })
+
+  await drive.put('/new-file.txt', Buffer.from('hello world'))
+  await drive.put('/new-file.txt', Buffer.from('hello'))
+
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('hello'))
+})
+
 test('atomic disabled', async function (t) {
   const drive = createDrive(t, { atomic: false })
 
