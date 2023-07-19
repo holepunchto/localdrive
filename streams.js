@@ -18,7 +18,6 @@ class FileWriteStream extends Writable {
     this.fd = 0
 
     this._cleanup = false
-    this._renamed = false
   }
 
   _open (cb) {
@@ -57,7 +56,7 @@ class FileWriteStream extends Writable {
 
   async _destroyp (cb) {
     if (this.fd) await closeFilePromise(this.fd)
-    if (this.atomic && !this._renamed && this._cleanup) await this._cleanupAtomicFile()
+    if (this.atomic && this._cleanup) await this._cleanupAtomicFile()
   }
 
   async _finalp () {
@@ -72,7 +71,7 @@ class FileWriteStream extends Writable {
 
     if (this.atomic) {
       await renameFilePromise(this.atomicFilename, this.filename)
-      this._renamed = true
+      this._cleanup = false
     }
   }
 
