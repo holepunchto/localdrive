@@ -39,10 +39,10 @@ module.exports = class Localdrive {
   }
 
   async entry (name, opts) {
-    if (!opts || !opts.follow) return this._entry(name, opts)
+    if (!opts || !opts.follow) return this._entry(name)
 
     for (let i = 0; i < 16; i++) {
-      const node = await this._entry(name, opts)
+      const node = await this._entry(name)
       if (!node || !node.value.linkname) return node
 
       name = unixPathResolve(node.key, node.value.linkname)
