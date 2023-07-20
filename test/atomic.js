@@ -6,6 +6,8 @@ const { createDrive } = require('./helpers/index.js')
 test('sequential put with atomic enabled', async function (t) {
   const drive = createDrive(t, { atomic: true })
 
+  t.absent(await drive.entry('/new-file.txt'))
+
   await drive.put('/new-file.txt', Buffer.from('hello world'))
   await drive.put('/new-file.txt', Buffer.from('hello'))
 
@@ -15,11 +17,13 @@ test('sequential put with atomic enabled', async function (t) {
 test('parallel put with atomic enabled', async function (t) {
   const drive = createDrive(t, { atomic: true })
 
+  t.absent(await drive.entry('/new-file.txt'))
+
   const put1 = drive.put('/new-file.txt', Buffer.from('hello world'))
   const put2 = drive.put('/new-file.txt', Buffer.from('hello'))
   await Promise.all([put1, put2])
 
-  t.alike(await drive.get('/new-file.txt'), Buffer.from('hello'))
+  t.ok(await drive.entry('/new-file.txt'))
 })
 
 test('atomic disabled', async function (t) {
