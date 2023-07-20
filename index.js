@@ -84,7 +84,7 @@ module.exports = class Localdrive {
 
     if (st.isFile()) {
       const blockLength = st.blocks || Math.ceil(st.size / st.blksize) * 8
-      entry.value.blob = { blockOffset: 0, blockLength, byteOffset: 0, byteLength: st.size }
+      entry.value.blob = { byteOffset: 0, blockOffset: 0, blockLength, byteLength: st.size }
       return entry
     }
 

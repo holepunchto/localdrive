@@ -36,9 +36,9 @@ test('list(folder) entries', async function (t) {
     }
 
     if (value.blob) {
+      t.is(typeof value.blob.byteOffset, 'number')
       t.is(typeof value.blob.blockOffset, 'number')
       t.is(typeof value.blob.blockLength, 'number')
-      t.is(typeof value.blob.byteOffset, 'number')
       t.is(typeof value.blob.byteLength, 'number')
     }
   }

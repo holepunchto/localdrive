@@ -93,9 +93,9 @@ Returns the entry at `key` path in the drive. It looks like this:
     executable: Boolean,
     linkname: null,
     blob: {
+      byteOffset: Number,
       blockOffset: Number,
       blockLength: Number,
-      byteOffset: Number,
       byteLength: Number
     },
     metadata: null
