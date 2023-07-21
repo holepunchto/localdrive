@@ -95,6 +95,42 @@ test('atomic enabled but stream is destroyed', async function (t) {
   t.alike(await drive.get('/new-file.txt'), long)
 })
 
+test('multiple atomic write stream', async function (t) {
+  const drive = createDrive(t, { atomic: true })
+
+  await drive.put('/new-file.txt', Buffer.from('hello world'))
+
+  const ws1 = drive.createWriteStream('/new-file.txt')
+  const ws2 = drive.createWriteStream('/new-file.txt')
+  const ws3 = drive.createWriteStream('/new-file.txt')
+
+  ws1.write(Buffer.from('1'))
+  ws2.write(Buffer.from('2'))
+  ws3.write(Buffer.from('3'))
+
+  await new Promise(resolve => setTimeout(resolve, 500))
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('hello world'))
+
+  ws2.end()
+  await new Promise(resolve => ws2.once('close', resolve))
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('2'))
+
+  const ws4 = drive.createWriteStream('/new-file.txt')
+  ws4.write(Buffer.from('4'))
+  await new Promise(resolve => setTimeout(resolve, 500))
+  ws4.end()
+  await new Promise(resolve => ws4.once('close', resolve))
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('4'))
+
+  ws1.end()
+  await new Promise(resolve => ws1.once('close', resolve))
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('1'))
+
+  ws3.end()
+  await new Promise(resolve => ws3.once('close', resolve))
+  t.alike(await drive.get('/new-file.txt'), Buffer.from('3'))
+})
+
 async function fileExists (filename) {
   try {
     await fs.promises.stat(filename)
