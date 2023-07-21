@@ -224,6 +224,18 @@ module.exports = class Localdrive {
     const { keyname, filename } = keyResolve(this.root, key)
     return new FileWriteStream(filename, keyname, this, { atomic: this._atomic, ...opts })
   }
+
+  _alloc (filename) {
+    let c = 0
+    while (this._atomics.has(filename + '.' + c + '.localdrive.tmp')) c++
+    filename += '.' + c + '.localdrive.tmp'
+    this._atomics.add(filename)
+    return filename
+  }
+
+  _free (atomicFilename) {
+    this._atomics.delete(atomicFilename)
+  }
 }
 
 function handleMetadataHooks (metadata) {
