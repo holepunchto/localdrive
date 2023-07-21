@@ -9,14 +9,12 @@ class FileWriteStream extends Writable {
     super({ map })
 
     this.filename = filename
+    this.atomicFilename = this.filename
     this.key = key
     this.drive = drive
     this.executable = !!opts.executable
     this.metadata = opts.metadata || null
     this.fd = 0
-
-    this.atomic = opts.atomic
-    this.atomicFilename = this.filename
   }
 
   _open (cb) {
@@ -32,7 +30,7 @@ class FileWriteStream extends Writable {
   }
 
   async _openp () {
-    if (this.atomic) this.atomicFilename = this.drive._alloc(this.filename)
+    if (this.drive._atomics) this.atomicFilename = this.drive._alloc(this.filename)
 
     const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
@@ -64,16 +62,19 @@ class FileWriteStream extends Writable {
   }
 
   async _finalp () {
-    const { del, put } = this.drive.metadata
     if (this.metadata === null) {
-      if (del) await del(this.key)
-    } else if (put) await put(this.key, this.metadata)
+      if (this.drive.metadata.del) {
+        await this.drive.metadata.del(this.key)
+      }
+    } else if (this.drive.metadata.put) {
+      await this.drive.metadata.put(this.key, this.metadata)
+    }
 
     const fd = this.fd
     this.fd = 0
     await closeFilePromise(fd)
 
-    if (this.atomic) {
+    if (this.drive._atomics) {
       await renameFilePromise(this.atomicFilename, this.filename)
       this._free()
     }
