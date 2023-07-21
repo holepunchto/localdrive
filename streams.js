@@ -14,49 +14,53 @@ class FileWriteStream extends Writable {
     this.executable = !!opts.executable
     this.metadata = opts.metadata || null
     this.fd = 0
+
+    this.atomic = opts.atomic
+    this.atomicFilename = this.filename
   }
 
   _open (cb) {
     this._openp().then(cb, cb)
   }
 
+  _final (cb) {
+    this._finalp().then(cb, cb)
+  }
+
+  _destroy (cb) {
+    this._destroyp().then(cb, cb)
+  }
+
   async _openp () {
-    let fd = 0
+    if (this.atomic) this.atomicFilename = this.drive._alloc(this.filename)
 
     const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
-      fd = await openFilePromise(this.filename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+      this.fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
     } finally {
       release()
     }
 
-    try {
-      const st = await fstatPromise(fd)
-      if (this.executable !== !!(st.mode & fs.constants.S_IXUSR)) {
-        await fchmodPromise(fd, mode)
-      }
-    } catch (err) {
-      await closeFilePromise(fd)
-      throw err
+    const st = await fstatPromise(this.fd)
+    if (this.executable !== !!(st.mode & fs.constants.S_IXUSR)) {
+      await fchmodPromise(this.fd, mode)
     }
-
-    this.fd = fd
   }
 
   _writev (datas, cb) {
     fs.writev(this.fd, datas, cb)
   }
 
-  _destroy (cb) {
-    if (!this.fd) return cb(null)
-    fs.close(this.fd, () => cb(null))
-  }
+  async _destroyp (cb) {
+    if (this.fd) await closeFilePromise(this.fd)
 
-  _final (cb) {
-    this._finalp().then(cb, cb)
+    if (this.atomicFilename !== this.filename) {
+      await unlinkSafe(this.atomicFilename)
+      this._free()
+    }
   }
 
   async _finalp () {
@@ -64,6 +68,21 @@ class FileWriteStream extends Writable {
     if (this.metadata === null) {
       if (del) await del(this.key)
     } else if (put) await put(this.key, this.metadata)
+
+    const fd = this.fd
+    this.fd = 0
+    await closeFilePromise(fd)
+
+    if (this.atomic) {
+      await renameFilePromise(this.atomicFilename, this.filename)
+      this._free()
+    }
+  }
+
+  _free () {
+    if (this.atomicFilename === this.filename) return
+    this.drive._free(this.atomicFilename)
+    this.atomicFilename = this.filename
   }
 }
 
@@ -182,4 +201,21 @@ function closeFilePromise (fd) {
       else resolve()
     })
   })
+}
+
+function renameFilePromise (oldPath, newPath) {
+  return new Promise((resolve, reject) => {
+    fs.rename(oldPath, newPath, function (err) {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
+}
+
+async function unlinkSafe (filename) {
+  try {
+    await fsp.unlink(filename)
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
 }
