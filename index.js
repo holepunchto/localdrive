@@ -225,6 +225,7 @@ module.exports = class Localdrive {
   }
 
   _alloc (filename) {
+    if (!this._atomics) return filename
     let c = 0
     while (this._atomics.has(filename + '.' + c + '.localdrive.tmp')) c++
     filename += '.' + c + '.localdrive.tmp'

@@ -30,7 +30,7 @@ class FileWriteStream extends Writable {
   }
 
   async _openp () {
-    if (this.drive._atomics) this.atomicFilename = this.drive._alloc(this.filename)
+    this.atomicFilename = this.drive._alloc(this.filename)
 
     const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
@@ -74,7 +74,7 @@ class FileWriteStream extends Writable {
     this.fd = 0
     await closeFilePromise(fd)
 
-    if (this.drive._atomics) {
+    if (this.atomicFilename !== this.filename) {
       await renameFilePromise(this.atomicFilename, this.filename)
       this._free()
     }
