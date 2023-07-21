@@ -35,7 +35,7 @@ class FileWriteStream extends Writable {
   }
 
   async _openp () {
-    this._atomicIncrement()
+    if (this.atomic) this.atomicFilename = this._alloc(this.filename)
 
     const release = await this.drive._lock()
     const mode = this.executable ? 0o744 : 0o644
@@ -62,7 +62,7 @@ class FileWriteStream extends Writable {
     if (this.fd) await closeFilePromise(this.fd)
     if (this.atomic && this._shouldCleanup) await this._cleanupAtomicFile()
 
-    this._atomicDecrement()
+    if (this.atomic) this._free(this.atomicFilename)
   }
 
   async _finalp () {
@@ -85,21 +85,16 @@ class FileWriteStream extends Writable {
     await fsp.unlink(this.atomicFilename)
   }
 
-  _atomicIncrement () {
-    if (!this.atomic) return
-
-    const counter = this._atomics.get(this.filename) || 0
-    this._atomics.set(this.filename, counter + 1)
-
-    this.atomicFilename += '.localdrive.' + counter + '.tmp'
+  _alloc (filename) {
+    let c = 0
+    while (this._atomics.has(filename + '.' + c + '.localdrive.tmp')) c++
+    filename += '.' + c + '.localdrive.tmp'
+    this._atomics.add(filename)
+    return filename
   }
 
-  _atomicDecrement () {
-    if (!this.atomic) return
-
-    const counter = this._atomics.get(this.filename) || 0
-    if (counter > 1) this._atomics.set(this.filename, counter - 1)
-    else this._atomics.delete(this.filename)
+  _free (atomicFilename) {
+    this._atomics.delete(atomicFilename)
   }
 }
 
