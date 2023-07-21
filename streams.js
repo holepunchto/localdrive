@@ -59,7 +59,7 @@ class FileWriteStream extends Writable {
 
     if (this.atomicFilename !== this.filename) {
       await unlinkSafe(this.atomicFilename)
-      this.drive._free(this.atomicFilename)
+      this._free()
     }
   }
 
@@ -75,9 +75,14 @@ class FileWriteStream extends Writable {
 
     if (this.atomic) {
       await renameFilePromise(this.atomicFilename, this.filename)
-      this.drive._free(this.atomicFilename)
-      this.atomicFilename = this.filename
+      this._free()
     }
+  }
+
+  _free () {
+    if (this.atomicFilename === this.filename) return
+    this.drive._free(this.atomicFilename)
+    this.atomicFilename = this.filename
   }
 }
 
