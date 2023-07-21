@@ -15,8 +15,7 @@ module.exports = class Localdrive {
 
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
-    this._atomics = new Set()
-    this._atomic = !!opts.atomic
+    this._atomics = opts.atomic ? new Set() : null
   }
 
   async ready () { /* No-op, compatibility */ }
@@ -222,10 +221,11 @@ module.exports = class Localdrive {
 
   createWriteStream (key, opts) {
     const { keyname, filename } = keyResolve(this.root, key)
-    return new FileWriteStream(filename, keyname, this, { atomic: this._atomic, ...opts })
+    return new FileWriteStream(filename, keyname, this, opts)
   }
 
   _alloc (filename) {
+    if (!this._atomics) return filename
     let c = 0
     while (this._atomics.has(filename + '.' + c + '.localdrive.tmp')) c++
     filename += '.' + c + '.localdrive.tmp'
