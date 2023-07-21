@@ -58,7 +58,7 @@ class FileWriteStream extends Writable {
     if (this.fd) await closeFilePromise(this.fd)
 
     if (this.atomicFilename !== this.filename) {
-      await this._cleanupAtomicFile()
+      await unlinkSafe(this.atomicFilename)
       this.drive._free(this.atomicFilename)
     }
   }
@@ -77,14 +77,6 @@ class FileWriteStream extends Writable {
       await renameFilePromise(this.atomicFilename, this.filename)
       this.drive._free(this.atomicFilename)
       this.atomicFilename = this.filename
-    }
-  }
-
-  async _cleanupAtomicFile () {
-    try {
-      await fsp.unlink(this.atomicFilename)
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
     }
   }
 }
@@ -213,4 +205,12 @@ function renameFilePromise (oldPath, newPath) {
       else resolve()
     })
   })
+}
+
+async function unlinkSafe (filename) {
+  try {
+    await fsp.unlink(filename)
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
 }
