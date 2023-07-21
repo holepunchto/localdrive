@@ -16,7 +16,6 @@ class FileWriteStream extends Writable {
     this.fd = 0
 
     this.atomic = opts.atomic
-    this._atomics = this.drive._atomics
     this.atomicFilename = this.filename
 
     this._shouldCleanup = false
