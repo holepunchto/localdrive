@@ -17,8 +17,6 @@ class FileWriteStream extends Writable {
 
     this.atomic = opts.atomic
     this.atomicFilename = this.filename
-
-    this._shouldCleanup = false
   }
 
   _open (cb) {
@@ -42,7 +40,6 @@ class FileWriteStream extends Writable {
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
       this.fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
-      this._shouldCleanup = true
     } finally {
       release()
     }
@@ -59,9 +56,11 @@ class FileWriteStream extends Writable {
 
   async _destroyp (cb) {
     if (this.fd) await closeFilePromise(this.fd)
-    if (this.atomic && this._shouldCleanup) await this._cleanupAtomicFile()
 
-    if (this.atomic) this.drive._free(this.atomicFilename)
+    if (this.atomicFilename !== this.filename) {
+      await this._cleanupAtomicFile()
+      this.drive._free(this.atomicFilename)
+    }
   }
 
   async _finalp () {
@@ -76,12 +75,17 @@ class FileWriteStream extends Writable {
 
     if (this.atomic) {
       await renameFilePromise(this.atomicFilename, this.filename)
-      this._shouldCleanup = false
+      this.drive._free(this.atomicFilename)
+      this.atomicFilename = this.filename
     }
   }
 
   async _cleanupAtomicFile () {
-    await fsp.unlink(this.atomicFilename)
+    try {
+      await fsp.unlink(this.atomicFilename)
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
   }
 }
 
