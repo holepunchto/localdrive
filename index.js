@@ -263,36 +263,32 @@ function isExecutable (mode) {
 async function lstat (filename) {
   try {
     return await fsp.lstat(filename)
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
+  } catch {
+    return null
   }
 }
 
 async function stat (filename) {
   try {
     return await fsp.stat(filename)
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
+  } catch {
+    return null
   }
 }
 
 async function opendir (dir) {
   try {
     return await fsp.opendir(dir)
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
+  } catch {
+    return null
   }
 }
 
 async function readdir (dir) {
   try {
     return await fsp.readdir(dir, { withFileTypes: true })
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
+  } catch {
+    return null
   }
 }
 
