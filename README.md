@@ -76,11 +76,13 @@ If you pass `opts.metadata` hooks then `supportsMetadata` becomes true.
 
 Creates a file at `key` path in the drive. `options` are the same as in `createWriteStream`.
 
-#### `const buffer = await drive.get(key)`
+#### `const buffer = await drive.get(key, [options])`
 
 Returns the blob at `key` path in the drive. If no blob exists, returns null.
 
 It also returns null for symbolic links.
+
+`options` are the same as in `drive.entry` method.
 
 #### `const entry = await drive.entry(key, [options])`
 
