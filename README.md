@@ -56,7 +56,8 @@ Available `options`:
     put (key) {},
     del (key) {}
   },
-  atomic: false // Enable atomicity for file writing (tmp file and rename)
+  atomic: false, // Enable atomicity for file writing (tmp file and rename)
+  roots: {} // For mapping key prefixes to different roots
 }
 ```
 
