@@ -13,9 +13,29 @@ module.exports = class Localdrive {
     this.metadata = handleMetadataHooks(opts.metadata) || {}
     this.supportsMetadata = !!opts.metadata
 
+    this._roots = opts.roots ? {} : null
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
+
+    for (const prefix in opts.roots) {
+      this._roots[unixPathResolve('/', prefix)] = path.resolve(opts.roots[prefix])
+    }
+  }
+
+  _root (keyname) {
+    for (const prefix in this._roots) {
+      if (keyname.startsWith(prefix)) return { prefix, root: this._roots[prefix] }
+    }
+
+    return { prefix: null, root: this.root }
+  }
+
+  _resolve (key) {
+    const keyname = unixPathResolve('/', key)
+    const { prefix, root } = this._root(keyname)
+    const filename = path.join(root, prefix ? keyname.replace(prefix, '') : keyname)
+    return { root, keyname, filename }
   }
 
   async ready () { /* No-op, compatibility */ }
@@ -30,13 +50,8 @@ module.exports = class Localdrive {
     return this
   }
 
-  toKey (filename) {
-    if (filename.startsWith(this.root)) filename = filename.slice(this.root.length)
-    return unixPathResolve('/', filename)
-  }
-
   toPath (key) {
-    return keyResolve(this.root, key).filename
+    return this._resolve(key).filename
   }
 
   async entry (name, opts) {
@@ -55,7 +70,7 @@ module.exports = class Localdrive {
   async _entry (key) {
     if (typeof key === 'object') key = key.key
 
-    const { keyname, filename } = keyResolve(this.root, key)
+    const { root, keyname, filename } = this._resolve(key)
 
     const st = await this._stat(filename)
     if (!st || st.isDirectory()) {
@@ -75,7 +90,7 @@ module.exports = class Localdrive {
 
     if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
-      if (link.startsWith(this.root)) link = link.slice(this.root.length)
+      if (link.startsWith(root)) link = link.slice(root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
@@ -120,7 +135,7 @@ module.exports = class Localdrive {
   }
 
   async del (key) {
-    const { keyname, filename } = keyResolve(this.root, key)
+    const { root, keyname, filename } = this._resolve(key)
 
     try {
       await fsp.unlink(filename)
@@ -131,7 +146,7 @@ module.exports = class Localdrive {
 
     const release = await this._lock()
     try {
-      await gcEmptyFolders(this.root, path.dirname(filename))
+      await gcEmptyFolders(root, path.dirname(filename))
     } finally {
       release()
     }
@@ -143,14 +158,14 @@ module.exports = class Localdrive {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
-    const { filename: pointer } = keyResolve(this.root, key)
+    const { filename: pointer } = this._resolve(key)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
 
       const target = linkname.startsWith('/')
-        ? keyResolve(this.root, linkname).filename
+        ? this._resolve(linkname).filename
         : linkname.replace(/\//g, path.sep)
 
       await fsp.symlink(target, pointer)
@@ -165,7 +180,7 @@ module.exports = class Localdrive {
   }
 
   async * list (folder) {
-    const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
+    const { keyname, filename: fulldir } = this._resolve(folder || '/')
     const iterator = await opendir(fulldir)
 
     if (!iterator) return
@@ -184,7 +199,7 @@ module.exports = class Localdrive {
   }
 
   async * readdir (folder) {
-    const { keyname, filename: fulldir } = keyResolve(this.root, folder || '/')
+    const { keyname, filename: fulldir } = this._resolve(folder || '/')
     const iterator = await readdir(fulldir)
 
     if (!iterator) return
@@ -215,12 +230,12 @@ module.exports = class Localdrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    const { filename } = keyResolve(this.root, key)
+    const { filename } = this._resolve(key)
     return new FileReadStream(filename, opts)
   }
 
   createWriteStream (key, opts) {
-    const { keyname, filename } = keyResolve(this.root, key)
+    const { keyname, filename } = this._resolve(key)
     return new FileWriteStream(filename, keyname, this, opts)
   }
 
@@ -248,12 +263,6 @@ function handleMetadataHooks (metadata) {
   }
 
   return metadata
-}
-
-function keyResolve (root, key) {
-  const keyname = unixPathResolve('/', key)
-  const filename = path.join(root, keyname)
-  return { keyname, filename }
 }
 
 function isExecutable (mode) {
