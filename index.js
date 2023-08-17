@@ -13,19 +13,24 @@ module.exports = class Localdrive {
     this.metadata = handleMetadataHooks(opts.metadata) || {}
     this.supportsMetadata = !!opts.metadata
 
-    this._roots = opts.roots ? {} : null
+    this._roots = opts.roots ? [] : null
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
 
     for (const prefix in opts.roots) {
-      this._roots[unixPathResolve('/', prefix)] = path.resolve(opts.roots[prefix])
+      this._roots.push({
+        from: unixPathResolve('/', prefix),
+        to: path.resolve(opts.roots[prefix])
+      })
     }
   }
 
   _root (keyname) {
-    for (const prefix in this._roots) {
-      if (keyname.startsWith(prefix)) return { prefix, root: this._roots[prefix] }
+    if (this._roots) {
+      for (const { from, to } of this._roots) {
+        if (keyname.startsWith(from)) return { prefix: from, root: to }
+      }
     }
 
     return { prefix: null, root: this.root }
