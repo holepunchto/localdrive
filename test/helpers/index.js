@@ -12,6 +12,7 @@ const isRelativeTmpDir = process.argv.indexOf('--relative-tmp-dir') > -1
 module.exports = {
   createTmpDir,
   createDrive,
+  generateTestFiles,
   streamToString,
   bufferToStream,
   isWin
