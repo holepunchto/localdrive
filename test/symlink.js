@@ -137,3 +137,24 @@ test('symlink(key, linkname) mutex', async function (t) {
 
   t.ok(fs.existsSync(path.join(drive.root, 'solo')))
 })
+
+test('get symlinks', async function (t) {
+  const drive = createDrive(t)
+
+  t.ok(await drive.get('/examples/a.txt'))
+
+  await drive.symlink('/examples/a.shortcut', '/examples/a.txt')
+
+  const entry = await drive.entry('/examples/a.shortcut')
+  t.alike(entry.key, '/examples/a.shortcut')
+  t.alike(entry.value, {
+    executable: false,
+    linkname: '/examples/a.txt',
+    blob: null,
+    metadata: null
+  })
+
+  t.absent(await drive.get('/examples/a.shortcut'))
+
+  t.alike(await drive.get('/examples/a.shortcut', { follow: true }), Buffer.from('1st'))
+})
