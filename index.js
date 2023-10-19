@@ -96,7 +96,9 @@ module.exports = class Localdrive {
     if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
       if (link.startsWith(root)) link = link.slice(root.length)
-      entry.value.linkname = link.replace(/\\/g, '/')
+      link = link.replace(/\\/g, '/')
+      if (link.endsWith('/')) link = link.slice(0, -1)
+      entry.value.linkname = link
       return entry
     }
 
