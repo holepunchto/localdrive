@@ -175,7 +175,10 @@ module.exports = class Localdrive {
         ? this._resolve(linkname).filename
         : linkname.replace(/\//g, path.sep)
 
-      await fsp.symlink(target, pointer, 'junction')
+      const st = await this._stat(target)
+      const type = st && st.isDirectory() ? 'junction' : null
+
+      await fsp.symlink(target, pointer, type)
     } finally {
       release()
     }
