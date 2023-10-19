@@ -96,9 +96,7 @@ module.exports = class Localdrive {
     if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
       if (link.startsWith(root)) link = link.slice(root.length)
-      link = link.replace(/\\/g, '/')
-      if (link.endsWith('/')) link = link.slice(0, -1)
-      entry.value.linkname = link
+      entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
 
@@ -118,7 +116,7 @@ module.exports = class Localdrive {
     const entry = await this.entry(key, opts)
     if (!entry || !entry.value.blob) return null
 
-    const rs = this.createReadStream(entry.key)
+    const rs = this.createReadStream(key)
     const chunks = []
     for await (const chunk of rs) {
       chunks.push(chunk)
