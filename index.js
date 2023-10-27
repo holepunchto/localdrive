@@ -6,6 +6,7 @@ const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
 const MirrorDrive = require('mirror-drive')
+const ReadyResource = require('ready-resource')
 const RecursiveWatch = require('recursive-watch')
 const safetyCatch = require('safety-catch')
 
@@ -269,13 +270,15 @@ module.exports = class Localdrive {
 
   async close () {
     for (const watcher of this._watchers) {
-      await watcher.destroy()
+      await watcher.destroy().catch(safetyCatch)
     }
   }
 }
 
-class Watcher {
+class Watcher extends ReadyResource {
   constructor (drive, folder) {
+    super()
+
     drive._watchers.add(this)
 
     this.drive = drive
@@ -291,19 +294,28 @@ class Watcher {
 
     this._watcher = null
 
-    this._closing = null
-    this._opening = this._ready()
-    this._opening.catch(safetyCatch)
+    this.ready().catch(safetyCatch)
   }
 
-  ready () {
-    return this._opening
-  }
-
-  async _ready () {
+  async _open () {
     this._watcher = new RecursiveWatch(this.range, this._onchange.bind(this))
-    await this._watcher.ready()
-    this.opened = true
+
+    try {
+      await this._watcher.ready()
+    } catch (err) {
+      // safetyCatch(err)
+      this._onchange()
+      throw err
+    }
+  }
+
+  async close () {
+    try {
+      return await super.close()
+    } catch (err) {
+      safetyCatch(err)
+      // throw err
+    }
   }
 
   [Symbol.asyncIterator] () {
@@ -319,7 +331,7 @@ class Watcher {
   }
 
   async _waitForChanges () {
-    if (this._lostChange || this.closed) {
+    if (this._lostChange || this.closing) {
       this._lostChange = false
       return
     }
@@ -342,13 +354,13 @@ class Watcher {
     const release = await this._lock()
 
     try {
-      if (this.closed) return { value: undefined, done: true }
+      if (this.closing) return { value: undefined, done: true }
 
-      if (!this.opened) await this._opening
+      if (!this.opened) await this.ready()
 
       await this._waitForChanges()
 
-      if (this.closed) return { value: undefined, done: true }
+      if (this.closing) return { value: undefined, done: true }
 
       return { done: false, value: {} }
     } finally {
@@ -361,21 +373,14 @@ class Watcher {
     return { done: true }
   }
 
-  async destroy () {
-    if (this._closing) return this._closing
-    this._closing = this._destroy()
-    return this._closing
+  destroy () {
+    return this.close()
   }
 
-  async _destroy () {
-    if (this.closed) return
-    this.closed = true
-
-    if (!this.opened) await this._opening.catch(safetyCatch)
-
+  async _close () {
     this.drive._watchers.delete(this)
 
-    if (this._watcher) await this._watcher.close()
+    await this._watcher.close().catch(safetyCatch)
 
     this._onchange() // Continue execution being closed
 

@@ -321,17 +321,28 @@ test('closing drive should destroy watcher', async function (t) {
 })
 
 test('watcher ready throwing an error', async function (t) {
-  t.plan(1)
+  t.plan(3)
 
   const drive = createDrive(t)
-  const watcher = drive.watch('/this-does-not-exists')
+  const watcher1 = drive.watch('/this-does-not-exists-1')
+  const watcher2 = drive.watch('/this-does-not-exists-2')
 
   try {
-    await watcher.ready()
+    await watcher1.ready()
     t.fail('should have failed')
   } catch (err) {
     t.is(err.code, 'ENOENT')
   }
+
+  // Closing a watcher should not throw error if it had an error on open
+  await watcher1.close()
+
+  // Closing a drive should not throw error if it had an error on open
+  await drive.close()
+
+  // They had errors on open so they're not closed
+  t.absent(watcher1.closed)
+  t.absent(watcher2.closed)
 })
 
 test('watcher iterator throwing an error', async function (t) {
