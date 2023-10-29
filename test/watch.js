@@ -247,7 +247,7 @@ test.skip('watch on non existing folder', async function (t) {
   onchange = null
 })
 
-test.skip('batch multiple changes', async function (t) {
+test('batch multiple changes', async function (t) {
   t.plan(2)
 
   const drive = createDrive(t)
@@ -260,6 +260,7 @@ test.skip('batch multiple changes', async function (t) {
     await batch.put('/b')
     await batch.put('/c')
     await batch.flush()
+    t.pass()
   })
 
   for await (const diff of watcher) { // eslint-disable-line no-unreachable-loop
