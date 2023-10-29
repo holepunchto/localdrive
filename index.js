@@ -264,7 +264,7 @@ module.exports = class Localdrive {
   }
 
   watch (key) {
-    const { filename: folder } = keyResolve(this.root, key)
+    const { filename: folder } = this._resolve(key)
     return new Watcher(this, folder)
   }
 
