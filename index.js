@@ -282,10 +282,6 @@ class Watcher extends ReadyResource {
     drive._watchers.add(this)
 
     this.drive = drive
-
-    this.opened = false
-    this.closed = false
-
     this.range = folder
 
     this._lock = mutexify()
@@ -302,19 +298,11 @@ class Watcher extends ReadyResource {
 
     try {
       await this._watcher.ready()
+
+      if (!this._watcher.watching) this._onchange()
     } catch (err) {
-      // safetyCatch(err)
       this._onchange()
       throw err
-    }
-  }
-
-  async close () {
-    try {
-      return await super.close()
-    } catch (err) {
-      safetyCatch(err)
-      // throw err
     }
   }
 
@@ -331,7 +319,7 @@ class Watcher extends ReadyResource {
   }
 
   async _waitForChanges () {
-    if (this._lostChange || this.closing) {
+    if (this._lostChange || this.closing || !this._watcher.watching) {
       this._lostChange = false
       return
     }
@@ -360,7 +348,7 @@ class Watcher extends ReadyResource {
 
       await this._waitForChanges()
 
-      if (this.closing) return { value: undefined, done: true }
+      if (this.closing || !this._watcher.watching) return { value: undefined, done: true }
 
       return { done: false, value: {} }
     } finally {
