@@ -226,7 +226,7 @@ test('watch should normalize folder', { skip: isMac }, async function (t) {
   onchange = null
 })
 
-test.skip('watch on non existing folder', async function (t) {
+test.skip('watch on non existing folder, then put a file', async function (t) {
   t.plan(1)
 
   const drive = createDrive(t, undefined, { noTestFiles: true })
@@ -237,6 +237,7 @@ test.skip('watch on non existing folder', async function (t) {
   let next = watcher.next()
   let onchange = null
   next.then(data => {
+    if (data.done) return
     next = watcher.next()
     onchange(data)
   })
@@ -245,6 +246,27 @@ test.skip('watch on non existing folder', async function (t) {
   await drive.put('/examples/more/a.txt', buf)
   await eventFlush()
   onchange = null
+})
+
+test.skip('watch on non existing file, then put a file', async function (t) {
+  t.plan(1)
+
+  const drive = createDrive(t)
+  const watcher = drive.watch('/this-does-not-exists')
+
+  await watcher.ready()
+
+  let put = null
+  eventFlush().then(() => {
+    put = drive.put('/this-does-not-exists', 'hello')
+  })
+
+  for await (const diff of watcher) { // eslint-disable-line no-unreachable-loop
+    t.alike(diff, {})
+    break
+  }
+
+  await put
 })
 
 test('batch multiple changes', async function (t) {
@@ -321,7 +343,7 @@ test('closing drive should destroy watcher', async function (t) {
   t.ok(watcher.closed)
 })
 
-test('watcher ready throwing an error', async function (t) {
+test('watcher is closed when drive is closed', async function (t) {
   t.plan(2)
 
   const drive = createDrive(t)
@@ -337,21 +359,16 @@ test('watcher ready throwing an error', async function (t) {
   t.ok(watcher2.closed)
 })
 
-test('watcher iterator throwing an error', async function (t) {
+test('watcher calls next after is already done', async function (t) {
   t.plan(2)
 
   const drive = createDrive(t)
   const watcher = drive.watch('/this-does-not-exists')
 
-  let put = null
-  eventFlush().then(async () => {
-    put = drive.put('/a.txt', Buffer.from('hi'))
-  })
+  await watcher.close()
 
   t.alike(await watcher.next(), { value: undefined, done: true })
   t.alike(await watcher.next(), { value: undefined, done: true })
-
-  await put
 })
 
 test('create lots of watchers', async function (t) {
