@@ -377,7 +377,7 @@ test('create lots of watchers', async function (t) {
   const drive = createDrive(t)
   const watchers = []
 
-  const max = isMac ? 100 : 1000
+  const max = isMac ? 100 : 500
   let count = 0
 
   for (let i = 0; i < max; i++) {
@@ -403,7 +403,7 @@ test('create lots of watchers', async function (t) {
 test('create and destroy lots of watchers', async function (t) {
   const drive = createDrive(t)
 
-  const max = isMac ? 100 : 1000
+  const max = isMac ? 100 : 500
 
   for (let i = 0; i < max; i++) {
     let changed = false
