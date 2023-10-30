@@ -145,7 +145,7 @@ Efficiently mirror this drive into another. Returns a [`MirrorDrive`](https://gi
 
 Call `await mirror.done()` to wait for the mirroring to finish.
 
-#### `const watcher = db.watch([folder])`
+#### `const watcher = drive.watch([folder])`
 
 Listens to changes that are on `folder`, by default `/`.
 
@@ -162,7 +162,7 @@ Returns a new value after a change, it will be an empty object.
 
 Waits until the watcher is loaded and detecting changes.
 
-`await watcher.destroy()`
+`await watcher.close()`
 
 Stops the watcher. You could also stop it by using `break` in the loop.
 
