@@ -7,6 +7,20 @@
     "index.js",
     "streams.js"
   ],
+  "imports": {
+    "fs": {
+      "bare": "bare-fs",
+      "default": "fs"
+    },
+    "fs/*": {
+      "bare": "bare-fs/*",
+      "default": "fs/*"
+    },
+    "path": {
+      "bare": "bare-path",
+      "default": "fs"
+    }
+  },
   "scripts": {
     "test": "standard && brittle test/*.js && brittle test/*.js --relative-tmp-dir",
     "lint": "standard"
