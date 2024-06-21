@@ -196,6 +196,13 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
+      try {
+        const link = await fsp.readlink(dirent.path)
+        if (dirent.parentPath.indexOf(link) === 0) {
+          continue
+        }
+      } catch (err) { /* Do nothing */ }
+
       if (dirent.isDirectory()) {
         yield * this.list(key)
         continue
