@@ -187,7 +187,13 @@ module.exports = class Localdrive {
     return diff > 0 ? 1 : (diff < 0 ? -1 : 0)
   }
 
-  async * list (folder) {
+  async * list (folder, opts = {}) {
+    if (typeof folder === 'object') {
+      opts = folder
+      folder = undefined
+    }
+
+    const ignore = opts.ignore ? opts.ignore instanceof Array ? opts.ignore : [opts.ignore] : []
     const { keyname, filename: fulldir } = this._resolve(folder || '/')
     const iterator = await opendir(fulldir)
 
@@ -196,8 +202,10 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
+      if (ignore.map(e => unixPathResolve('/', e)).includes(key)) continue
+
       if (dirent.isDirectory()) {
-        yield * this.list(key)
+        yield * this.list(key, opts)
         continue
       }
 

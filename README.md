@@ -127,9 +127,16 @@ If a blob entry currently exists at `key` path then it will get overwritten and 
 
 Returns `0` if entries are the same, `1` if `entryA` is older, and `-1` if `entryB` is older.
 
-#### `const iterator = drive.list([folder])`
+#### `const iterator = drive.list([folder], [options])`
 
 Returns a stream of all entries in the drive inside of specified `folder`.
+
+Available `options`:
+```js
+{
+  ignore: String || Array // Ignore file and folders by name.
+}
+```
 
 #### `const iterator = drive.readdir([folder])`
 
