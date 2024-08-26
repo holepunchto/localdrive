@@ -193,7 +193,7 @@ module.exports = class Localdrive {
       folder = undefined
     }
 
-    const ignore = opts.ignore ? opts.ignore instanceof Array ? opts.ignore : [opts.ignore] : []
+    const ignore = opts.ignore ? [].concat(opts.ignore) : []
     const { keyname, filename: fulldir } = this._resolve(folder || '/')
     const iterator = await opendir(fulldir)
 
