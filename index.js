@@ -6,6 +6,9 @@ const unixPathResolve = require('unix-path-resolve')
 const { FileReadStream, FileWriteStream } = require('./streams.js')
 const mutexify = require('mutexify/promise')
 const MirrorDrive = require('mirror-drive')
+const ReadyResource = require('ready-resource')
+const RecursiveWatch = require('recursive-watch')
+const safetyCatch = require('safety-catch')
 
 module.exports = class Localdrive {
   constructor (root, opts = {}) {
@@ -17,6 +20,7 @@ module.exports = class Localdrive {
     this._stat = opts.followLinks ? stat : lstat
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
+    this._watchers = new Set()
 
     if (opts.roots) {
       for (const prefix of Object.keys(opts.roots)) {
@@ -44,7 +48,6 @@ module.exports = class Localdrive {
   }
 
   async ready () { /* No-op, compatibility */ }
-  async close () { /* No-op, compatibility */ }
   async flush () { /* No-op, compatibility */ }
 
   batch () {
@@ -266,6 +269,119 @@ module.exports = class Localdrive {
 
   _free (atomicFilename) {
     this._atomics.delete(atomicFilename)
+  }
+
+  watch (key) {
+    const { filename: folder } = this._resolve(key)
+    return new Watcher(this, folder)
+  }
+
+  async close () {
+    for (const watcher of this._watchers) {
+      await watcher.destroy().catch(safetyCatch)
+    }
+  }
+}
+
+class Watcher extends ReadyResource {
+  constructor (drive, folder) {
+    super()
+
+    drive._watchers.add(this)
+
+    this.drive = drive
+    this.range = folder
+
+    this._lock = mutexify()
+    this._resolveOnChange = null
+    this._lostChange = false
+
+    this._watcher = null
+
+    this.ready().catch(safetyCatch)
+  }
+
+  async _open () {
+    this._watcher = new RecursiveWatch(this.range, this._onchange.bind(this))
+
+    try {
+      await this._watcher.ready()
+
+      if (!this._watcher.watching) this._onchange()
+    } catch (err) {
+      this._onchange()
+      throw err
+    }
+  }
+
+  [Symbol.asyncIterator] () {
+    return this
+  }
+
+  _onchange (filename) {
+    this._lostChange = this._resolveOnChange === null
+
+    const resolve = this._resolveOnChange
+    this._resolveOnChange = null
+    if (resolve) resolve()
+  }
+
+  async _waitForChanges () {
+    if (this._lostChange || this.closing || !this._watcher.watching) {
+      this._lostChange = false
+      return
+    }
+
+    await new Promise(resolve => {
+      this._resolveOnChange = resolve
+    })
+  }
+
+  async next () {
+    try {
+      return await this._next()
+    } catch (err) {
+      await this.destroy()
+      throw err
+    }
+  }
+
+  async _next () {
+    const release = await this._lock()
+
+    try {
+      if (this.closing) return { value: undefined, done: true }
+
+      if (!this.opened) await this.ready()
+
+      await this._waitForChanges()
+
+      if (this.closing || !this._watcher.watching) return { value: undefined, done: true }
+
+      return { done: false, value: {} }
+    } finally {
+      release()
+    }
+  }
+
+  async return () {
+    await this.destroy()
+    return { done: true }
+  }
+
+  destroy () {
+    return this.close()
+  }
+
+  async _close () {
+    this.drive._watchers.delete(this)
+
+    await this._watcher.close().catch(safetyCatch)
+
+    this._onchange() // Continue execution being closed
+
+    const release = await this._lock()
+    release()
   }
 }
 
