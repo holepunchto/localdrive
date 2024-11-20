@@ -112,6 +112,10 @@ module.exports = class Localdrive {
     return null
   }
 
+  async exists (name) {
+    return await this.entry(name) !== null
+  }
+
   async get (key, opts) {
     const entry = await this.entry(key, opts)
     if (!entry || !entry.value.blob) return null
