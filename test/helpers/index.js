@@ -15,7 +15,8 @@ module.exports = {
   generateTestFiles,
   streamToString,
   bufferToStream,
-  isWin
+  isWin,
+  eventFlush
 }
 
 function createTmpDir (t) {
@@ -36,7 +37,9 @@ function createDrive (t, opts, cfg = {}) {
   const root = isRelativeTmpDir ? createRelativeTmpDir(t) : createTmpDir(t)
   if (!cfg.noTestFiles) generateTestFiles(t, root)
 
-  return new Localdrive(root, opts)
+  const drive = new Localdrive(root, opts)
+  t.teardown(() => drive.close(), { order: -1 })
+  return drive
 }
 
 function generateTestFiles (t, root) {
@@ -82,9 +85,13 @@ async function bufferToStream (buffer, writeStream) {
 
 async function rmdir (dir) {
   try {
-    await fs.promises.rm(dir, { recursive: true })
+    await fs.promises.rm(dir, { force: true, recursive: true })
   } catch (error) {
     if (error.code === 'ENOENT') return
     throw error
   }
+}
+
+function eventFlush () {
+  return new Promise(resolve => setImmediate(resolve))
 }
