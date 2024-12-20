@@ -37,6 +37,8 @@
   "homepage": "https://github.com/holepunchto/localdrive",
   "dependencies": {
     "b4a": "^1.6.1",
+    "bare-fs": "^4.0.1",
+    "bare-path": "^3.0.0",
     "mirror-drive": "^1.2.0",
     "mutexify": "^1.4.0",
     "streamx": "^2.12.5",
@@ -45,9 +47,5 @@
   "devDependencies": {
     "brittle": "^3.1.0",
     "standard": "^17.0.0"
-  },
-  "optionalDependencies": {
-    "bare-fs": "^3.0.2",
-    "bare-path": "^3.0.0"
   }
 }
