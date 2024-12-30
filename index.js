@@ -15,7 +15,7 @@ module.exports = class Localdrive {
 
     this._roots = []
     this._stat = opts.followLinks ? stat : lstat
-    this._followExternalLinks = opts.followExternalLinks
+    this._followExternalLinks = !!opts.followExternalLinks
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
 
