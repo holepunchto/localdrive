@@ -15,6 +15,7 @@ module.exports = class Localdrive {
 
     this._roots = []
     this._stat = opts.followLinks ? stat : lstat
+    this._followExternalLinks = opts.followExternalLinks
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
 
@@ -95,6 +96,7 @@ module.exports = class Localdrive {
 
     if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
+      if (!this._followExternalLinks && !path.resolve(root, link).startsWith(root)) return null
       if (link.startsWith(root)) link = link.slice(root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
