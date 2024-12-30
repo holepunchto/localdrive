@@ -13,35 +13,10 @@ module.exports = class Localdrive {
     this.metadata = handleMetadataHooks(opts.metadata) || {}
     this.supportsMetadata = !!opts.metadata
 
-    this._roots = []
-    this._stat = opts.followLinks ? stat : lstat
+    this._followLinks = !!opts.followLinks
     this._followExternalLinks = !!opts.followExternalLinks
     this._lock = mutexify()
     this._atomics = opts.atomic ? new Set() : null
-
-    if (opts.roots) {
-      for (const prefix of Object.keys(opts.roots)) {
-        this._roots.push({
-          from: unixPathResolve('/', prefix),
-          to: path.resolve(opts.roots[prefix])
-        })
-      }
-    }
-  }
-
-  _root (keyname) {
-    for (const { from, to } of this._roots) {
-      if (keyname.startsWith(from)) return { prefix: from, root: to }
-    }
-
-    return { prefix: null, root: this.root }
-  }
-
-  _resolve (key) {
-    const keyname = unixPathResolve('/', key)
-    const { prefix, root } = this._root(keyname)
-    const filename = path.join(root, prefix ? keyname.replace(prefix, '') : keyname)
-    return { root, keyname, filename }
   }
 
   async ready () { /* No-op, compatibility */ }
@@ -57,7 +32,9 @@ module.exports = class Localdrive {
   }
 
   toPath (key) {
-    return this._resolve(key).filename
+    const keyname = unixPathResolve('/', key)
+    const filename = path.join(this.root, keyname)
+    return filename
   }
 
   async entry (name, opts) {
@@ -73,12 +50,42 @@ module.exports = class Localdrive {
     throw new Error('Recursive symlink')
   }
 
+  async _resolve (filename) {
+    if (this._followLinks) {
+      const st = await stat(filename)
+      return { st, filename }
+    }
+
+    if (!this._followExternalLinks) {
+      const st = await lstat(filename)
+      return { st, filename }
+    }
+
+    // 256 is the max recursion...
+    for (let i = 0; i < 256; i++) {
+      const st = await lstat(filename)
+
+      if (!st || !st.isSymbolicLink()) return { st, filename }
+
+      const link = await fsp.readlink(filename)
+      const resolved = path.resolve(path.dirname(filename), link)
+
+      // not external
+      if (resolved.startsWith(this.root)) return { st, filename }
+
+      filename = resolved
+    }
+
+    // too much recursion, bail
+    throw new Error('Reached symlink recursion limit')
+  }
+
   async _entry (key) {
     if (typeof key === 'object') key = key.key
 
-    const { root, keyname, filename } = this._resolve(key)
+    const keyname = unixPathResolve('/', key)
+    const { st, filename } = await this._resolve(path.join(this.root, keyname))
 
-    const st = await this._stat(filename)
     if (!st || st.isDirectory()) {
       return null
     }
@@ -96,8 +103,7 @@ module.exports = class Localdrive {
 
     if (st.isSymbolicLink()) {
       let link = await fsp.readlink(filename)
-      if (!this._followExternalLinks && !path.resolve(root, link).startsWith(root)) return null
-      if (link.startsWith(root)) link = link.slice(root.length)
+      if (link.startsWith(this.root)) link = link.slice(this.root.length)
       entry.value.linkname = link.replace(/\\/g, '/')
       return entry
     }
@@ -142,7 +148,8 @@ module.exports = class Localdrive {
   }
 
   async del (key) {
-    const { root, keyname, filename } = this._resolve(key)
+    const keyname = unixPathResolve('/', key)
+    const filename = path.join(this.root, keyname)
 
     try {
       await fsp.unlink(filename)
@@ -151,11 +158,15 @@ module.exports = class Localdrive {
       throw error
     }
 
-    const release = await this._lock()
-    try {
-      await gcEmptyFolders(root, path.dirname(filename))
-    } finally {
-      release()
+    const dir = path.dirname(filename)
+
+    if (dir.startsWith(this.root)) {
+      const release = await this._lock()
+      try {
+        await gcEmptyFolders(this.root, path.dirname(filename))
+      } finally {
+        release()
+      }
     }
 
     if (this.metadata.del) await this.metadata.del(keyname)
@@ -165,17 +176,17 @@ module.exports = class Localdrive {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
-    const { filename: pointer } = this._resolve(key)
+    const pointer = this.toPath(key)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
 
       const target = linkname.startsWith('/')
-        ? this._resolve(linkname).filename
+        ? this.toPath(linkname)
         : linkname.replace(/\//g, path.sep)
 
-      const st = await this._stat(target)
+      const st = await lstat(target)
       const type = st && st.isDirectory() ? 'junction' : null
 
       await fsp.symlink(target, pointer, type)
@@ -196,7 +207,10 @@ module.exports = class Localdrive {
     }
 
     const ignore = opts.ignore ? [].concat(opts.ignore).map(e => unixPathResolve('/', e)) : []
-    const { keyname, filename: fulldir } = this._resolve(folder || '/')
+    const keyname = unixPathResolve('/', folder)
+    const fulldir = path.join(this.root, keyname)
+    const follow = this._followLinks || this._followExternalLinks
+
     const iterator = await opendir(fulldir)
 
     if (!iterator) return
@@ -206,7 +220,14 @@ module.exports = class Localdrive {
 
       if (ignore.includes(key)) continue
 
-      if (dirent.isDirectory()) {
+      let isDirectory = dirent.isDirectory()
+
+      if (dirent.isSymbolicLink() && follow) {
+        const { st } = await this._resolve(path.join(fulldir, dirent.name))
+        if (st && st.isDirectory()) isDirectory = true
+      }
+
+      if (isDirectory) {
         yield * this.list(key, opts)
         continue
       }
@@ -217,7 +238,10 @@ module.exports = class Localdrive {
   }
 
   async * readdir (folder) {
-    const { keyname, filename: fulldir } = this._resolve(folder || '/')
+    const keyname = unixPathResolve('/', folder)
+    const fulldir = path.join(this.root, keyname)
+    const follow = this._followLinks || this._followExternalLinks
+
     const iterator = await readdir(fulldir)
 
     if (!iterator) return
@@ -229,7 +253,14 @@ module.exports = class Localdrive {
       const i = suffix.indexOf('/')
       if (i > -1) suffix = suffix.slice(i + 1)
 
-      if (dirent.isDirectory()) {
+      let isDirectory = dirent.isDirectory()
+
+      if (dirent.isSymbolicLink() && follow) {
+        const { st } = await this._resolve(path.join(fulldir, dirent.name))
+        if (st && st.isDirectory()) isDirectory = true
+      }
+
+      if (isDirectory) {
         if (!(await isEmptyDirectory(this, key))) {
           yield suffix
         }
@@ -248,12 +279,14 @@ module.exports = class Localdrive {
   createReadStream (key, opts) {
     if (typeof key === 'object') key = key.key
 
-    const { filename } = this._resolve(key)
+    const filename = this.toPath(key)
     return new FileReadStream(filename, opts)
   }
 
   createWriteStream (key, opts) {
-    const { keyname, filename } = this._resolve(key)
+    const keyname = unixPathResolve('/', key)
+    const filename = path.join(this.root, keyname)
+
     return new FileWriteStream(filename, keyname, this, opts)
   }
 

@@ -59,14 +59,24 @@ test('entry(key) symbolic link', { skip: isWin }, async function (t) {
 
 test('entry(key) external symbolic link', { skip: isWin }, async function (t) {
   const drive = createDrive(t, { followExternalLinks: false })
+
   const entry = await drive.entry('/external.shortcut')
-  t.ok(entry === null)
+  t.alike(entry, {
+    key: '/external.shortcut',
+    value: {
+      executable: false,
+      linkname: '/external',
+      blob: null,
+      metadata: null
+    },
+    mtime: entry.mtime
+  })
 })
 
 test('entry(key) external symbolic link', { skip: isWin }, async function (t) {
   const drive = createDrive(t, { followExternalLinks: true })
   const entry = await drive.entry('/external.shortcut')
-  t.ok(entry !== null)
+  t.ok(entry === null) // points to nothing so will be null
 })
 
 test('entry(key) follow links', { skip: isWin }, async function (t) {

@@ -13,7 +13,8 @@ test('list(folder) keys', async function (t) {
     '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
-    '/solo/one.txt'
+    '/solo/one.txt',
+    '/external.shortcut'
   ]
   if (!isWin) expectedKeys.push('/LICENSE.shortcut')
 
@@ -35,7 +36,6 @@ test('list(folder) entries', async function (t) {
 
     if (value.linkname) {
       t.ok(key.endsWith('.shortcut'))
-      t.ok(key.substring(1).startsWith(value.linkname))
     }
 
     if (value.blob) {
