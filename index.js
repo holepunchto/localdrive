@@ -322,14 +322,7 @@ function isExecutable (mode) {
 
 async function lstat (filename) {
   try {
-    const st = await fsp.lstat(filename)
-    if (st.isSymbolicLink()) {
-      const link = await fsp.readlink(filename)
-      const resolved = path.resolve(this.root, path.resolve(path.dirname(filename), link))
-      const isExternal = resolved.startsWith(this.root)
-      if (this._followExternalLinks && isExternal) return stat(resolved)
-    }
-    return st
+    return await fsp.lstat(filename)
   } catch {
     return null
   }
