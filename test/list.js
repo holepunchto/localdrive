@@ -15,7 +15,11 @@ test('list(folder) keys', async function (t) {
     '/examples/more/c.txt', '/examples/more/d.txt',
     '/solo/one.txt'
   ]
-  if (!isWin) expectedKeys.push('/LICENSE.shortcut')
+
+  if (!isWin) {
+    expectedKeys.push('/external.shortcut')
+    expectedKeys.push('/LICENSE.shortcut')
+  }
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
@@ -35,7 +39,6 @@ test('list(folder) entries', async function (t) {
 
     if (value.linkname) {
       t.ok(key.endsWith('.shortcut'))
-      t.ok(key.substring(1).startsWith(value.linkname))
     }
 
     if (value.blob) {
