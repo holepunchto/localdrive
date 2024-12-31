@@ -13,10 +13,13 @@ test('list(folder) keys', async function (t) {
     '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
     '/examples/a.txt', '/examples/b.txt',
     '/examples/more/c.txt', '/examples/more/d.txt',
-    '/solo/one.txt',
-    '/external.shortcut'
+    '/solo/one.txt'
   ]
-  if (!isWin) expectedKeys.push('/LICENSE.shortcut')
+
+  if (!isWin) {
+    expectedKeys.push('/external.shortcut')
+    expectedKeys.push('/LICENSE.shortcut')
+  }
 
   for await (const { key } of drive.list('/')) {
     actualKeys.push(key)
