@@ -218,7 +218,13 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
-      if (ignore.includes(key)) continue
+      if (opts.ignoreFn) {
+        if (opts.ignoreFn(key)) {
+          continue
+        }
+      } else {
+        if (ignore.includes(key)) continue
+      }
 
       let isDirectory = dirent.isDirectory()
 
