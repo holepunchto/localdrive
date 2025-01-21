@@ -219,9 +219,7 @@ module.exports = class Localdrive {
       const key = unixPathResolve(keyname, dirent.name)
 
       if (opts.ignoreFn) {
-        if (opts.ignoreFn(key)) {
-          continue
-        }
+        if (opts.ignoreFn(key)) continue
       } else {
         if (ignore.includes(key)) continue
       }
