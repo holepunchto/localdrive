@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "brittle": "^3.1.0",
-    "pear-ignore": "github:holepunchto/pear-ignore",
+    "pear-ignore": "^1.0.0",
     "standard": "^17.0.0"
   }
 }
