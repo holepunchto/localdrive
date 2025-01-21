@@ -4,6 +4,7 @@ const { createDrive, isWin } = require('./helpers/index.js')
 const { createTmpDir } = require('./helpers/index.js')
 const path = require('path')
 const Localdrive = require('..')
+const ignore = require('pear-ignore')
 
 test('list(folder) keys', async function (t) {
   const drive = createDrive(t)
@@ -119,6 +120,47 @@ test('ignore one file in folder', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {  // eslint-disable-line
+    entries++
+  }
+  t.is(entries, 1)
+})
+
+test('ignore files in folder with ignoreFn', async function (t) {
+  const tmpdir = createTmpDir(t)
+  await fsp.mkdir(path.join(tmpdir, 'folder'))
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_b.txt'), 'file-content')
+  const drive = new Localdrive(tmpdir)
+
+  const ignores = [
+    'folder'
+  ]
+
+  const ignoreFn = ignore(ignores)
+
+  let entries = 0
+  for await (const entry of drive.list({ ignoreFn })) {  // eslint-disable-line
+    entries++
+  }
+  t.is(entries, 0)
+})
+
+test('ignore one file in folder with ignoreFn', async function (t) {
+  const tmpdir = createTmpDir(t)
+  await fsp.mkdir(path.join(tmpdir, 'folder'))
+  await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
+  const drive = new Localdrive(tmpdir)
+
+  const ignores = [
+    'folder/file_a.txt'
+  ]
+
+  const ignoreFn = ignore(ignores)
+
+  let entries = 0
+  for await (const entry of drive.list({ ignoreFn })) {  // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
