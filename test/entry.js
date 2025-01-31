@@ -217,3 +217,13 @@ test('non-existing follow entry', async function (t) {
 
   t.is(await drive.entry('/file.random.shortcut', { follow: true }), null)
 })
+
+test('exists', async function (t) {
+  const drive = createDrive(t)
+  t.is(await drive.exists('/examples/a.txt'), true)
+  t.is(await drive.exists('/exists.txt'), false)
+
+  await drive.put('/exists.txt', Buffer.from('hello-world'))
+
+  t.is(await drive.exists('/exists.txt'), true)
+})

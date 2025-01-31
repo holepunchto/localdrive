@@ -272,6 +272,10 @@ module.exports = class Localdrive {
     }
   }
 
+  async exists (name) {
+    return await this.entry(name) !== null
+  }
+
   mirror (out, opts) {
     return new MirrorDrive(this, out, opts)
   }
