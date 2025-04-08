@@ -135,6 +135,7 @@ Available `options`:
 ```js
 {
   ignore: String || Array // Ignore file and folders by name.
+  unignore: String || Array // Unignore file and folders by name.
 }
 ```
 
