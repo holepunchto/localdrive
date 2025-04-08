@@ -84,42 +84,57 @@ test('ignore everything', async function (t) {
   t.is(entries, 0)
 })
 
-test('ignore only symlinks', async function (t) {
+test('unignore everything', async function (t) {
   const tmpdir = createTmpDir(t)
-  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink-a'), 'junction')
-  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink-b'), 'junction')
+  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink'), 'junction')
   await fsp.writeFile(path.join(tmpdir, 'file.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['symlink-a', 'symlink-b'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['symlink', 'file.txt'], unignore: ['symlink', 'file.txt'] })) {  // eslint-disable-line
     entries++
   }
-  t.is(entries, 1)
+  t.is(entries, 2)
 })
 
-test('ignore files in folder', async function (t) {
+test('ignore/unignore only symlinks', async function (t) {
+  const tmpdir = createTmpDir(t)
+  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink-a'), 'junction')
+  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink-b'), 'junction')
+  await fsp.symlink(tmpdir, path.join(tmpdir, 'symlink-c'), 'junction')
+  await fsp.writeFile(path.join(tmpdir, 'file.txt'), 'file-content')
+  const drive = new Localdrive(tmpdir)
+  let entries = 0
+  for await (const entry of drive.list({ ignore: ['symlink-a', 'symlink-b', 'symlink-c'], unignore: ['symlink-c'] })) {  // eslint-disable-line
+    entries++
+  }
+  t.is(entries, 2)
+})
+
+test('ignore/unignore files in folder', async function (t) {
   const tmpdir = createTmpDir(t)
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_b.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_c.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['folder'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['folder'], unignore: ['folder/file_c.txt'] })) {  // eslint-disable-line
     entries++
   }
-  t.is(entries, 0)
+  t.is(entries, 1)
 })
 
-test('ignore one file in folder', async function (t) {
+test('ignore/unignore one file in folder', async function (t) {
   const tmpdir = createTmpDir(t)
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_b.txt'), 'file-content')
   await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['folder/file_a.txt', 'folder/file_b.txt'], unignore: ['folder/file_b.txt'] })) {  // eslint-disable-line
     entries++
   }
-  t.is(entries, 1)
+  t.is(entries, 2)
 })
