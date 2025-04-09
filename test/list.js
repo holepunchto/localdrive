@@ -1,7 +1,7 @@
 const fsp = require('fs/promises')
 const test = require('brittle')
 const { createDrive, isWin } = require('./helpers/index.js')
-const { createTmpDir } = require('./helpers/index.js')
+const { createTmpDir, toIgnoreFunction } = require('./helpers/index.js')
 const path = require('path')
 const Localdrive = require('..')
 
@@ -119,6 +119,20 @@ test('ignore one file in folder', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {  // eslint-disable-line
+    entries++
+  }
+  t.is(entries, 1)
+})
+
+test('ignore one file in folder with function', async function (t) {
+  const tmpdir = createTmpDir(t)
+  await fsp.mkdir(path.join(tmpdir, 'folder'))
+  await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
+  const drive = new Localdrive(tmpdir)
+  let entries = 0
+  for await (const entry of drive.list({ ignore: toIgnoreFunction(['folder/file_a.txt']) })) {  // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
