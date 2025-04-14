@@ -2,7 +2,6 @@ const Localdrive = require('../../index.js')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
-const unixPathResolve = require('unix-path-resolve')
 const { promisify } = require('util')
 let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
@@ -16,14 +15,7 @@ module.exports = {
   generateTestFiles,
   streamToString,
   bufferToStream,
-  toIgnoreFunction,
   isWin
-}
-
-function toIgnoreFunction (arr) {
-  return function (key) {
-    return arr.some(e => unixPathResolve('/', e) === key)
-  }
 }
 
 function createTmpDir (t) {

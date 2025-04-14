@@ -1,7 +1,8 @@
 const fsp = require('fs/promises')
 const test = require('brittle')
 const { createDrive, isWin } = require('./helpers/index.js')
-const { createTmpDir, toIgnoreFunction } = require('./helpers/index.js')
+const { createTmpDir } = require('./helpers/index.js')
+const unixPathResolve = require('unix-path-resolve')
 const path = require('path')
 const Localdrive = require('..')
 
@@ -124,15 +125,21 @@ test('ignore one file in folder', async function (t) {
   t.is(entries, 1)
 })
 
-test('ignore one file in folder with function', async function (t) {
+test('ignore one file in folder and whole subfolder and unignore file in subfolder', async function (t) {
   const tmpdir = createTmpDir(t)
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
   await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_c.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: toIgnoreFunction(['folder/file_a.txt']) })) {  // eslint-disable-line
+  const ignore = (key) => {
+    const all = [].concat(['folder/file_a.txt', 'folder/subfolder']).map(e => unixPathResolve('/', e))
+    return all.some(path => key.startsWith(path)) && key !== unixPathResolve('/', 'folder/subfolder/file_d.txt')
+  }
+  for await (const entry of drive.list({ ignore })) {  // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
