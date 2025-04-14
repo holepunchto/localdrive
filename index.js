@@ -218,9 +218,9 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
-      let isDirectory = dirent.isDirectory()
-
       if (ignore && ignore(key)) continue
+      
+      let isDirectory = dirent.isDirectory()
 
       if (dirent.isSymbolicLink() && follow) {
         const { st } = await this._resolve(path.join(fulldir, dirent.name))
