@@ -135,9 +135,20 @@ test('ignore one file in folder and whole subfolder and unignore file in subfold
   await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  const ignore = (key) => {
-    const all = [].concat(['folder/file_a.txt', 'folder/subfolder']).map(e => unixPathResolve('/', e))
-    return all.some(path => key.startsWith(path)) && key !== unixPathResolve('/', 'folder/subfolder/file_d.txt')
+  const ignores = ['folder/file_a.txt', 'folder/subfolder']
+  const unignores = ['folder/subfolder/file_d.txt']
+  function ignore (key) {
+    for (const u of unignores) {
+      const path = unixPathResolve('/', u)
+      if (path === key) return false
+      if (path.startsWith(key + '/')) return false
+    }
+    for (const i of ignores) {
+      const path = unixPathResolve('/', i)
+      if (path === key) return true
+      if (key.startsWith(path + '/')) return true
+    }
+    return false
   }
   for await (const entry of drive.list({ ignore })) {  // eslint-disable-line
     entries++

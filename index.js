@@ -220,7 +220,7 @@ module.exports = class Localdrive {
 
       let isDirectory = dirent.isDirectory()
 
-      if (ignore && !isDirectory && ignore(key)) continue
+      if (ignore && ignore(key)) continue
 
       if (dirent.isSymbolicLink() && follow) {
         const { st } = await this._resolve(path.join(fulldir, dirent.name))
@@ -329,7 +329,7 @@ function toIgnoreFunction (ignore) {
     return ignore
   }
   const all = [].concat(ignore).map(e => unixPathResolve('/', e))
-  return key => all.some(path => key.startsWith(path))
+  return key => all.includes(key)
 }
 
 async function lstat (filename) {
