@@ -219,7 +219,7 @@ module.exports = class Localdrive {
       const key = unixPathResolve(keyname, dirent.name)
 
       if (ignore && ignore(key)) continue
-      
+
       let isDirectory = dirent.isDirectory()
 
       if (dirent.isSymbolicLink() && follow) {
