@@ -206,7 +206,7 @@ module.exports = class Localdrive {
       folder = undefined
     }
 
-    const ignore = opts.ignore ? [].concat(opts.ignore).map(e => unixPathResolve('/', e)) : []
+    const ignore = opts.ignore ? toIgnoreFunction(opts.ignore) : null
     const keyname = unixPathResolve('/', folder)
     const fulldir = path.join(this.root, keyname)
     const follow = this._followLinks || this._followExternalLinks
@@ -218,7 +218,7 @@ module.exports = class Localdrive {
     for await (const dirent of iterator) {
       const key = unixPathResolve(keyname, dirent.name)
 
-      if (ignore.includes(key)) continue
+      if (ignore && ignore(key)) continue
 
       let isDirectory = dirent.isDirectory()
 
@@ -322,6 +322,14 @@ function handleMetadataHooks (metadata) {
 
 function isExecutable (mode) {
   return !!(mode & fs.constants.S_IXUSR)
+}
+
+function toIgnoreFunction (ignore) {
+  if (typeof ignore === 'function') {
+    return ignore
+  }
+  const all = [].concat(ignore).map(e => unixPathResolve('/', e))
+  return key => all.includes(key)
 }
 
 async function lstat (filename) {
