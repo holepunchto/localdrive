@@ -128,8 +128,16 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   }
 
   await symlinkAndEntry('b.txt.shortcut', '/b.txt', '/b.txt.shortcut')
-  await symlinkAndEntry('/examples/more/../f.txt.shortcut', '/examples/f.txt', '/examples/f.txt.shortcut')
-  await symlinkAndEntry('\\examples\\more\\h.txt.shortcut', '/examples/more/h.txt', '/examples/more/h.txt.shortcut')
+  await symlinkAndEntry(
+    '/examples/more/../f.txt.shortcut',
+    '/examples/f.txt',
+    '/examples/f.txt.shortcut'
+  )
+  await symlinkAndEntry(
+    '\\examples\\more\\h.txt.shortcut',
+    '/examples/more/h.txt',
+    '/examples/more/h.txt.shortcut'
+  )
 })
 
 test('symlink(key, linkname) mutex', async function (t) {
@@ -162,5 +170,8 @@ test('get symlinks', async function (t) {
 
   t.absent(await drive.get('/examples/a.shortcut'))
 
-  t.alike(await drive.get('/examples/a.shortcut', { follow: true }), Buffer.from('1st'))
+  t.alike(
+    await drive.get('/examples/a.shortcut', { follow: true }),
+    Buffer.from('1st')
+  )
 })

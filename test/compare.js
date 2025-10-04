@@ -7,7 +7,7 @@ test('compare(a, b) basic', async function (t) {
   await drive.put('/file.txt', 'hi')
   const a = await drive.entry('/file.txt')
 
-  await new Promise(resolve => setTimeout(resolve, 200))
+  await new Promise((resolve) => setTimeout(resolve, 200))
 
   await drive.put('/file.txt', 'hi')
   const b = await drive.entry('/file.txt')

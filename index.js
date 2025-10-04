@@ -8,7 +8,7 @@ const mutexify = require('mutexify/promise')
 const MirrorDrive = require('mirror-drive')
 
 module.exports = class Localdrive {
-  constructor (root, opts = {}) {
+  constructor(root, opts = {}) {
     this.root = path.resolve(root)
     this.metadata = handleMetadataHooks(opts.metadata) || {}
     this.supportsMetadata = !!opts.metadata
@@ -19,25 +19,31 @@ module.exports = class Localdrive {
     this._atomics = opts.atomic ? new Set() : null
   }
 
-  async ready () { /* No-op, compatibility */ }
-  async close () { /* No-op, compatibility */ }
-  async flush () { /* No-op, compatibility */ }
+  async ready() {
+    /* No-op, compatibility */
+  }
+  async close() {
+    /* No-op, compatibility */
+  }
+  async flush() {
+    /* No-op, compatibility */
+  }
 
-  batch () {
+  batch() {
     return this
   }
 
-  checkout () {
+  checkout() {
     return this
   }
 
-  toPath (key) {
+  toPath(key) {
     const keyname = unixPathResolve('/', key)
     const filename = path.join(this.root, keyname)
     return filename
   }
 
-  async entry (name, opts) {
+  async entry(name, opts) {
     if (!opts || !opts.follow) return this._entry(name)
 
     for (let i = 0; i < 16; i++) {
@@ -50,7 +56,7 @@ module.exports = class Localdrive {
     throw new Error('Recursive symlink')
   }
 
-  async _resolve (filename) {
+  async _resolve(filename) {
     if (this._followLinks) {
       const st = await stat(filename)
       return { st, filename }
@@ -80,7 +86,7 @@ module.exports = class Localdrive {
     throw new Error('Reached symlink recursion limit')
   }
 
-  async _entry (key) {
+  async _entry(key) {
     if (typeof key === 'object') key = key.key
 
     const keyname = unixPathResolve('/', key)
@@ -114,18 +120,24 @@ module.exports = class Localdrive {
     }
 
     entry.value.executable = isExecutable(st.mode)
-    if (this.metadata.get) entry.value.metadata = await this.metadata.get(keyname)
+    if (this.metadata.get)
+      entry.value.metadata = await this.metadata.get(keyname)
 
     if (st.isFile()) {
       const blockLength = st.blocks || Math.ceil(st.size / st.blksize) * 8
-      entry.value.blob = { byteOffset: 0, blockOffset: 0, blockLength, byteLength: st.size }
+      entry.value.blob = {
+        byteOffset: 0,
+        blockOffset: 0,
+        blockLength,
+        byteLength: st.size
+      }
       return entry
     }
 
     return null
   }
 
-  async get (key, opts) {
+  async get(key, opts) {
     const entry = await this.entry(key, opts)
     if (!entry || !entry.value.blob) return null
 
@@ -137,7 +149,7 @@ module.exports = class Localdrive {
     return b4a.concat(chunks)
   }
 
-  put (key, buffer, opts) {
+  put(key, buffer, opts) {
     return new Promise((resolve, reject) => {
       const ws = this.createWriteStream(key, opts)
       let error = null
@@ -152,7 +164,7 @@ module.exports = class Localdrive {
     })
   }
 
-  async del (key) {
+  async del(key) {
     const keyname = unixPathResolve('/', key)
     const filename = path.join(this.root, keyname)
 
@@ -177,7 +189,7 @@ module.exports = class Localdrive {
     if (this.metadata.del) await this.metadata.del(keyname)
   }
 
-  async symlink (key, linkname) {
+  async symlink(key, linkname) {
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
@@ -200,12 +212,12 @@ module.exports = class Localdrive {
     }
   }
 
-  compare (a, b) {
+  compare(a, b) {
     const diff = a.mtime - b.mtime
-    return diff > 0 ? 1 : (diff < 0 ? -1 : 0)
+    return diff > 0 ? 1 : diff < 0 ? -1 : 0
   }
 
-  async * list (folder, opts = {}) {
+  async *list(folder, opts = {}) {
     if (typeof folder === 'object') {
       opts = folder
       folder = undefined
@@ -233,7 +245,7 @@ module.exports = class Localdrive {
       }
 
       if (isDirectory) {
-        yield * this.list(key, opts)
+        yield* this.list(key, opts)
         continue
       }
 
@@ -242,7 +254,7 @@ module.exports = class Localdrive {
     }
   }
 
-  async * readdir (folder) {
+  async *readdir(folder) {
     const keyname = unixPathResolve('/', folder)
     const fulldir = path.join(this.root, keyname)
     const follow = this._followLinks || this._followExternalLinks
@@ -277,29 +289,29 @@ module.exports = class Localdrive {
     }
   }
 
-  async exists (name) {
-    return await this.entry(name) !== null
+  async exists(name) {
+    return (await this.entry(name)) !== null
   }
 
-  mirror (out, opts) {
+  mirror(out, opts) {
     return new MirrorDrive(this, out, opts)
   }
 
-  createReadStream (key, opts) {
+  createReadStream(key, opts) {
     if (typeof key === 'object') key = key.key
 
     const filename = this.toPath(key)
     return new FileReadStream(filename, opts)
   }
 
-  createWriteStream (key, opts) {
+  createWriteStream(key, opts) {
     const keyname = unixPathResolve('/', key)
     const filename = path.join(this.root, keyname)
 
     return new FileWriteStream(filename, keyname, this, opts)
   }
 
-  _alloc (filename) {
+  _alloc(filename) {
     if (!this._atomics) return filename
     let c = 0
     while (this._atomics.has(filename + '.' + c + '.localdrive.tmp')) c++
@@ -308,15 +320,15 @@ module.exports = class Localdrive {
     return filename
   }
 
-  _free (atomicFilename) {
+  _free(atomicFilename) {
     this._atomics.delete(atomicFilename)
   }
 }
 
-function handleMetadataHooks (metadata) {
+function handleMetadataHooks(metadata) {
   if (metadata instanceof Map) {
     return {
-      get: (key) => metadata.has(key) ? metadata.get(key) : null,
+      get: (key) => (metadata.has(key) ? metadata.get(key) : null),
       put: (key, value) => metadata.set(key, value),
       del: (key) => metadata.delete(key)
     }
@@ -325,19 +337,19 @@ function handleMetadataHooks (metadata) {
   return metadata
 }
 
-function isExecutable (mode) {
+function isExecutable(mode) {
   return !!(mode & fs.constants.S_IXUSR)
 }
 
-function toIgnoreFunction (ignore) {
+function toIgnoreFunction(ignore) {
   if (typeof ignore === 'function') {
     return ignore
   }
-  const all = [].concat(ignore).map(e => unixPathResolve('/', e))
-  return key => all.includes(key)
+  const all = [].concat(ignore).map((e) => unixPathResolve('/', e))
+  return (key) => all.includes(key)
 }
 
-async function lstat (filename) {
+async function lstat(filename) {
   try {
     return await fsp.lstat(filename)
   } catch {
@@ -345,7 +357,7 @@ async function lstat (filename) {
   }
 }
 
-async function stat (filename) {
+async function stat(filename) {
   try {
     return await fsp.stat(filename)
   } catch {
@@ -353,7 +365,7 @@ async function stat (filename) {
   }
 }
 
-async function opendir (dir) {
+async function opendir(dir) {
   try {
     return await fsp.opendir(dir)
   } catch {
@@ -361,7 +373,7 @@ async function opendir (dir) {
   }
 }
 
-async function readdir (dir) {
+async function readdir(dir) {
   try {
     return await fsp.readdir(dir, { withFileTypes: true })
   } catch {
@@ -369,7 +381,7 @@ async function readdir (dir) {
   }
 }
 
-async function gcEmptyFolders (root, dir) {
+async function gcEmptyFolders(root, dir) {
   try {
     while (dir !== root) {
       await fsp.rmdir(dir)
@@ -380,8 +392,9 @@ async function gcEmptyFolders (root, dir) {
   }
 }
 
-async function isEmptyDirectory (drive, key) {
-  for await (const entry of drive.list(key)) { // eslint-disable-line
+async function isEmptyDirectory(drive, key) {
+  for await (const entry of drive.list(key)) {
+    // eslint-disable-line
     return false
   }
   return true

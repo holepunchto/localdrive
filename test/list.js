@@ -11,9 +11,16 @@ test('list(folder) keys', async function (t) {
 
   const actualKeys = []
   const expectedKeys = [
-    '/README.md', '/script.sh', '/LICENSE', '/LICENSE-V2', '/key.secret', '/empty.txt',
-    '/examples/a.txt', '/examples/b.txt',
-    '/examples/more/c.txt', '/examples/more/d.txt',
+    '/README.md',
+    '/script.sh',
+    '/LICENSE',
+    '/LICENSE-V2',
+    '/key.secret',
+    '/empty.txt',
+    '/examples/a.txt',
+    '/examples/b.txt',
+    '/examples/more/c.txt',
+    '/examples/more/d.txt',
     '/solo/one.txt'
   ]
 
@@ -67,7 +74,8 @@ test('ignore recursive symlink', async function (t) {
   await fsp.writeFile(path.join(tmpdir, 'file.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: 'symlink' })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: 'symlink' })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -79,7 +87,8 @@ test('ignore everything', async function (t) {
   await fsp.writeFile(path.join(tmpdir, 'file.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['symlink', 'file.txt'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['symlink', 'file.txt'] })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 0)
@@ -92,7 +101,10 @@ test('ignore only symlinks', async function (t) {
   await fsp.writeFile(path.join(tmpdir, 'file.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['symlink-a', 'symlink-b'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({
+    ignore: ['symlink-a', 'symlink-b']
+  })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -105,7 +117,8 @@ test('ignore files in folder', async function (t) {
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_b.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['folder'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['folder'] })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 0)
@@ -116,10 +129,14 @@ test('ignore one file in folder', async function (t) {
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
-  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
+  await fsp.writeFile(
+    path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'),
+    'file-content'
+  )
   const drive = new Localdrive(tmpdir)
   let entries = 0
-  for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -130,14 +147,23 @@ test('ignore one file in folder and whole subfolder and unignore file in subfold
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
-  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
-  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_c.txt'), 'file-content')
-  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'), 'file-content')
+  await fsp.writeFile(
+    path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'),
+    'file-content'
+  )
+  await fsp.writeFile(
+    path.join(tmpdir, 'folder', 'subfolder', 'file_c.txt'),
+    'file-content'
+  )
+  await fsp.writeFile(
+    path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'),
+    'file-content'
+  )
   const drive = new Localdrive(tmpdir)
   let entries = 0
   const ignores = ['folder/file_a.txt', 'folder/subfolder']
   const unignores = ['folder/subfolder/file_d.txt']
-  function ignore (key) {
+  function ignore(key) {
     for (const u of unignores) {
       const path = unixPathResolve('/', u)
       if (path === key) return false
@@ -150,7 +176,8 @@ test('ignore one file in folder and whole subfolder and unignore file in subfold
     }
     return false
   }
-  for await (const entry of drive.list({ ignore })) {  // eslint-disable-line
+  for await (const entry of drive.list({ ignore })) {
+    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)

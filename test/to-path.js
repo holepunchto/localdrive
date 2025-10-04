@@ -13,6 +13,12 @@ test('toPath(key) resolve', async function (t) {
 
   t.is(drive.toPath('README.md'), path.join(drive.root, 'README.md'))
   t.is(drive.toPath('./README.md'), path.join(drive.root, 'README.md'))
-  t.is(drive.toPath('/examples/more/../a.txt'), path.join(drive.root, 'examples', 'a.txt'))
-  t.is(drive.toPath('\\examples\\more\\c.txt'), path.join(drive.root, 'examples', 'more', 'c.txt'))
+  t.is(
+    drive.toPath('/examples/more/../a.txt'),
+    path.join(drive.root, 'examples', 'a.txt')
+  )
+  t.is(
+    drive.toPath('\\examples\\more\\c.txt'),
+    path.join(drive.root, 'examples', 'more', 'c.txt')
+  )
 })

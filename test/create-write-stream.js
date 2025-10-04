@@ -48,7 +48,7 @@ test('createWriteStream(key) write and end', function (t) {
   ws.write(data)
   ws.end()
 
-  async function onClose () {
+  async function onClose() {
     const entry = await drive.entry('/new-example.txt')
     t.alike(entry.value, {
       executable: false,
@@ -73,14 +73,18 @@ test('createWriteStream(key) replace', async function (t) {
   t.alike(await drive.get('/LICENSE'), buffer)
 })
 
-test('createWriteStream(key) replace existing executable', { skip: isWin }, async function (t) {
-  const drive = createDrive(t)
+test(
+  'createWriteStream(key) replace existing executable',
+  { skip: isWin },
+  async function (t) {
+    const drive = createDrive(t)
 
-  t.ok((await drive.entry('/script.sh')).value.executable)
+    t.ok((await drive.entry('/script.sh')).value.executable)
 
-  const buffer = Buffer.from('# script replaced')
-  const ws = drive.createWriteStream('/script.sh') // we're not marking it as executable
-  await bufferToStream(buffer, ws)
+    const buffer = Buffer.from('# script replaced')
+    const ws = drive.createWriteStream('/script.sh') // we're not marking it as executable
+    await bufferToStream(buffer, ws)
 
-  t.absent((await drive.entry('/script.sh')).value.executable)
-})
+    t.absent((await drive.entry('/script.sh')).value.executable)
+  }
+)

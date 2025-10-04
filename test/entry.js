@@ -149,7 +149,10 @@ test('entry(key) resolve key path', async function (t) {
 
   t.alike((await drive.entry('README.md')).key, '/README.md')
   t.alike((await drive.entry('/examples/more/../a.txt')).key, '/examples/a.txt')
-  t.alike((await drive.entry('\\examples\\more\\c.txt')).key, '/examples/more/c.txt')
+  t.alike(
+    (await drive.entry('\\examples\\more\\c.txt')).key,
+    '/examples/more/c.txt'
+  )
 })
 
 test('basic follow entry', async function (t) {
@@ -177,7 +180,10 @@ test('multiple follow entry', async function (t) {
   await drive.symlink('/file.shortcut', '/file.txt')
   await drive.symlink('/file.shortcut.shortcut', '/file.shortcut')
 
-  t.is((await drive.entry('/file.shortcut.shortcut')).value.linkname, '/file.shortcut')
+  t.is(
+    (await drive.entry('/file.shortcut.shortcut')).value.linkname,
+    '/file.shortcut'
+  )
 
   const entry = await drive.entry('/file.shortcut.shortcut', { follow: true })
   t.is(entry.key, '/file.txt')

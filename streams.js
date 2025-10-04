@@ -5,7 +5,7 @@ const path = require('path')
 const b4a = require('b4a')
 
 class FileWriteStream extends Writable {
-  constructor (filename, key, drive, opts = {}) {
+  constructor(filename, key, drive, opts = {}) {
     super({ map })
 
     this.filename = filename
@@ -17,19 +17,19 @@ class FileWriteStream extends Writable {
     this.fd = 0
   }
 
-  _open (cb) {
+  _open(cb) {
     this._openp().then(cb, cb)
   }
 
-  _final (cb) {
+  _final(cb) {
     this._finalp().then(cb, cb)
   }
 
-  _destroy (cb) {
+  _destroy(cb) {
     this._destroyp().then(cb, cb)
   }
 
-  async _openp () {
+  async _openp() {
     this.atomicFilename = this.drive._alloc(this.filename)
 
     const release = await this.drive._lock()
@@ -37,7 +37,14 @@ class FileWriteStream extends Writable {
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
-      this.fd = await openFilePromise(this.atomicFilename, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND, mode)
+      this.fd = await openFilePromise(
+        this.atomicFilename,
+        fs.constants.O_WRONLY |
+          fs.constants.O_CREAT |
+          fs.constants.O_TRUNC |
+          fs.constants.O_APPEND,
+        mode
+      )
     } finally {
       release()
     }
@@ -48,11 +55,11 @@ class FileWriteStream extends Writable {
     }
   }
 
-  _writev (datas, cb) {
+  _writev(datas, cb) {
     fs.writev(this.fd, datas, cb)
   }
 
-  async _destroyp (cb) {
+  async _destroyp(cb) {
     if (this.fd) await closeFilePromise(this.fd)
 
     if (this.atomicFilename !== this.filename) {
@@ -61,7 +68,7 @@ class FileWriteStream extends Writable {
     }
   }
 
-  async _finalp () {
+  async _finalp() {
     if (this.metadata === null) {
       if (this.drive.metadata.del) {
         await this.drive.metadata.del(this.key)
@@ -80,7 +87,7 @@ class FileWriteStream extends Writable {
     }
   }
 
-  _free () {
+  _free() {
     if (this.atomicFilename === this.filename) return
     this.drive._free(this.atomicFilename)
     this.atomicFilename = this.filename
@@ -88,7 +95,7 @@ class FileWriteStream extends Writable {
 }
 
 class FileReadStream extends Readable {
-  constructor (filename, opts = {}) {
+  constructor(filename, opts = {}) {
     super()
 
     this.filename = filename
@@ -98,11 +105,12 @@ class FileReadStream extends Readable {
     this._missing = 0
 
     if (opts.length) this._missing = opts.length
-    else if (typeof opts.end === 'number') this._missing = opts.end - this._offset + 1
+    else if (typeof opts.end === 'number')
+      this._missing = opts.end - this._offset + 1
     else this._missing = -1
   }
 
-  _open (cb) {
+  _open(cb) {
     fs.open(this.filename, fs.constants.O_RDONLY, (err, fd) => {
       if (err) return cb(err)
 
@@ -110,7 +118,8 @@ class FileReadStream extends Readable {
 
       fs.fstat(fd, (err, st) => {
         if (err) return onerror(err)
-        if (!st.isFile()) return onerror(new Error(this.filename + ' is not a file'))
+        if (!st.isFile())
+          return onerror(new Error(this.filename + ' is not a file'))
 
         this.fd = fd
         if (this._missing === -1) this._missing = st.size
@@ -130,7 +139,7 @@ class FileReadStream extends Readable {
     })
   }
 
-  _read (cb) {
+  _read(cb) {
     if (!this._missing) {
       this.push(null)
       return cb(null)
@@ -156,7 +165,7 @@ class FileReadStream extends Readable {
     })
   }
 
-  _destroy (cb) {
+  _destroy(cb) {
     if (!this.fd) return cb(null)
     fs.close(this.fd, () => cb(null))
   }
@@ -164,11 +173,11 @@ class FileReadStream extends Readable {
 
 module.exports = { FileWriteStream, FileReadStream }
 
-function map (s) {
+function map(s) {
   return typeof s === 'string' ? b4a.from(s) : s
 }
 
-function openFilePromise (filename, flags, mode) {
+function openFilePromise(filename, flags, mode) {
   return new Promise((resolve, reject) => {
     fs.open(filename, flags, mode, function (error, fd) {
       if (error) reject(error)
@@ -177,7 +186,7 @@ function openFilePromise (filename, flags, mode) {
   })
 }
 
-function fstatPromise (fd) {
+function fstatPromise(fd) {
   return new Promise((resolve, reject) => {
     fs.fstat(fd, function (error, stats) {
       if (error) reject(error)
@@ -186,7 +195,7 @@ function fstatPromise (fd) {
   })
 }
 
-function fchmodPromise (fd, mode) {
+function fchmodPromise(fd, mode) {
   return new Promise((resolve, reject) => {
     fs.fchmod(fd, mode, function (error) {
       if (error) reject(error)
@@ -195,7 +204,7 @@ function fchmodPromise (fd, mode) {
   })
 }
 
-function closeFilePromise (fd) {
+function closeFilePromise(fd) {
   return new Promise((resolve, reject) => {
     fs.close(fd, function (error) {
       if (error) reject(error)
@@ -204,7 +213,7 @@ function closeFilePromise (fd) {
   })
 }
 
-function renameFilePromise (oldPath, newPath) {
+function renameFilePromise(oldPath, newPath) {
   return new Promise((resolve, reject) => {
     fs.rename(oldPath, newPath, function (err) {
       if (err) reject(err)
@@ -213,7 +222,7 @@ function renameFilePromise (oldPath, newPath) {
   })
 }
 
-async function unlinkSafe (filename) {
+async function unlinkSafe(filename) {
   try {
     await fsp.unlink(filename)
   } catch (err) {
