@@ -170,8 +170,5 @@ test('get symlinks', async function (t) {
 
   t.absent(await drive.get('/examples/a.shortcut'))
 
-  t.alike(
-    await drive.get('/examples/a.shortcut', { follow: true }),
-    Buffer.from('1st')
-  )
+  t.alike(await drive.get('/examples/a.shortcut', { follow: true }), Buffer.from('1st'))
 })

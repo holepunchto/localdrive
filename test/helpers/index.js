@@ -28,9 +28,7 @@ function createTmpDir(t) {
 }
 
 function createRelativeTmpDir(t) {
-  const tmpdir = path.join(
-    './localdrive-test-' + Math.floor(Math.random() * 100000)
-  )
+  const tmpdir = path.join('./localdrive-test-' + Math.floor(Math.random() * 100000))
   fs.mkdirSync(tmpdir)
   t.teardown(() => rmdir(tmpdir))
   return tmpdir
@@ -45,8 +43,7 @@ function createDrive(t, opts, cfg = {}) {
 
 function generateTestFiles(t, root) {
   const fullpath = (name) => path.join(root, name)
-  const createFile = (name, content) =>
-    fs.writeFileSync(fullpath(name), content)
+  const createFile = (name, content) => fs.writeFileSync(fullpath(name), content)
   const createFolder = (name) => fs.mkdirSync(fullpath(name))
 
   createFile('README.md', '# example')

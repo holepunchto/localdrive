@@ -39,10 +39,7 @@ class FileWriteStream extends Writable {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
       this.fd = await openFilePromise(
         this.atomicFilename,
-        fs.constants.O_WRONLY |
-          fs.constants.O_CREAT |
-          fs.constants.O_TRUNC |
-          fs.constants.O_APPEND,
+        fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND,
         mode
       )
     } finally {
@@ -105,8 +102,7 @@ class FileReadStream extends Readable {
     this._missing = 0
 
     if (opts.length) this._missing = opts.length
-    else if (typeof opts.end === 'number')
-      this._missing = opts.end - this._offset + 1
+    else if (typeof opts.end === 'number') this._missing = opts.end - this._offset + 1
     else this._missing = -1
   }
 
@@ -118,8 +114,7 @@ class FileReadStream extends Readable {
 
       fs.fstat(fd, (err, st) => {
         if (err) return onerror(err)
-        if (!st.isFile())
-          return onerror(new Error(this.filename + ' is not a file'))
+        if (!st.isFile()) return onerror(new Error(this.filename + ' is not a file'))
 
         this.fd = fd
         if (this._missing === -1) this._missing = st.size

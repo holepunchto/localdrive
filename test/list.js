@@ -129,10 +129,7 @@ test('ignore one file in folder', async function (t) {
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
-  await fsp.writeFile(
-    path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'),
-    'file-content'
-  )
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const entry of drive.list({ ignore: ['folder/file_a.txt'] })) {
@@ -147,18 +144,9 @@ test('ignore one file in folder and whole subfolder and unignore file in subfold
   await fsp.mkdir(path.join(tmpdir, 'folder'))
   await fsp.mkdir(path.join(tmpdir, 'folder', 'subfolder'))
   await fsp.writeFile(path.join(tmpdir, 'folder', 'file_a.txt'), 'file-content')
-  await fsp.writeFile(
-    path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'),
-    'file-content'
-  )
-  await fsp.writeFile(
-    path.join(tmpdir, 'folder', 'subfolder', 'file_c.txt'),
-    'file-content'
-  )
-  await fsp.writeFile(
-    path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'),
-    'file-content'
-  )
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_b.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_c.txt'), 'file-content')
+  await fsp.writeFile(path.join(tmpdir, 'folder', 'subfolder', 'file_d.txt'), 'file-content')
   const drive = new Localdrive(tmpdir)
   let entries = 0
   const ignores = ['folder/file_a.txt', 'folder/subfolder']

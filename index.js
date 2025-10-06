@@ -120,8 +120,7 @@ module.exports = class Localdrive {
     }
 
     entry.value.executable = isExecutable(st.mode)
-    if (this.metadata.get)
-      entry.value.metadata = await this.metadata.get(keyname)
+    if (this.metadata.get) entry.value.metadata = await this.metadata.get(keyname)
 
     if (st.isFile()) {
       const blockLength = st.blocks || Math.ceil(st.size / st.blksize) * 8
