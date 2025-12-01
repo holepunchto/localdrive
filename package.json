@@ -39,8 +39,10 @@
   },
   "scripts": {
     "format": "prettier --write .",
-    "lint": "prettier --check .",
-    "test": "npm run lint && brittle test/*.js && brittle test/*.js --relative-tmp-dir"
+    "lint": "prettier --check . && lunte",
+    "test": "npm run test:node && npm run test:bare",
+    "test:node": "brittle-node test/*.js && brittle-node test/*.js --relative-tmp-dir",
+    "test:bare": "brittle-bare test/*.js && brittle-bare test/*.js --relative-tmp-dir"
   },
   "repository": {
     "type": "git",
@@ -66,6 +68,7 @@
     "bare-stream": "^2.7.0",
     "bare-utils": "^1.5.1",
     "brittle": "^3.1.0",
+    "lunte": "^1.0.0",
     "prettier": "^3.6.2",
     "prettier-config-holepunch": "^2.0.0"
   }
