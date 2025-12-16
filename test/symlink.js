@@ -3,6 +3,11 @@ const { createDrive } = require('./helpers/index.js')
 const fs = require('fs')
 const path = require('path')
 
+// Bare's readlink on Windows resolves relative symlinks to absolute paths
+const isBare = typeof Bare !== 'undefined'
+const isWin = path.sep === '\\'
+const bareWin = isBare && isWin
+
 test('symlink(key, linkname) basic', async function (t) {
   const drive = createDrive(t)
 
@@ -52,7 +57,8 @@ test('symlink(key, linkname) relative inside a folder', async function (t) {
   t.is(entry.key, '/examples/README.shortcut')
   t.alike(entry.value, {
     executable: false,
-    linkname: 'more/c.txt',
+    // Bare's readlink on Windows resolves relative symlinks to absolute paths
+    linkname: bareWin ? '/examples/more/c.txt' : 'more/c.txt',
     blob: null,
     metadata: null
   })
