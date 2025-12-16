@@ -392,9 +392,6 @@ async function gcEmptyFolders(root, dir) {
 }
 
 async function isEmptyDirectory(drive, key) {
-  for await (const entry of drive.list(key)) {
-    // eslint-disable-line
-    return false
-  }
+  for await (const entry of drive.list(key)) return false
   return true
 }
