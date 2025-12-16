@@ -75,7 +75,6 @@ test('ignore recursive symlink', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const _entry of drive.list({ ignore: 'symlink' })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -88,7 +87,6 @@ test('ignore everything', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const _entry of drive.list({ ignore: ['symlink', 'file.txt'] })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 0)
@@ -104,7 +102,6 @@ test('ignore only symlinks', async function (t) {
   for await (const _entry of drive.list({
     ignore: ['symlink-a', 'symlink-b']
   })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -118,7 +115,6 @@ test('ignore files in folder', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const _entry of drive.list({ ignore: ['folder'] })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 0)
@@ -133,7 +129,6 @@ test('ignore one file in folder', async function (t) {
   const drive = new Localdrive(tmpdir)
   let entries = 0
   for await (const _entry of drive.list({ ignore: ['folder/file_a.txt'] })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
@@ -165,7 +160,6 @@ test('ignore one file in folder and whole subfolder and unignore file in subfold
     return false
   }
   for await (const _entry of drive.list({ ignore })) {
-    // eslint-disable-line
     entries++
   }
   t.is(entries, 1)
