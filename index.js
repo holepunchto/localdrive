@@ -124,7 +124,7 @@ module.exports = class Localdrive {
     const entry = await this.entry(key, opts)
     if (!entry || !entry.value.blob) return null
 
-    const rs = this.createReadStream(key)
+    const rs = this.createReadStream(entry.key)
     const chunks = []
     for await (const chunk of rs) {
       chunks.push(chunk)
