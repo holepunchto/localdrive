@@ -19,10 +19,26 @@
     "path": {
       "bare": "bare-path",
       "default": "path"
+    },
+    "os": {
+      "bare": "bare-os",
+      "default": "os"
+    },
+    "util": {
+      "bare": "bare-utils",
+      "default": "util"
+    },
+    "stream": {
+      "bare": "bare-stream",
+      "default": "stream"
+    },
+    "process": {
+      "bare": "bare-process",
+      "default": "process"
     }
   },
   "scripts": {
-    "test": "standard && brittle test/*.js && brittle test/*.js --relative-tmp-dir",
+    "test": "standard && brittle-node test/*.js && brittle-node test/*.js --relative-tmp-dir && brittle-bare test/*.js && brittle-bare test/*.js --relative-tmp-dir",
     "lint": "standard"
   },
   "repository": {
@@ -45,6 +61,9 @@
     "unix-path-resolve": "^1.0.2"
   },
   "devDependencies": {
+    "bare-os": "^3.6.2",
+    "bare-stream": "^2.7.0",
+    "bare-utils": "^1.5.1",
     "brittle": "^3.1.0",
     "standard": "^17.0.0"
   }

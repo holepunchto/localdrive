@@ -2,7 +2,9 @@ const Localdrive = require('../../index.js')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
+const process = require('process')
 const { promisify } = require('util')
+const mkdtempSync = require('./mkdtemp.js')
 let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
 
@@ -20,7 +22,7 @@ module.exports = {
 
 function createTmpDir (t) {
   const tmpdir = path.join(os.tmpdir(), 'localdrive-test-')
-  const dir = fs.mkdtempSync(tmpdir)
+  const dir = mkdtempSync(tmpdir)
   t.teardown(() => rmdir(dir))
   return dir
 }
