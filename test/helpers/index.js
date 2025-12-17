@@ -8,8 +8,6 @@ const mkdtempSync = require('./mkdtemp.js')
 let { pipeline, Readable } = require('stream')
 pipeline = promisify(pipeline)
 
-const mkdtempSync = require('./mkdtemp.js')
-
 const isWin = os.platform() === 'win32'
 const isRelativeTmpDir = process.argv.indexOf('--relative-tmp-dir') > -1
 
