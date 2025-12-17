@@ -20,28 +20,28 @@ module.exports = {
   isWin
 }
 
-function createTmpDir (t) {
+function createTmpDir(t) {
   const tmpdir = path.join(os.tmpdir(), 'localdrive-test-')
   const dir = mkdtempSync(tmpdir)
   t.teardown(() => rmdir(dir))
   return dir
 }
 
-function createRelativeTmpDir (t) {
+function createRelativeTmpDir(t) {
   const tmpdir = path.join('./localdrive-test-' + Math.floor(Math.random() * 100000))
   fs.mkdirSync(tmpdir)
   t.teardown(() => rmdir(tmpdir))
   return tmpdir
 }
 
-function createDrive (t, opts, cfg = {}) {
+function createDrive(t, opts, cfg = {}) {
   const root = isRelativeTmpDir ? createRelativeTmpDir(t) : createTmpDir(t)
   if (!cfg.noTestFiles) generateTestFiles(t, root)
 
   return new Localdrive(root, opts)
 }
 
-function generateTestFiles (t, root) {
+function generateTestFiles(t, root) {
   const fullpath = (name) => path.join(root, name)
   const createFile = (name, content) => fs.writeFileSync(fullpath(name), content)
   const createFolder = (name) => fs.mkdirSync(fullpath(name))
@@ -70,7 +70,7 @@ function generateTestFiles (t, root) {
   if (!isWin) fs.symlinkSync('/external', fullpath('external.shortcut'))
 }
 
-async function streamToString (stream) {
+async function streamToString(stream) {
   const chunks = []
   for await (const chunk of stream) {
     chunks.push(chunk)
@@ -78,12 +78,12 @@ async function streamToString (stream) {
   return Buffer.concat(chunks).toString()
 }
 
-async function bufferToStream (buffer, writeStream) {
+async function bufferToStream(buffer, writeStream) {
   const readable = Readable.from(buffer)
   await pipeline(readable, writeStream)
 }
 
-async function rmdir (dir) {
+async function rmdir(dir) {
   try {
     await fs.promises.rm(dir, { recursive: true })
   } catch (error) {

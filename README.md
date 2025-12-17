@@ -7,6 +7,7 @@ npm i localdrive
 ```
 
 ## Usage
+
 ```js
 const Localdrive = require('localdrive')
 
@@ -48,6 +49,7 @@ ws.once('close', () => console.log('file saved'))
 Creates a drive based on a `root` directory. `root` can be relative or absolute.
 
 Available `options`:
+
 ```js
 {
   followLinks: false, // If enabled then `entry(key)` will follow the `linkname`
@@ -88,6 +90,7 @@ It also returns null for symbolic links.
 #### `const entry = await drive.entry(key, [options])`
 
 Returns the entry at `key` path in the drive. It looks like this:
+
 ```js
 {
   key: String,
@@ -107,6 +110,7 @@ Returns the entry at `key` path in the drive. It looks like this:
 ```
 
 Available `options`:
+
 ```js
 {
   follow: false // Follow symlinks, 16 max or throws an error
@@ -132,6 +136,7 @@ Returns `0` if entries are the same, `1` if `entryA` is older, and `-1` if `entr
 Returns a stream of all entries in the drive inside of specified `folder`.
 
 Available `options`:
+
 ```js
 {
   ignore: String || Array // Ignore file and folders by name.
@@ -153,6 +158,7 @@ Call `await mirror.done()` to wait for the mirroring to finish.
 Returns a stream to read out the blob stored in the drive at `key` path.
 
 Available `options`:
+
 ```js
 {
   start: Number,
@@ -169,6 +175,7 @@ Available `options`:
 Stream a blob into the drive at `key` path.
 
 Available `options`:
+
 ```js
 {
   executable: Boolean
@@ -178,11 +185,13 @@ Available `options`:
 ## Examples
 
 ### Metadata hooks
+
 Metadata backed by `Map`:
+
 ```js
 const meta = new Map()
 const metadata = {
-  get: (key) => meta.has(key) ? meta.get(key) : null,
+  get: (key) => (meta.has(key) ? meta.get(key) : null),
   put: (key, value) => meta.set(key, value),
   del: (key) => meta.delete(key)
 }
@@ -193,9 +202,11 @@ const drive = new Localdrive('./my-app', { metadata })
 ```
 
 Note: `metadata.del()` will also be called when metadata is `null`:
+
 ```js
 await drive.put('/file.txt', Buffer.from('a')) // Default metadata is null
 ```
 
 ## License
+
 Apache-2.0

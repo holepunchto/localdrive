@@ -61,13 +61,15 @@ test('metadata backed by map', async function (t) {
   const drive = createDrive(t)
 
   const meta = new Map()
-  drive.metadata.get = (key) => meta.has(key) ? meta.get(key) : null
+  drive.metadata.get = (key) => (meta.has(key) ? meta.get(key) : null)
   drive.metadata.put = (key, value) => meta.set(key, value)
   drive.metadata.del = (key) => meta.delete(key)
 
   t.is((await drive.entry('/LICENSE')).value.metadata, null)
 
-  await drive.put('/LICENSE', Buffer.from('MIT'), { metadata: 'Typical license' })
+  await drive.put('/LICENSE', Buffer.from('MIT'), {
+    metadata: 'Typical license'
+  })
 
   t.is((await drive.entry('/LICENSE')).value.metadata, 'Typical license')
 
@@ -86,7 +88,9 @@ test('metadata automatic map', async function (t) {
 
   t.is((await drive.entry('/LICENSE')).value.metadata, null)
 
-  await drive.put('/LICENSE', Buffer.from('MIT'), { metadata: 'Typical license' })
+  await drive.put('/LICENSE', Buffer.from('MIT'), {
+    metadata: 'Typical license'
+  })
 
   t.is((await drive.entry('/LICENSE')).value.metadata, 'Typical license')
 
@@ -104,9 +108,9 @@ test('metadata hooks defined in constructor', async function (t) {
     metadata: { get, put, del }
   })
 
-  function get () {}
-  function put () {}
-  function del () {}
+  function get() {}
+  function put() {}
+  function del() {}
 
   t.is(drive.metadata.get, get)
   t.is(drive.metadata.put, put)

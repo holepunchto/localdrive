@@ -48,7 +48,7 @@ test('createWriteStream(key) write and end', function (t) {
   ws.write(data)
   ws.end()
 
-  async function onClose () {
+  async function onClose() {
     const entry = await drive.entry('/new-example.txt')
     t.alike(entry.value, {
       executable: false,

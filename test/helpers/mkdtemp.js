@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 // Polyfill as mkdtempSync doesn't exist in bare-fs
-function mkdtempSync (prefix) {
+function mkdtempSync(prefix) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let suffix = ''
   for (let i = 0; i < 6; i++) {
