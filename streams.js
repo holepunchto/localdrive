@@ -33,7 +33,7 @@ class FileWriteStream extends Writable {
     this.atomicFilename = this.drive._alloc(this.filename)
 
     const release = await this.drive._lock()
-    const mode = this.executable ? 0o744 : 0o644
+    const mode = this.executable ? 0o755 : 0o644
 
     try {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
