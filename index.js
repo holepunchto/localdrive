@@ -92,7 +92,7 @@ module.exports = class Localdrive {
     const keyname = unixPathResolve('/', key)
     const { st, filename } = await this._resolve(path.join(this.root, keyname))
 
-    if (!st || st.isDirectory()) {
+    if (!st || st.isDirectory() || (await hasSymlinkInParents(this.root, filename))) {
       return null
     }
 
@@ -205,16 +205,7 @@ module.exports = class Localdrive {
       const st = await lstat(target)
       const type = st && st.isDirectory() ? 'junction' : null
 
-      try {
-        await fsp.symlink(target, pointer, type)
-      } catch (err) {
-        if (err.code !== 'EEXIST') {
-          throw err
-        } else {
-          await fsp.rm(pointer, { recursive: true })
-          await fsp.symlink(target, pointer, type)
-        }
-      }
+      await fsp.symlink(target, pointer, type)
     } finally {
       release()
     }
@@ -403,4 +394,15 @@ async function gcEmptyFolders(root, dir) {
 async function isEmptyDirectory(drive, key) {
   for await (const entry of drive.list(key)) return false
   return true
+}
+
+async function hasSymlinkInParents(root, filename) {
+  let current = path.dirname(filename)
+  while (true) {
+    current = path.dirname(current)
+    if (current === root || current === path.dirname(root)) break
+    const stat = await fsp.lstat(current).catch(() => null)
+    if (stat?.isSymbolicLink()) return true
+  }
+  return false
 }
