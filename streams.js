@@ -36,18 +36,6 @@ class FileWriteStream extends Writable {
     const mode = this.executable ? 0o755 : 0o644
 
     try {
-      const parent = path.dirname(this.filename)
-      let stat
-      try {
-        stat = await fsp.lstat(parent)
-      } catch {}
-      if (stat?.isSymbolicLink()) {
-        const target = await fsp.readlink(parent)
-        const resolvedTarget = path.resolve(path.dirname(parent), target)
-        await fsp.mkdir(resolvedTarget, { recursive: true })
-        this.filename = this.filename.replace(parent, target)
-        this.atomicFilename = this.drive._alloc(this.filename)
-      }
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
       this.fd = await openFilePromise(
         this.atomicFilename,
