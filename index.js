@@ -167,11 +167,16 @@ module.exports = class Localdrive {
     const keyname = unixPathResolve('/', key)
     const filename = path.join(this.root, keyname)
 
-    try {
-      await fsp.unlink(filename)
-    } catch (error) {
-      if (error.code === 'ENOENT') return
-      throw error
+    const stat = await fsp.lstat(filename).catch(() => null)
+    if (stat && stat.isDirectory()) {
+      await fsp.rm(filename, { recursive: true, force: true })
+    } else {
+      try {
+        await fsp.unlink(filename)
+      } catch (error) {
+        if (error.code === 'ENOENT') return
+        throw error
+      }
     }
 
     const dir = path.dirname(filename)
