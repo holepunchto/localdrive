@@ -205,7 +205,16 @@ module.exports = class Localdrive {
       const st = await lstat(target)
       const type = st && st.isDirectory() ? 'junction' : null
 
-      await fsp.symlink(target, pointer, type)
+      try {
+        await fsp.symlink(target, pointer, type)
+      } catch (err) {
+        if (err.code !== 'EEXIST') {
+          throw err
+        } else {
+          await fsp.rm(pointer, { recursive: true })
+          await fsp.symlink(target, pointer, type)
+        }
+      }
     } finally {
       release()
     }
