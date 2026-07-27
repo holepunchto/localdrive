@@ -3,9 +3,11 @@
   "version": "2.2.1",
   "description": "File system interoperable with Hyperdrive",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "index.js",
-    "streams.js"
+    "streams.js",
+    "index.d.ts"
   ],
   "imports": {
     "fs": {
