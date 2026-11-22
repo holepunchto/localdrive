@@ -189,6 +189,8 @@ module.exports = class Localdrive {
   }
 
   async symlink(key, linkname) {
+    if (escapesRoot(linkname)) throw new Error(`Symlink target escapes root: ${linkname}`)
+
     const entry = await this.entry(key)
     if (entry) await this.del(key)
 
@@ -394,4 +396,11 @@ async function gcEmptyFolders(root, dir) {
 async function isEmptyDirectory(drive, key) {
   for await (const entry of drive.list(key)) return false
   return true
+}
+
+function escapesRoot(p) {
+  if (p.startsWith('/')) return false
+  if (!p.startsWith('/') && path.isAbsolute(p)) return true // this is a Windows absolute path, flag it
+  const n = path.normalize(p)
+  return n === '..' || n.startsWith('..' + path.sep)
 }

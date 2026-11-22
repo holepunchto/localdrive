@@ -2,6 +2,8 @@ const test = require('brittle')
 const { createDrive } = require('./helpers/index.js')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
+const Localdrive = require('..')
 
 // Bare's readlink on Windows resolves relative symlinks to absolute paths
 const isBare = typeof Bare !== 'undefined'
@@ -140,6 +142,20 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   )
 })
 
+test(
+  'symlink(key, linkname) rejects a windows drive-absolute linkname',
+  { skip: !isWin },
+  async function (t) {
+    const drive = createDrive(t)
+
+    await t.exception(
+      () => drive.symlink('/file.shortcut', 'C:\\Windows\\System32\\file.dll'),
+      /escapes root/
+    )
+    t.absent(await drive.entry('/file.shortcut'))
+  }
+)
+
 test('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
@@ -171,4 +187,20 @@ test('get symlinks', async function (t) {
   t.absent(await drive.get('/examples/a.shortcut'))
 
   t.alike(await drive.get('/examples/a.shortcut', { follow: true }), Buffer.from('1st'))
+})
+
+test('symlink(key, linkname) rejects a relative linkname that escapes root', async function (t) {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'localdrive-'))
+  t.teardown(() => fs.rmSync(base, { recursive: true, force: true }))
+  fs.mkdirSync(path.join(base, 'outside'))
+
+  const drive = new Localdrive(path.join(base, 'root'))
+
+  await t.exception(() => drive.symlink('/link', '../outside'), /escapes root/)
+  t.absent(await drive.entry('/link'))
+
+  // the symlink was never created, so this just writes a plain file inside root
+  await drive.put('/link/file.txt', Buffer.from('hello'))
+  t.ok(fs.existsSync(path.join(drive.root, 'link', 'file.txt')))
+  t.absent(fs.existsSync(path.join(base, 'outside', 'file.txt')))
 })
