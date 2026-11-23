@@ -1,8 +1,10 @@
 const test = require('brittle')
 const { createDrive, createTmpDir } = require('./helpers/index.js')
 const fs = require('fs')
+const process = require('process')
 const path = require('path')
 const os = require('os')
+
 const Localdrive = require('..')
 
 // Bare's readlink on Windows resolves relative symlinks to absolute paths
@@ -163,7 +165,7 @@ test(
     const drive = createDrive(t)
 
     const originalCwd = process.cwd()
-    t.teardown(() => process.chdir(originalCwd))
+    t.teardown(() => process.chdir(originalCwd), { order: -1 })
     process.chdir(os.tmpdir())
 
     await drive.symlink('/more.shortcut', 'examples/more')
