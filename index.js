@@ -419,7 +419,7 @@ async function isEmptyDirectory(drive, key) {
 }
 
 // Resolves the real (symlink-free) path of the longest existing ancestor of
-// `filename`, then appends the remaining, not-yet-existing suffix
+// `filename`, then appends the remaining not-yet-existing suffix
 async function realpathLongestExisting(filename) {
   let suffix = ''
   let dir = filename
