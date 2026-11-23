@@ -30,13 +30,12 @@ class FileWriteStream extends Writable {
   }
 
   async _openp() {
-    this.atomicFilename = this.drive._alloc(this.filename)
-
     const release = await this.drive._lock()
     const mode = this.executable ? 0o755 : 0o644
 
     try {
       await this.drive._assertInsideRoot(path.dirname(this.filename))
+      this.atomicFilename = this.drive._alloc(this.filename)
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
 
       // writing must replace an existing symlink instead of following it
