@@ -36,7 +36,12 @@ class FileWriteStream extends Writable {
     const mode = this.executable ? 0o755 : 0o644
 
     try {
+      await this.drive._assertInsideRoot(path.dirname(this.filename))
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
+
+      // writing must replace an existing symlink instead of following it
+      if (this.atomicFilename === this.filename) await unlinkIfSymlink(this.filename)
+
       this.fd = await openFilePromise(
         this.atomicFilename,
         fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND,
@@ -220,6 +225,15 @@ function renameFilePromise(oldPath, newPath) {
 async function unlinkSafe(filename) {
   try {
     await fsp.unlink(filename)
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
+}
+
+async function unlinkIfSymlink(filename) {
+  try {
+    const st = await fsp.lstat(filename)
+    if (st.isSymbolicLink()) await fsp.unlink(filename)
   } catch (err) {
     if (err.code !== 'ENOENT') throw err
   }
