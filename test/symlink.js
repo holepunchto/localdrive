@@ -156,6 +156,26 @@ test(
   }
 )
 
+test(
+  'symlink(key, linkname) relative directory target resolves independently of cwd',
+  { skip: !isWin },
+  async function (t) {
+    const drive = createDrive(t)
+
+    const originalCwd = process.cwd()
+    t.teardown(() => process.chdir(originalCwd))
+    process.chdir(os.tmpdir())
+
+    await drive.symlink('/more.shortcut', 'examples/more')
+
+    const pointer = drive.toPath('/more.shortcut')
+    t.ok(fs.lstatSync(pointer).isSymbolicLink())
+    t.ok(path.isAbsolute(fs.readlinkSync(pointer)))
+
+    t.alike(fs.readdirSync(pointer), fs.readdirSync(path.join(drive.root, 'examples', 'more')))
+  }
+)
+
 test('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
