@@ -227,7 +227,8 @@ module.exports = class Localdrive {
     const realRoot = await realpathLongestExisting(this.root)
     const real = await realpathLongestExisting(filename)
 
-    if (real !== realRoot && !real.startsWith(realRoot + path.sep)) {
+    const prefix = realRoot.endsWith(path.sep) ? realRoot : realRoot + path.sep
+    if (real !== realRoot && !real.startsWith(prefix)) {
       throw new Error(`Path escapes root: ${filename}`)
     }
   }

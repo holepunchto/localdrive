@@ -40,7 +40,7 @@ class FileWriteStream extends Writable {
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
 
       // writing must replace an existing symlink instead of following it
-      if (this.atomicFilename === this.filename) await unlinkIfSymlink(this.filename)
+      await unlinkIfSymlink(this.atomicFilename)
 
       this.fd = await openFilePromise(
         this.atomicFilename,

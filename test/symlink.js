@@ -279,3 +279,43 @@ test('symlink(key, linkname) relative to parent folder', async function (t) {
   await drive.symlink('/examples/LICENSE.shortcut', '../LICENSE')
   t.alike(fs.readFileSync(drive.toPath('/examples/LICENSE.shortcut')), Buffer.from('MIT'))
 })
+
+test('put(key, buffer) atomic with symlink at temp file', async function (t) {
+  const drive = createDrive(t, { atomic: true })
+  const outside = createTmpDir(t)
+
+  fs.symlinkSync(path.join(outside, 'a.txt'), path.join(drive.root, 'a.txt.0.localdrive.tmp'))
+
+  await drive.put('/a.txt', Buffer.from('a'))
+  t.alike(await drive.get('/a.txt'), Buffer.from('a'))
+  t.alike(fs.readdirSync(outside), [])
+})
+
+test('put(key, buffer) atomic with relative symlink at temp file', async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'), { atomic: true })
+  fs.mkdirSync(path.join(tmp, 'outside'))
+
+  await drive.symlink('/a.txt.0.localdrive.tmp', 'b/../outside/a.txt')
+  await drive.symlink('/b', '.')
+  await drive.put('/a.txt', Buffer.from('a'))
+
+  t.alike(await drive.get('/a.txt'), Buffer.from('a'))
+  t.alike(fs.readdirSync(path.join(tmp, 'outside')), [])
+})
+
+test('put, symlink and del with filesystem root', async function (t) {
+  const tmp = path.resolve(createTmpDir(t))
+  const root = tmp.split(path.sep)[0] + path.sep
+  const drive = new Localdrive(root)
+  const dir = '/' + path.relative(root, tmp).split(path.sep).join('/')
+
+  await t.execution(drive.put(dir + '/a.txt', Buffer.from('a')))
+  t.alike(await drive.get(dir + '/a.txt'), Buffer.from('a'))
+
+  await t.execution(drive.symlink(dir + '/b.txt', dir + '/a.txt'))
+  t.ok(await drive.entry(dir + '/b.txt'))
+
+  await t.execution(drive.del(dir + '/b.txt'))
+  t.absent(await drive.entry(dir + '/b.txt'))
+})
