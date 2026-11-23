@@ -170,7 +170,7 @@ test(
 
     const pointer = drive.toPath('/more.shortcut')
     t.ok(fs.lstatSync(pointer).isSymbolicLink())
-    t.ok(path.isAbsolute(fs.readlinkSync(pointer)))
+    t.ok(path.isAbsolute(fs.readlinkSync(pointer))) // a junction always point to an absolute path
 
     t.alike(fs.readdirSync(pointer), fs.readdirSync(path.join(drive.root, 'examples', 'more')))
   }
