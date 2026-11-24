@@ -352,7 +352,7 @@ test('get(key) through link outside root', async function (t) {
   await t.exception(drive.get('/linked/a.txt'))
 })
 
-test('get(key) through relative link to root', async function (t) {
+test('get(key) through relative link to root', { skip: isWin }, async function (t) {
   const tmp = createTmpDir(t)
   const drive = new Localdrive(path.join(tmp, 'root'))
 
@@ -363,4 +363,19 @@ test('get(key) through relative link to root', async function (t) {
   await drive.symlink('/a', '.')
 
   await t.exception(drive.get('/b/a.txt'))
+})
+
+test('get(key) through link swapped to escape root after creation', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.mkdirSync(path.join(drive.root, 'real'))
+
+  await drive.symlink('/a', 'real') // validated as inside root while /real is a plain directory
+
+  fs.rmdirSync(path.join(drive.root, 'real'))
+  fs.symlinkSync(outside, path.join(drive.root, 'real'), 'junction') // swapped for a link that escapes
+
+  await t.exception(drive.get('/a/a.txt'))
 })
