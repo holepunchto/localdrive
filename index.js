@@ -57,6 +57,8 @@ module.exports = class Localdrive {
   }
 
   async _resolve(filename) {
+    await this._assertInsideRoot(path.dirname(filename))
+
     if (this._followLinks) {
       const st = await stat(filename)
       return { st, filename }

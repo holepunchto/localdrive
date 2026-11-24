@@ -341,3 +341,26 @@ test('put, symlink and del with filesystem root', async function (t) {
   await t.execution(drive.del(dir + '/b.txt'))
   t.absent(await drive.entry(dir + '/b.txt'))
 })
+
+test('get(key) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(drive.get('/linked/a.txt'))
+})
+
+test('get(key) through relative link to root', async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'), { followLinks: true, followExternalLinks: true })
+
+  fs.mkdirSync(path.join(tmp, 'outside'))
+  fs.writeFileSync(path.join(tmp, 'outside', 'a.txt'), 'a')
+
+  await drive.symlink('/b', 'a/../outside') // accepted while /a does not exist
+  await drive.symlink('/a', '.')
+
+  await t.exception(drive.get('/b/a.txt'))
+})
