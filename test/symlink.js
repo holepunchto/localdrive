@@ -354,7 +354,7 @@ test('get(key) through link outside root', async function (t) {
 
 test('get(key) through relative link to root', async function (t) {
   const tmp = createTmpDir(t)
-  const drive = new Localdrive(path.join(tmp, 'root'), { followLinks: true, followExternalLinks: true })
+  const drive = new Localdrive(path.join(tmp, 'root'))
 
   fs.mkdirSync(path.join(tmp, 'outside'))
   fs.writeFileSync(path.join(tmp, 'outside', 'a.txt'), 'a')
