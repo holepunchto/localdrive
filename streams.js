@@ -96,10 +96,11 @@ class FileWriteStream extends Writable {
 }
 
 class FileReadStream extends Readable {
-  constructor(filename, opts = {}) {
+  constructor(filename, drive, opts = {}) {
     super()
 
     this.filename = filename
+    this.drive = drive
     this.fd = 0
 
     this._offset = opts.start || 0
@@ -111,6 +112,13 @@ class FileReadStream extends Readable {
   }
 
   _open(cb) {
+    this.drive._resolve(this.filename).then((resolved) => {
+      this.filename = resolved.filename
+      this._openFile(cb)
+    }, cb)
+  }
+
+  _openFile(cb) {
     fs.open(this.filename, fs.constants.O_RDONLY, (err, fd) => {
       if (err) return cb(err)
 

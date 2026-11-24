@@ -379,3 +379,26 @@ test('get(key) through link swapped to escape root after creation', async functi
 
   await t.exception(drive.get('/a/a.txt'))
 })
+
+test('createReadStream(key) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(async function () {
+    const chunks = []
+    for await (const chunk of drive.createReadStream('/linked/a.txt')) chunks.push(chunk)
+  })
+})
+
+test('get(key) through link outside root with followLinks', async function (t) {
+  const drive = createDrive(t, { followLinks: true })
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  t.alike(await drive.get('/linked/a.txt'), Buffer.from('a'))
+})

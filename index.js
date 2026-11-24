@@ -57,12 +57,12 @@ module.exports = class Localdrive {
   }
 
   async _resolve(filename) {
-    await this._assertInsideRoot(path.dirname(filename))
-
     if (this._followLinks) {
       const st = await stat(filename)
       return { st, filename }
     }
+
+    await this._assertInsideRoot(path.dirname(filename))
 
     if (!this._followExternalLinks) {
       const st = await lstat(filename)
@@ -324,7 +324,7 @@ module.exports = class Localdrive {
     if (typeof key === 'object') key = key.key
 
     const filename = this.toPath(key)
-    return new FileReadStream(filename, opts)
+    return new FileReadStream(filename, this, opts)
   }
 
   createWriteStream(key, opts) {
