@@ -62,6 +62,8 @@ module.exports = class Localdrive {
       return { st, filename }
     }
 
+    await this._assertInsideRoot(path.dirname(filename))
+
     if (!this._followExternalLinks) {
       const st = await lstat(filename)
       return { st, filename }
@@ -167,6 +169,8 @@ module.exports = class Localdrive {
     const keyname = unixPathResolve('/', key)
     const filename = path.join(this.root, keyname)
 
+    await this._assertInsideRoot(path.dirname(filename))
+
     try {
       await fsp.unlink(filename)
     } catch (error) {
@@ -189,25 +193,45 @@ module.exports = class Localdrive {
   }
 
   async symlink(key, linkname) {
+    const pointer = this.toPath(key)
+
+    if (!linkname.startsWith('/') && path.isAbsolute(linkname)) {
+      // this is a Windows absolute path, flag it
+      throw new Error(`Symlink target escapes root: ${linkname}`)
+    }
+
+    const target = linkname.startsWith('/')
+      ? this.toPath(linkname)
+      : linkname.replace(/\//g, path.sep)
+
+    const rawTarget = linkname.startsWith('/') ? target : path.dirname(pointer) + path.sep + target
+
+    await this._assertInsideRoot(path.dirname(pointer))
+    await this._assertInsideRoot(rawTarget)
+
     const entry = await this.entry(key)
     if (entry) await this.del(key)
-
-    const pointer = this.toPath(key)
 
     const release = await this._lock()
     try {
       await fsp.mkdir(path.dirname(pointer), { recursive: true })
 
-      const target = linkname.startsWith('/')
-        ? this.toPath(linkname)
-        : linkname.replace(/\//g, path.sep)
-
-      const st = await lstat(target)
+      const st = await lstat(rawTarget)
       const type = st && st.isDirectory() ? 'junction' : null
 
       await fsp.symlink(target, pointer, type)
     } finally {
       release()
+    }
+  }
+
+  async _assertInsideRoot(filename) {
+    const realRoot = await realpathLongestExisting(this.root)
+    const real = await realpathLongestExisting(filename)
+
+    const prefix = realRoot.endsWith(path.sep) ? realRoot : realRoot + path.sep
+    if (real !== realRoot && !real.startsWith(prefix)) {
+      throw new Error(`Path escapes root: ${filename}`)
     }
   }
 
@@ -300,7 +324,7 @@ module.exports = class Localdrive {
     if (typeof key === 'object') key = key.key
 
     const filename = this.toPath(key)
-    return new FileReadStream(filename, opts)
+    return new FileReadStream(filename, this, opts)
   }
 
   createWriteStream(key, opts) {
@@ -394,4 +418,26 @@ async function gcEmptyFolders(root, dir) {
 async function isEmptyDirectory(drive, key) {
   for await (const entry of drive.list(key)) return false
   return true
+}
+
+// Resolves the real (symlink-free) path of the longest existing ancestor of
+// `filename`, then appends the remaining not-yet-existing suffix
+async function realpathLongestExisting(filename) {
+  let suffix = ''
+  let dir = filename
+
+  while (true) {
+    try {
+      const real = await fsp.realpath(dir)
+      return suffix ? path.join(real, suffix) : real
+    } catch (err) {
+      if (err.code !== 'ENOENT' && err.code !== 'ENOTDIR') throw err
+
+      const parent = path.dirname(dir)
+      if (parent === dir) return suffix ? path.join(dir, suffix) : dir
+
+      suffix = suffix ? path.join(path.basename(dir), suffix) : path.basename(dir)
+      dir = parent
+    }
+  }
 }

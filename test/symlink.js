@@ -1,7 +1,11 @@
 const test = require('brittle')
-const { createDrive } = require('./helpers/index.js')
+const { createDrive, createTmpDir } = require('./helpers/index.js')
 const fs = require('fs')
+const process = require('process')
 const path = require('path')
+const os = require('os')
+
+const Localdrive = require('..')
 
 // Bare's readlink on Windows resolves relative symlinks to absolute paths
 const isBare = typeof Bare !== 'undefined'
@@ -140,6 +144,40 @@ test('symlink(key, linkname) resolve key path', async function (t) {
   )
 })
 
+test(
+  'symlink(key, linkname) rejects a windows drive-absolute linkname',
+  { skip: !isWin },
+  async function (t) {
+    const drive = createDrive(t)
+
+    await t.exception(
+      () => drive.symlink('/file.shortcut', 'C:\\Windows\\System32\\file.dll'),
+      /escapes root/
+    )
+    t.absent(await drive.entry('/file.shortcut'))
+  }
+)
+
+test(
+  'symlink(key, linkname) relative directory target resolves independently of cwd',
+  { skip: !isWin },
+  async function (t) {
+    const drive = createDrive(t)
+
+    const originalCwd = process.cwd()
+    t.teardown(() => process.chdir(originalCwd), { order: -1 })
+    process.chdir(os.tmpdir())
+
+    await drive.symlink('/more.shortcut', 'examples/more')
+
+    const pointer = drive.toPath('/more.shortcut')
+    t.ok(fs.lstatSync(pointer).isSymbolicLink())
+    t.ok(path.isAbsolute(fs.readlinkSync(pointer))) // a junction always points to an absolute path
+
+    t.alike(fs.readdirSync(pointer), fs.readdirSync(path.join(drive.root, 'examples', 'more')))
+  }
+)
+
 test('symlink(key, linkname) mutex', async function (t) {
   const drive = createDrive(t)
 
@@ -171,4 +209,196 @@ test('get symlinks', async function (t) {
   t.absent(await drive.get('/examples/a.shortcut'))
 
   t.alike(await drive.get('/examples/a.shortcut', { follow: true }), Buffer.from('1st'))
+})
+
+test('symlink(key, linkname) rejects a relative linkname that escapes root', async function (t) {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'localdrive-'))
+  t.teardown(() => fs.rmSync(base, { recursive: true, force: true }))
+  fs.mkdirSync(path.join(base, 'outside'))
+
+  const drive = new Localdrive(path.join(base, 'root'))
+
+  await t.exception(() => drive.symlink('/link', '../outside'), /escapes root/)
+  t.absent(await drive.entry('/link'))
+
+  // the symlink was never created, so this just writes a plain file inside root
+  await drive.put('/link/file.txt', Buffer.from('hello'))
+  t.ok(fs.existsSync(path.join(drive.root, 'link', 'file.txt')))
+  t.absent(fs.existsSync(path.join(base, 'outside', 'file.txt')))
+})
+
+test('symlink(key, linkname) relative through relative link to root', async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'))
+  fs.mkdirSync(path.join(tmp, 'outside'))
+
+  await drive.symlink('/a', '.')
+  await t.exception(async function () {
+    await drive.symlink('/b', 'a/../outside')
+    await drive.put('/b/c.txt', Buffer.from('c'))
+  })
+  t.alike(fs.readdirSync(path.join(tmp, 'outside')), [])
+})
+
+test('symlink(key, linkname) relative through absolute link to root', async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'))
+  fs.mkdirSync(path.join(tmp, 'outside'))
+
+  await drive.symlink('/a/b', '/')
+  await t.exception(async function () {
+    await drive.symlink('/c', 'a/b/../outside')
+    await drive.put('/c/d.txt', Buffer.from('d'))
+  })
+  t.alike(fs.readdirSync(path.join(tmp, 'outside')), [])
+})
+
+test('symlink(key, linkname) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(drive.symlink('/linked/LICENSE.shortcut', '/LICENSE'))
+  t.alike(fs.readdirSync(outside), [])
+})
+
+test('put(key, buffer) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(drive.put('/linked/a.txt', Buffer.from('a')))
+  await t.exception(drive.put('/linked/b/c.txt', Buffer.from('c')))
+  t.alike(fs.readdirSync(outside), [])
+})
+
+test('put(key, buffer) replace symlink', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.symlink('/LICENSE.link', '/LICENSE')
+  await drive.put('/LICENSE.link', Buffer.from('ISC'))
+
+  t.is((await drive.entry('/LICENSE.link')).value.linkname, null)
+  t.alike(await drive.get('/LICENSE'), Buffer.from('MIT'))
+})
+
+test('del(key) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(drive.del('/linked/a.txt'))
+  t.ok(fs.existsSync(path.join(outside, 'a.txt')))
+})
+
+test('symlink(key, linkname) relative to parent folder', async function (t) {
+  const drive = createDrive(t)
+
+  await drive.symlink('/examples/LICENSE.shortcut', '../LICENSE')
+  t.alike(fs.readFileSync(drive.toPath('/examples/LICENSE.shortcut')), Buffer.from('MIT'))
+})
+
+test('put(key, buffer) atomic with symlink at temp file', async function (t) {
+  const drive = createDrive(t, { atomic: true })
+  const outside = createTmpDir(t)
+
+  fs.symlinkSync(path.join(outside, 'a.txt'), path.join(drive.root, 'a.txt.0.localdrive.tmp'))
+
+  await drive.put('/a.txt', Buffer.from('a'))
+  t.alike(await drive.get('/a.txt'), Buffer.from('a'))
+  t.alike(fs.readdirSync(outside), [])
+})
+
+test('put(key, buffer) atomic with relative symlink at temp file', async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'), { atomic: true })
+  fs.mkdirSync(path.join(tmp, 'outside'))
+
+  await drive.symlink('/a.txt.0.localdrive.tmp', 'b/../outside/a.txt')
+  await drive.symlink('/b', '.')
+  await drive.put('/a.txt', Buffer.from('a'))
+
+  t.alike(await drive.get('/a.txt'), Buffer.from('a'))
+  t.alike(fs.readdirSync(path.join(tmp, 'outside')), [])
+})
+
+test('put, symlink and del with filesystem root', async function (t) {
+  const tmp = path.resolve(createTmpDir(t))
+  const root = tmp.split(path.sep)[0] + path.sep
+  const drive = new Localdrive(root)
+  const dir = '/' + path.relative(root, tmp).split(path.sep).join('/')
+
+  await t.execution(drive.put(dir + '/a.txt', Buffer.from('a')))
+  t.alike(await drive.get(dir + '/a.txt'), Buffer.from('a'))
+
+  await t.execution(drive.symlink(dir + '/b.txt', dir + '/a.txt'))
+  t.ok(await drive.entry(dir + '/b.txt'))
+
+  await t.execution(drive.del(dir + '/b.txt'))
+  t.absent(await drive.entry(dir + '/b.txt'))
+})
+
+test('get(key) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(drive.get('/linked/a.txt'))
+})
+
+test('get(key) through relative link to root', { skip: isWin }, async function (t) {
+  const tmp = createTmpDir(t)
+  const drive = new Localdrive(path.join(tmp, 'root'))
+
+  fs.mkdirSync(path.join(tmp, 'outside'))
+  fs.writeFileSync(path.join(tmp, 'outside', 'a.txt'), 'a')
+
+  await drive.symlink('/b', 'a/../outside') // accepted while /a does not exist
+  await drive.symlink('/a', '.')
+
+  await t.exception(drive.get('/b/a.txt'))
+})
+
+test('get(key) through link swapped to escape root after creation', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.mkdirSync(path.join(drive.root, 'real'))
+
+  await drive.symlink('/a', 'real') // validated as inside root while /real is a plain directory
+
+  fs.rmdirSync(path.join(drive.root, 'real'))
+  fs.symlinkSync(outside, path.join(drive.root, 'real'), 'junction') // swapped for a link that escapes
+
+  await t.exception(drive.get('/a/a.txt'))
+})
+
+test('createReadStream(key) through link outside root', async function (t) {
+  const drive = createDrive(t)
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  await t.exception(async function () {
+    const chunks = []
+    for await (const chunk of drive.createReadStream('/linked/a.txt')) chunks.push(chunk)
+  })
+})
+
+test('get(key) through link outside root with followLinks', async function (t) {
+  const drive = createDrive(t, { followLinks: true })
+  const outside = createTmpDir(t)
+
+  fs.writeFileSync(path.join(outside, 'a.txt'), 'a')
+  fs.symlinkSync(outside, path.join(drive.root, 'linked'), 'junction')
+
+  t.alike(await drive.get('/linked/a.txt'), Buffer.from('a'))
 })

@@ -30,13 +30,17 @@ class FileWriteStream extends Writable {
   }
 
   async _openp() {
-    this.atomicFilename = this.drive._alloc(this.filename)
-
     const release = await this.drive._lock()
     const mode = this.executable ? 0o755 : 0o644
 
     try {
+      await this.drive._assertInsideRoot(path.dirname(this.filename))
+      this.atomicFilename = this.drive._alloc(this.filename)
       await fsp.mkdir(path.dirname(this.filename), { recursive: true })
+
+      // writing must replace an existing symlink instead of following it
+      await unlinkIfSymlink(this.atomicFilename)
+
       this.fd = await openFilePromise(
         this.atomicFilename,
         fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | fs.constants.O_APPEND,
@@ -92,10 +96,11 @@ class FileWriteStream extends Writable {
 }
 
 class FileReadStream extends Readable {
-  constructor(filename, opts = {}) {
+  constructor(filename, drive, opts = {}) {
     super()
 
     this.filename = filename
+    this.drive = drive
     this.fd = 0
 
     this._offset = opts.start || 0
@@ -107,6 +112,13 @@ class FileReadStream extends Readable {
   }
 
   _open(cb) {
+    this.drive._resolve(this.filename).then((resolved) => {
+      this.filename = resolved.filename
+      this._openFile(cb)
+    }, cb)
+  }
+
+  _openFile(cb) {
     fs.open(this.filename, fs.constants.O_RDONLY, (err, fd) => {
       if (err) return cb(err)
 
@@ -220,6 +232,15 @@ function renameFilePromise(oldPath, newPath) {
 async function unlinkSafe(filename) {
   try {
     await fsp.unlink(filename)
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
+}
+
+async function unlinkIfSymlink(filename) {
+  try {
+    const st = await fsp.lstat(filename)
+    if (st.isSymbolicLink()) await fsp.unlink(filename)
   } catch (err) {
     if (err.code !== 'ENOENT') throw err
   }
